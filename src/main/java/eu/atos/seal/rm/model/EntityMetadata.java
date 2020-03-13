@@ -20,7 +20,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Information about the an external entity")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-11-07T15:11:31.760Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-03-12T16:32:48.125Z")
 
 public class EntityMetadata   {
   @JsonProperty("entityId")
@@ -85,7 +85,8 @@ public class EntityMetadata   {
    * Unique identifier of the entity, usually a metadata url
    * @return entityId
   **/
-  @ApiModelProperty(example = "https://esmo.uji.es/gw/saml/idp/metadata.xml", value = "Unique identifier of the entity, usually a metadata url")
+  @ApiModelProperty(example = "https://esmo.uji.es/gw/saml/idp/metadata.xml", required = true, value = "Unique identifier of the entity, usually a metadata url")
+  @NotNull
 
 
   public String getEntityId() {

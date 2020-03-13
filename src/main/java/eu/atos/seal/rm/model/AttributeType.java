@@ -16,7 +16,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Contents of an attribute item.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-11-07T15:11:31.760Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-03-12T16:32:48.125Z")
 
 public class AttributeType   {
   @JsonProperty("name")
@@ -31,8 +31,8 @@ public class AttributeType   {
   @JsonProperty("language")
   private String language = null;
 
-  @JsonProperty("isMandatory")
-  private Boolean isMandatory = null;
+  @JsonProperty("mandatory")
+  private Boolean mandatory = null;
 
   @JsonProperty("values")
   @Valid
@@ -118,24 +118,24 @@ public class AttributeType   {
     this.language = language;
   }
 
-  public AttributeType isMandatory(Boolean isMandatory) {
-    this.isMandatory = isMandatory;
+  public AttributeType mandatory(Boolean mandatory) {
+    this.mandatory = mandatory;
     return this;
   }
 
   /**
    * To mark the mandatoriness of the attribute.
-   * @return isMandatory
+   * @return mandatory
   **/
   @ApiModelProperty(example = "true", value = "To mark the mandatoriness of the attribute.")
 
 
-  public Boolean isIsMandatory() {
-    return isMandatory;
+  public Boolean isMandatory() {
+    return mandatory;
   }
 
-  public void setIsMandatory(Boolean isMandatory) {
-    this.isMandatory = isMandatory;
+  public void setMandatory(Boolean mandatory) {
+    this.mandatory = mandatory;
   }
 
   public AttributeType values(List<String> values) {
@@ -180,13 +180,13 @@ public class AttributeType   {
         Objects.equals(this.friendlyName, attributeType.friendlyName) &&
         Objects.equals(this.encoding, attributeType.encoding) &&
         Objects.equals(this.language, attributeType.language) &&
-        Objects.equals(this.isMandatory, attributeType.isMandatory) &&
+        Objects.equals(this.mandatory, attributeType.mandatory) &&
         Objects.equals(this.values, attributeType.values);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, friendlyName, encoding, language, isMandatory, values);
+    return Objects.hash(name, friendlyName, encoding, language, mandatory, values);
   }
 
   @Override
@@ -198,7 +198,7 @@ public class AttributeType   {
     sb.append("    friendlyName: ").append(toIndentedString(friendlyName)).append("\n");
     sb.append("    encoding: ").append(toIndentedString(encoding)).append("\n");
     sb.append("    language: ").append(toIndentedString(language)).append("\n");
-    sb.append("    isMandatory: ").append(toIndentedString(isMandatory)).append("\n");
+    sb.append("    mandatory: ").append(toIndentedString(mandatory)).append("\n");
     sb.append("    values: ").append(toIndentedString(values)).append("\n");
     sb.append("}");
     return sb.toString();

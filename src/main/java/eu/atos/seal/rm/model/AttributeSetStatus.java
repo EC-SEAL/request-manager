@@ -14,7 +14,7 @@ import javax.validation.constraints.*;
  * AttributeSetStatus
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-11-07T15:11:31.760Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-03-12T16:32:48.125Z")
 
 public class AttributeSetStatus   {
   /**

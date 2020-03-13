@@ -21,7 +21,7 @@ import javax.validation.constraints.*;
  */
 @ApiModel(description = "Object representing a generic request/response. Used for in-application transference of the security assertions or claims containing trusted user information (attribute values); also to set the list of attributes to be requested.")
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-11-07T15:11:31.760Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-03-12T16:32:48.125Z")
 
 public class AttributeSet   {
   @JsonProperty("id")
