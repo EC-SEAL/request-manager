@@ -1,4 +1,4 @@
-package eu.atos.seal.rm.service.rm.model;
+package eu.atos.seal.rm.model;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -18,8 +18,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.validation.annotation.Validated;
-
-import eu.atos.seal.rm.model.MsMetadata;
 
 
 /**

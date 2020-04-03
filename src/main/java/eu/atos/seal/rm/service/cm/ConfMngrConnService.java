@@ -2,10 +2,13 @@ package eu.atos.seal.rm.service.cm;
 
 import java.util.List;
 
+
+
 import eu.atos.seal.rm.model.AttributeTypeList;
 import eu.atos.seal.rm.model.EntityMetadata;
 import eu.atos.seal.rm.model.EntityMetadataList;
-import eu.atos.seal.rm.service.rm.model.MsMetadataList;
+import eu.atos.seal.rm.model.MsMetadataList;
+
 
 public interface ConfMngrConnService
 {

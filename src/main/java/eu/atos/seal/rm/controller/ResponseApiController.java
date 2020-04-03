@@ -1,4 +1,4 @@
-package eu.atos.seal.rm;
+package eu.atos.seal.rm.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.*;
@@ -22,21 +22,21 @@ import java.util.List;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-11-07T15:11:31.760Z")
 
 @Controller
-public class RequestApiController implements RequestApi {
+public class ResponseApiController implements ResponseApi {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestApiController.class);
+    private static final Logger log = LoggerFactory.getLogger(ResponseApiController.class);
 
     private final ObjectMapper objectMapper;
 
     private final HttpServletRequest request;
 
     @org.springframework.beans.factory.annotation.Autowired
-    public RequestApiController(ObjectMapper objectMapper, HttpServletRequest request) {
+    public ResponseApiController(ObjectMapper objectMapper, HttpServletRequest request) {
         this.objectMapper = objectMapper;
         this.request = request;
     }
 
-    public ResponseEntity<Void> requestPost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken) {
+    public ResponseEntity<Void> responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken) {
         String accept = request.getHeader("Accept");
         return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
     }

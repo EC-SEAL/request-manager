@@ -82,7 +82,7 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 	//@Value("${gateway.sm.host}")
 	private final String hostURL;
 	
-	private HttpSignatureServiceImpl httpSigService = null;
+	//private HttpSignatureServiceImpl httpSigService = null;
 	private NetworkServiceImpl network = null;
 	
 	
@@ -102,16 +102,17 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 		this.keyStoreService = keyStoreServ;
 		this.confMngrService = confMngrConnService;
 		//EntityMetadata myLGW = null;
-		String thisCL = confMngrService.getMicroservicesByApiClass("RM").get(0).getMsId(); // The unique client
-		if (thisCL != null)
-		{
-        	sender = thisCL;
-		}
-        else
-        {
-        	sender = "CLms001";
-        	log.error("HARDCODED sender! "+ sender);
-		}
+//		String thisCL = confMngrService.getMicroservicesByApiClass("RM").get(0).getMsId(); // The unique client
+//		if (thisCL != null)
+//		{
+//        	sender = thisCL;
+//		}
+//        else
+//        {
+//        	sender = "CLms001";
+//        	log.error("HARDCODED sender! "+ sender);
+//		}
+		sender = "RMms001";
 		
 	}
 	
@@ -123,10 +124,10 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 		String service = "/sm/startSession";
 		log.info("En startSession host:"+hostURL+" service:"+service );
 		
-		if (httpSigService== null)
-		{
-			createHttpSigService();
-		}
+//		if (httpSigService== null)
+//		{
+//			createHttpSigService();
+//		}
 		if (network == null)
 		{
 			//network = new NetworkServiceImpl(httpSigService);
@@ -161,10 +162,10 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 		log.info("En generateToken host:"+hostURL+" service:"+service );
 		
 		
-		if (httpSigService== null)
-		{
-			createHttpSigService();
-		}
+//		if (httpSigService== null)
+//		{
+//			createHttpSigService();
+//		}
 		if (network == null)
 		{
 			//network = new NetworkServiceImpl(httpSigService);
@@ -199,10 +200,10 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 		String service = "/sm/validateToken";
 		log.info("En validateToken host:"+hostURL+" service:"+service );
 		
-		if (httpSigService== null)
-		{
-			createHttpSigService();
-		}
+//		if (httpSigService== null)
+//		{
+//			createHttpSigService();
+//		}
 		if (network == null)
 		{
 			//network = new NetworkServiceImpl(httpSigService);
@@ -240,10 +241,10 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 		log.info("En readVariables host:"+hostURL+" service:"+service );
 		
 		HashMap<String, Object> sessionVbles= new HashMap<String, Object>();
-		if (httpSigService== null)
-		{
-			createHttpSigService();
-		}
+//		if (httpSigService== null)
+//		{
+//			createHttpSigService();
+//		}
 		if (network == null)
 		{
 			network = new NetworkServiceImpl(this.keyStoreService);
@@ -282,10 +283,10 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 		
 		
 		HashMap<String, Object> sessionVbles = new HashMap<String, Object>();
-		if (httpSigService== null)
-		{
-			createHttpSigService();
-		}
+//		if (httpSigService== null)
+//		{
+//			createHttpSigService();
+//		}
 		if (network == null)
 		{
 			network = new NetworkServiceImpl(this.keyStoreService);
@@ -333,10 +334,10 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 		String service = "/sm/updateSessionData";
 		log.info("En updateVariable("+varName+") host:"+hostURL+" service:"+service );
 		
-		if (httpSigService== null)
-		{
-			createHttpSigService();
-		}
+//		if (httpSigService== null)
+//		{
+//			createHttpSigService();
+//		}
 		if (network == null)
 		{
 			network = new NetworkServiceImpl(this.keyStoreService);
@@ -369,10 +370,10 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 		String service = "/sm/endSession";
 		log.info("En deleteSession host:"+hostURL+" service:"+service );
 		
-		if (httpSigService== null)
-		{
-			createHttpSigService();
-		}
+//		if (httpSigService== null)
+//		{
+//			createHttpSigService();
+//		}
 		if (network == null)
 		{
 			network = new NetworkServiceImpl(this.keyStoreService);
@@ -411,29 +412,31 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 	///
 	
 	//[TODO] Leer de variables de entorno
-	private void createHttpSigService() throws KeyStoreException, FileNotFoundException, IOException,
-											   NoSuchAlgorithmException, CertificateException, 
-											   UnrecoverableKeyException, InvalidKeySpecException 
-	{
-		//[TODO] Cambiar para cada microservicio, el su
-		String fingerPrint = "7a9ba747ab5ac50e640a07d90611ce612b7bde775457f2e57b804517a87c813b";
-		ClassLoader classLoader = getClass().getClassLoader();
-		//String path = classLoader.getResource("testKeys/keystore.jks").getPath();
-		ClassPathResource resource = new ClassPathResource("testKeys/keystore.jks");
-		log.info("En createHttpSigService resource:"+resource.getPath());
-		InputStream certIS = resource.getInputStream();
-		//File jwtCertFile = ResourceUtils.getFile("classpath:testKeys/keystore.jks");
-		
-		
-		KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-		//File jwtCertFile = new File(path);
-		//InputStream certIS = new FileInputStream(jwtCertFile);
-		keystore.load(certIS, "keystorepass".toCharArray());
-		
-		Key signingKey = keystore.getKey("1", "selfsignedpass".toCharArray());
-		
-		httpSigService = new HttpSignatureServiceImpl(fingerPrint, signingKey);
-	}
+//	private void createHttpSigService() throws KeyStoreException, FileNotFoundException, IOException,
+//											   NoSuchAlgorithmException, CertificateException, 
+//											   UnrecoverableKeyException, InvalidKeySpecException 
+//	{
+//		//[TODO] Cambiar para cada microservicio, el su
+//		String fingerPrint = "7a9ba747ab5ac50e640a07d90611ce612b7bde775457f2e57b804517a87c813b";
+//		ClassLoader classLoader = getClass().getClassLoader();
+//		//String path = classLoader.getResource("testKeys/keystore.jks").getPath();
+//		ClassPathResource resource = new ClassPathResource("testKeys/keystore.jks");
+//		
+//		
+//		log.info("En createHttpSigService resource:"+resource.getPath());
+//		InputStream certIS = resource.getInputStream();
+//		//File jwtCertFile = ResourceUtils.getFile("classpath:testKeys/keystore.jks");
+//		
+//		
+//		KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+//		//File jwtCertFile = new File(path);
+//		//InputStream certIS = new FileInputStream(jwtCertFile);
+//		keystore.load(certIS, "keystorepass".toCharArray());
+//		
+//		Key signingKey = keystore.getKey("1", "selfsignedpass".toCharArray());
+//		
+//		httpSigService = new HttpSignatureServiceImpl(fingerPrint, signingKey);
+//	}
 
 //	@Override
 //	public SessionMngrResponse getLastSMResponse() {
