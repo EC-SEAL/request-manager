@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -16,7 +17,9 @@ import eu.atos.seal.rm.model.AttributeSetStatus;
 import eu.atos.seal.rm.model.EntityMetadata;
 import eu.atos.seal.rm.service.cm.ConfMngrConnService;
 import eu.atos.seal.rm.service.sm.SessionManagerConnService;
+import org.springframework.ui.Model;
 
+@Service
 public class ResponseServiceImp implements ResponseService
 {
 	private static final Logger log = LoggerFactory.getLogger(ResponseServiceImp.class);
@@ -28,7 +31,7 @@ public class ResponseServiceImp implements ResponseService
 	private  ConfMngrConnService cmConnService;
 	
 	@Override
-	public String rmResponse(String token) throws JsonParseException, JsonMappingException, IOException
+	public String rmResponse( String token, Model model) throws JsonParseException, JsonMappingException, IOException
 	{
 		// Revisar token recibido
 		//				 
@@ -160,10 +163,10 @@ public class ResponseServiceImp implements ResponseService
 	        return "rmError";
 		}
 		String url = endPoint;
-//		model.addAttribute("msToken", tokenToSPms);
-//		model.addAttribute("UrlToRedirect", url);
+		model.addAttribute("msToken", tokenToSPms);
+		model.addAttribute("UrlToRedirect", url);
 		
-		return "idpRedirect";
+		return "redirectform";
 		//return null;
 	}
 

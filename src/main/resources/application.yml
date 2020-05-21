@@ -15,21 +15,17 @@
 springfox:
   documentation.swagger.v2.path: /api-docs
 
-spring.jackson:
-  date-format: eu.atos.seal.rm.RFC3339DateFormat
-  serialization.WRITE_DATES_AS_TIMESTAMPS: false
-
+spring:
+  jackson:
+    date-format: eu.atos.seal.rm.RFC3339DateFormat
+    serialization.WRITE_DATES_AS_TIMESTAMPS: false
+  mvc.view.prefix: /templates/
+  mvc.view.suffix: .html    
 server:   
    port: 8080
-   contextPath: /rm
+   #port: 8063
+   contextPath: /
    key-store: ${KEYSTORE_PATH}
-   #apigwcl.sm:
-   #protocol: http
-   #server: 5.79.83.118
-   #port: 8090
-   #name: SMms001
-   #contextPath: /fakeSm  # without httpSig
-   #contextPath: /sm
    
 ##
 ## SEAL configuration manager. To be read from environment variables (dockerization)

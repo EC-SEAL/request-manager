@@ -339,6 +339,7 @@ public class NetworkServiceImpl implements NetworkService
                         					  urlParameters, attempt + 1);
             }
         }
+        LOG.info("sendPostFormSMResponse("+uri+") returns null");
         return null;	
 	}
 
@@ -394,6 +395,7 @@ public class NetworkServiceImpl implements NetworkService
                         				 urlParameters, attempt + 1);
             }
         }
+        LOG.info("sendGetSMResponse("+uri+") returns null");
         return null;
 	}
 

@@ -137,9 +137,16 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 		
 		SessionMngrResponse smResponse = network.sendPostFormSMResponse(hostURL, service, urlParameters,1 );
 		
+		if (smResponse != null)
+		{
 		System.out.println("SMresponse(startSession):" +smResponse.toString());
 		System.out.println("sessionID:"+smResponse.getSessionData().getSessionId());
 		
+		}
+		else
+		{
+			return "";
+		}
 		setLastSMResponse(smResponse);
 		return smResponse.getSessionData().getSessionId();
 	}
@@ -346,6 +353,7 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 		List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
 		urlParameters = new ArrayList<NameValuePair>();
         urlParameters.add(new NameValuePair("sessionId",sessionId));
+        //urlParameters.add(new NameValuePair("sender", sender));
         
         UpdateDataRequest updateDR = new UpdateDataRequest();
         updateDR.setSessionId(sessionId);

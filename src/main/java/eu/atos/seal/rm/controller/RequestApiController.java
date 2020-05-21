@@ -1,6 +1,8 @@
 package eu.atos.seal.rm.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import eu.atos.seal.rm.service.sm.SessionManagerConnService;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -39,6 +42,8 @@ public class RequestApiController implements RequestApi {
     @Autowired
     private RequestService requestService;
     
+    @Autowired
+	private SessionManagerConnService smConn;
 
     @org.springframework.beans.factory.annotation.Autowired
     public RequestApiController(ObjectMapper objectMapper, HttpServletRequest request) {
@@ -46,18 +51,46 @@ public class RequestApiController implements RequestApi {
         this.request = request;
     }
 
-    public ResponseEntity<Void> requestPost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken) {
-        String accept = request.getHeader("Accept");
+    //public ResponseEntity<Void> requestPost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model) {
+    public String requestPost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model) {
+    	log.debug("requestPost called");
+    	System.out.println("requestPost called");
+    	String accept = request.getHeader("Accept");
         
         try {
-			String sReturn = requestService.rmRequest(msToken);
-			log.debug("sReturn="+sReturn);
+        	
+			String sReturn = requestService.rmRequest(msToken, model);
+			System.out.println("requestPost: sReturn="+sReturn);
+			log.debug("requestPost: sReturn="+sReturn);
+			
+			return sReturn;
+			//return "redirectform";
 		} catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | CertificateException
 				| InvalidKeySpecException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
+        System.out.println("requestPost return null");
+        return null;
+        //return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
+    }
+    
+   
+    public ResponseEntity<String> isToken()
+    {
+    	
+    	// Start Session: POST /sm/startSession
+    	String sessionId;
+    	String msToken = null;
+		try {
+			sessionId = smConn.startSession();
+			msToken = smConn.generateToken(sessionId, "RMms001");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	return new ResponseEntity<String>(msToken, HttpStatus.OK);
     }
 
 }

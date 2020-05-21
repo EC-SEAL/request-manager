@@ -31,7 +31,7 @@ public class AttributeType   {
   @JsonProperty("language")
   private String language = null;
 
-  @JsonProperty("mandatory")
+  @JsonProperty("isMandatory")
   private Boolean mandatory = null;
 
   @JsonProperty("values")

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.ui.Model;
 
 import javax.validation.Valid;
 import javax.validation.constraints.*;
@@ -30,9 +31,19 @@ public interface RequestApi {
         @ApiResponse(code = 200, message = "Request admitted"),
         @ApiResponse(code = 400, message = "Bad request"),
         @ApiResponse(code = 401, message = "Request not authorised") })
-    @RequestMapping(value = "/request",
+    @RequestMapping(value = "/rm/request",
         consumes = { "application/x-www-form-urlencoded" },
         method = RequestMethod.POST)
-    ResponseEntity<Void> requestPost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken);
+    public String requestPost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model);
 
+    
+    @ApiOperation(value = "FOR TESTING: Returns a token from SM", nickname = "isToken", notes = "FOR TESTING: Returns a token from SM", tags={ "RequestManager", })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Request admitted"),
+        @ApiResponse(code = 400, message = "Bad request"),
+        @ApiResponse(code = 401, message = "Not authorised") })
+    @RequestMapping(value = "/is/token",
+        produces = { "application/x-www-form-urlencoded" },
+        method = RequestMethod.GET)
+    public ResponseEntity<String> isToken();
 }
