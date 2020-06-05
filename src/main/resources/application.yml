@@ -22,8 +22,8 @@ spring:
   mvc.view.prefix: /templates/
   mvc.view.suffix: .html    
 server:   
-   #port: 8080
-   port: 8063
+   port: 8080
+   #port: 8063
    contextPath: /
    key-store: ${KEYSTORE_PATH}
    

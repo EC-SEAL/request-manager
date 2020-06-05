@@ -16,6 +16,7 @@ import eu.atos.seal.rm.model.EntityMetadataList;
 import eu.atos.seal.rm.model.MsMetadata;
 import eu.atos.seal.rm.model.MsMetadataList;
 import eu.atos.seal.rm.model.PublishedApiType;
+import eu.atos.seal.rm.service.cm.ApigwclConnServiceImp;
 import eu.atos.seal.rm.service.cm.ConfMngrConnService;
 import eu.atos.seal.rm.service.sm.SessionManagerConnService;
 
@@ -48,7 +49,13 @@ public class RequestServiceImp implements RequestService
 	private  ConfMngrConnService cmConnService;
 	
 	@Autowired
+	private ApigwclConnServiceImp apigwclConnService;
+	
+	@Autowired
 	HttpSession session;
+	
+	@Autowired
+	private  ResponseServiceImp respService;
 	
 	private String rmMsName="RMms001";
 	
@@ -68,18 +75,30 @@ public class RequestServiceImp implements RequestService
 //		{
 //				System.out.println("getEntityMetadataSet(idp)"+listIDP.toString());
 //		}
-		System.out.println("PRUEBA-A: "+cmConnService.getExternalEntities());
-		//System.out.println("PRUEBA-B: "+cmConnService.getEntityMetadataSet("eIDAS"));
-		System.out.println("PRUEBA-B: "+cmConnService.getEntityMetadataSet("EIDAS"));
-		if (cmConnService.getEntityMetadata("AUTHSOURCE","eIDAS")!=null)
-		{
-			System.out.println("EntityMetadata(EIDAS)"+cmConnService.getEntityMetadata("AUTHSOURCE","eIDAS").toString());
-		}
-		if(cmConnService.getEntityMetadata("AUTHSOURCE","eduGAIN") !=null)
-		{
+//		System.out.println("PRUEBA-A: "+cmConnService.getExternalEntities());
+//		//System.out.println("PRUEBA-B: "+cmConnService.getEntityMetadataSet("eIDAS"));
+//		System.out.println("PRUEBA-B: "+cmConnService.getEntityMetadataSet("EIDAS"));
+//		if (cmConnService.getEntityMetadata("AUTHSOURCE","eIDAS")!=null)
+//		{
+//			System.out.println("EntityMetadata(EIDAS)"+cmConnService.getEntityMetadata("AUTHSOURCE","eIDAS").toString());
+//		}
+//		if(cmConnService.getEntityMetadata("AUTHSOURCE","eduGAIN") !=null)
+//		{
+//		
+//			System.out.println("EntityMetadata(EDUGAIN)"+cmConnService.getEntityMetadata("AUTHSOURCE","eduGAIN").toString());
+//		}
+////		if (apigwclConnService.getCollectionList("PERSISTENCE")!=null)
+////		{
+////			System.out.println("PDS:  "+apigwclConnService.getCollectionList("PERSISTENCE").toString());
+////		}
+////		else
+////		{System.out.println("PDS:null");}
+////		if (apigwclConnService.getCollectionList("SSI")!=null)
+////		{
+////			System.out.println("SSI:  "+apigwclConnService.getCollectionList("SSI").toString());
+////		}
+////		{System.out.println("SSI:null");}
 		
-			System.out.println("EntityMetadata(EDUGAIN)"+cmConnService.getEntityMetadata("AUTHSOURCE","eduGAIN").toString());
-		}
 		// Revisar token recibido
 		//				 
 		if (token.endsWith("="))
@@ -120,114 +139,44 @@ public class RequestServiceImp implements RequestService
 		///
 		///	VALIDATE TOKEN
 		///
-		String sessionId="";
-		try
-		{
-			sessionId = smConnService.validateToken( token);
-		}
-		catch (Exception ex)
-		{
-			String errorMsg= "Exception calling SM (validateToken) with token:"+token+"\n";
-			errorMsg += "Exception message:"+ex.getMessage()+"\n";
-			//model.addAttribute("ErrorMessage",errorMsg);
-	        System.out.println("Devuelvo error "+errorMsg);
-	        
-	        return "rmError";
-		}
+		String sessionId = validateToken(token);
 		
 		//  
 		//	READ VARIABLE "spRequest" 
 		//  
 		log.info("RequestAttributes: Reading spRequest");
-		Object objSpRequest = null;
-		AttributeSet spRequest = null;
-		try
-		{
-			objSpRequest = smConnService.readVariable(sessionId, "spRequest");
-		}
-		catch (Exception ex)
-		{
-			String errorMsg= "Exception calling SM (getSessionData spRequest)  \n";
-			errorMsg += "Exception message:"+ex.getMessage()+"\n";
-			//model.addAttribute("ErrorMessage",errorMsg);
-			log.error(errorMsg);
-	        System.out.println("Devuelvo error "+errorMsg);
-	        return "rmError";
-			
-		}
-		if (objSpRequest!=null) //==null no existe la vble en SM
-		{
-			spRequest = (new ObjectMapper()).readValue(objSpRequest.toString(),AttributeSet.class);
-			log.info("RequestAttributes: Reading spRequest");
-		}
+		AttributeSet spRequest = readSpRequest(sessionId);
 		//System.out.println("spRequest:"+spRequest.toString() );
 				
 		/// 
 		///	READ VARIABLE		 "spMetadata" 
 		/// 
 		log.info("RequestAttributes: Reading spMetadata");
-		EntityMetadata spMetadata = null;
-		Object objSpMetadata = null;
-		try
-		{
-			objSpMetadata = smConnService.readVariable(sessionId, "spMetadata");
-		}
-		catch (Exception ex)
-		{
-			String errorMsg= "Exception calling SM (getSessionData spMetadata)  \n";
-			errorMsg += "Exception message:"+ex.getMessage()+"\n";
-			//model.addAttribute("ErrorMessage",errorMsg);
-			log.error(errorMsg);
-	        System.out.println("Devuelvo error "+errorMsg);
-	        
-	        //return "rmError"; //??
-		}
-		if (objSpMetadata!=null)
-		{
-			spMetadata = (new ObjectMapper()).readValue(objSpMetadata.toString(),EntityMetadata.class);
-			log.info("RequestAttributes: Reading spMetadata");
-		}
+		EntityMetadata spMetadata = readSpMetadata(sessionId);
+		
+//		////
+//		////  QUITAR (es una prueba del response
+//		///
+//		respService = new ResponseServiceImp();
+//		String msName= respService.getMsName(model, sessionId,spMetadata);
+//		String endPoint= respService.getSpResponseEndpoint(model, msName,cmConnService);
+//		System.out.println("ENDPOINT RESPONSE: "+endPoint);
+//		////
+//		////
+//		///
 		
 		
 		//  
 		//	READ VARIABLE "spRequestEP" 
 		//  
 		log.info("RequestAttributes: Reading spRequestEP");
-		String spRequestEP="";
-		try
-		{
-			spRequestEP = (String)smConnService.readVariable(sessionId, "spRequestEP");
-			log.info("spRequestEP readed:"+spRequestEP);
-		}
-		catch (Exception ex)
-		{
-			String errorMsg= "Exception calling SM (getSessionData spRequestEP)  \n";
-			errorMsg += "Exception message:"+ex.getMessage()+"\n";
-			//model.addAttribute("ErrorMessage",errorMsg);
-			log.error(errorMsg);
-	        System.out.println("Devuelvo error "+errorMsg);
-	        
-			
-		}
+		String spRequestEP = readSpRequestEP(sessionId);
 
 		//  
 		//	READ VARIABLE "spRequestSource" 
 		//  
-		String spRequestSource="";
 		log.info("RequestAttributes: Reading spRequestSource");
-		try
-		{
-			spRequestSource = (String)smConnService.readVariable(sessionId, "spRequestSource");
-			log.info("spRequestSource readed:"+spRequestSource);
-		}
-		catch (Exception ex)
-		{
-			String errorMsg= "Exception calling SM (getSessionData spRequestSource)  \n";
-			errorMsg += "Exception message:"+ex.getMessage()+"\n";
-			//model.addAttribute("ErrorMessage",errorMsg);
-			log.error(errorMsg);
-	        System.out.println("Devuelvo error "+errorMsg);
-		}
+		String spRequestSource = readSpRequestSource(sessionId);
 		
 		
 		/// Pongo en SM mi direccion de retorno
@@ -282,6 +231,7 @@ public class RequestServiceImp implements RequestService
 			collectionId = "DATAQUERYSOURCES";
 		}
 		EntityMetadataList sourceList = cmConnService.getEntityMetadataSet(collectionId);
+		
 		/// 
 		/// Select where to go
 		/// 
@@ -423,6 +373,10 @@ public class RequestServiceImp implements RequestService
 		//return null;
 	}
 
+
+	
+
+
 	private String prepareAndGoToIdp(String sessionId, AttributeSet spRequest, EntityMetadata spMetadata, String spRequestSource) throws UnrecoverableKeyException, KeyStoreException, FileNotFoundException, NoSuchAlgorithmException, CertificateException, InvalidKeySpecException, IOException
 	{
 //		System.out.println("getEntityMetadataSet(idp)"+cmConnService.getEntityMetadataSet("IdP").toString());
@@ -430,25 +384,32 @@ public class RequestServiceImp implements RequestService
 //		System.out.println("EntityMetadata(EDUGAIN)"+cmConnService.getEntityMetadata("AUTHSOURCE","EDUGAIN").toString());
 //		
 		log.info("En prepareAndGoToIdp");
-		String endpoint="";
-		String msName = "";
+		
+		
 		EntityMetadata authMetadata0 = cmConnService.getEntityMetadata("AUTHSOURCE", spRequestSource); // Reading the AUTHSOURCEmetadata.json
-		if (authMetadata0!=null)
-		{
-			System.out.println("[prepareAndGoToId] authMetadata:"+authMetadata0.toString());
-			msName= authMetadata0.getMicroservice().get(0);
-			System.out.println("msName:"+msName);
-			MsMetadata msMetadata = msmtdlist.getMs(msName);
-			System.out.println("[prepareAndGoToId] msMetadata:"+msMetadata.toString());
-			List<PublishedApiType> list = msMetadata.getPublishedAPI();
-			for (PublishedApiType publishedApiType : list) {
-				if (publishedApiType.getApiCall().contains("auth"))
-				{
-					endpoint = publishedApiType.getApiEndpoint();
-					break;
-				}
-			}
-		}
+		String msName = authMetadata0.getMicroservice().get(0);
+		String endpoint= getEndpoint("auth",msName);
+		
+		System.out.println("[prepareAndGoToId] authMetadata:"+authMetadata0.toString());
+		System.out.println("€€€€€€¬¬¬¬¬¬¬ endpoint"+endpoint+" msName:"+msName);
+		
+		
+//		if (authMetadata0!=null)
+//		{
+//			System.out.println("[prepareAndGoToId] authMetadata:"+authMetadata0.toString());
+//			msName= authMetadata0.getMicroservice().get(0);
+//			System.out.println("msName:"+msName);
+//			MsMetadata msMetadata = msmtdlist.getMs(msName);
+//			System.out.println("[prepareAndGoToId] msMetadata:"+msMetadata.toString());
+//			List<PublishedApiType> list = msMetadata.getPublishedAPI();
+//			for (PublishedApiType publishedApiType : list) {
+//				if (publishedApiType.getApiCall().contains("auth"))
+//				{
+//					endpoint = publishedApiType.getApiEndpoint();
+//					break;
+//				}
+//			}
+//		}
 		System.out.println("[prepareAndGoToId] endpoint:"+endpoint);
 		//spRequestSource= {Discovery, PDS, uportSSIwallet, eIDAS, eduGAIN}
 		/*
@@ -545,33 +506,63 @@ public class RequestServiceImp implements RequestService
 		//return "redirect:/redirect.html";
 	}
 
-	private String prepareAndGoToAP(String sessionId, AttributeSet spRequest, EntityMetadata spMetadata, String spRequestSource) {
+	private String prepareAndGoToAP(String sessionId, AttributeSet spRequest, EntityMetadata spMetadata, String spRequestSource) throws UnrecoverableKeyException, KeyStoreException, FileNotFoundException, NoSuchAlgorithmException, CertificateException, InvalidKeySpecException, IOException 
+	{
 		// TODO Auto-generated method stub
 		log.info("En prepareAndGoToAP");
 		System.out.println("[prepareAndGoToAP] ");
 		String endpoint="";
 		String msName = "";
-//		
-//		EntityMetadata dqMetadata = cmConnService.getEntityMetadata("DATAQUERYSOURCES", spRequestSource); // Reading the AUTHSOURCEmetadata.json
-//		if (dqMetadata != null)
-//		{
-//			System.out.println("[prepareAndGoToAP] dqMetadata:"+dqMetadata.toString());
-//		
-//		}
-//		else
-//		{
-//			System.out.println("[prepareAndGoToAP] dqMetadata NULLLLLLLLLLLLLllllllllllllllllll");
-//		}
+		String apiCall ="";
+
 		EntityMetadataList emList = cmConnService.getEntityMetadataSet("DATAQUERYSOURCES");
 		if (emList==null || emList.size()<=0)
 		{
 			System.out.println("[prepareAndGoToAP] emList NULLLLLLLLL");
+			return "error";
 		}
 		else
 		{
 			System.out.println("[prepareAndGoToAP] emList:"+emList.toString());
 		}
-		return null;
+		
+		if (spRequestSource.contains("PDS"))
+		{
+			spRequestSource="PERSISTENCE";
+			apiCall = "load";
+		}
+		else
+		{
+			apiCall = "issue";
+		}
+		//EntityMetadata dataMetadata = cmConnService.getEntityMetadata("DATAQUERYSOURCES", spRequestSource);
+		EntityMetadataList dataMetadatas = cmConnService.getEntityMetadataSet(spRequestSource);
+		if (dataMetadatas==null)
+		{
+			System.out.println("[prepareAndGoToAP] dataMetadatas NULLLLLLLLL");
+		}
+		else
+		{
+			System.out.println("[prepareAndGoToAP] dataMetadatas("+spRequestSource+"):"+dataMetadatas.toString());
+		}
+		
+		//SELECT between the different dataMetadatas
+		int size = dataMetadatas.size();
+		int selected = 0; //REVIEW
+		
+		EntityMetadata dqMetadata= dataMetadatas.get(selected);
+		msName = dqMetadata.getMicroservice().get(0);
+		endpoint = getEndpoint(apiCall, msName);
+		
+		String token = smConnService.generateToken(sessionId, msName);
+		System.out.println("Create token to "+msName+" tokenValue:"+token);
+		System.out.println("redirect to: "+endpoint);
+		
+		this.model.addAttribute("msToken", token);
+		this.model.addAttribute("UrlToRedirect", endpoint);
+		
+	
+		return "redirectform";
 	}
 
 	private String goToSelectApUI(Model model, AttributeSet spRequest, EntityMetadata spMetadata, EntityMetadataList sourceList)
@@ -600,6 +591,143 @@ public class RequestServiceImp implements RequestService
 		// TODO Auto-generated method stub
 		log.info("en goToSelectIdpUI");
 		return null;
+	}	
+	
+	//Auxiliary methods
+	private String validateToken(String token)
+	{
+		String sessionId="";
+		try
+		{
+			sessionId = smConnService.validateToken( token);
+		}
+		catch (Exception ex)
+		{
+			String errorMsg= "Exception calling SM (validateToken) with token:"+token+"\n";
+			errorMsg += "Exception message:"+ex.getMessage()+"\n";
+			//model.addAttribute("ErrorMessage",errorMsg);
+	        System.out.println("Devuelvo error "+errorMsg);
+	        
+	        return "rmError";
+		}
+		return sessionId;
 	}
+	
+	private AttributeSet readSpRequest(String sessionId) 
+			throws IOException, JsonParseException, JsonMappingException 
+	{
+		Object objSpRequest = null;
+		AttributeSet spRequest = null;
+		try
+		{
+			objSpRequest = smConnService.readVariable(sessionId, "spRequest");
+		}
+		catch (Exception ex)
+		{
+			String errorMsg= "Exception calling SM (getSessionData spRequest)  \n";
+			errorMsg += "Exception message:"+ex.getMessage()+"\n";
+			//model.addAttribute("ErrorMessage",errorMsg);
+			log.error(errorMsg);
+	        System.out.println("Devuelvo error "+errorMsg);
+	        //return "rmError";
+	        return null;
+		}
+		if (objSpRequest!=null) //==null no existe la vble en SM
+		{
+			spRequest = (new ObjectMapper()).readValue(objSpRequest.toString(),AttributeSet.class);
+			log.info("RequestAttributes: Reading spRequest");
+		}
+		return spRequest;
+	}
+	
+	private EntityMetadata readSpMetadata(String sessionId)
+			throws IOException, JsonParseException, JsonMappingException 
+	{
+		
+		EntityMetadata spMetadata = null;
+		Object objSpMetadata = null;
+		try
+		{
+			objSpMetadata = smConnService.readVariable(sessionId, "spMetadata");
+		}
+		catch (Exception ex)
+		{
+			String errorMsg= "Exception calling SM (getSessionData spMetadata)  \n";
+			errorMsg += "Exception message:"+ex.getMessage()+"\n";
+			//model.addAttribute("ErrorMessage",errorMsg);
+			log.error(errorMsg);
+	        System.out.println("Devuelvo error "+errorMsg);
+	        
+	        //return "rmError"; //??
+		}
+		if (objSpMetadata!=null)
+		{
+			spMetadata = (new ObjectMapper()).readValue(objSpMetadata.toString(),EntityMetadata.class);
+			log.info("RequestAttributes: Reading spMetadata");
+		}
+		return spMetadata;
+	}
+	
+	private String readSpRequestSource(String sessionId) 
+	{
+		String spRequestSource="";
+		try
+		{
+			spRequestSource = (String)smConnService.readVariable(sessionId, "spRequestSource");
+			log.info("spRequestSource readed:"+spRequestSource);
+		}
+		catch (Exception ex)
+		{
+			String errorMsg= "Exception calling SM (getSessionData spRequestSource)  \n";
+			errorMsg += "Exception message:"+ex.getMessage()+"\n";
+			//model.addAttribute("ErrorMessage",errorMsg);
+			log.error(errorMsg);
+	        System.out.println("Devuelvo error "+errorMsg);
+		}
+		return spRequestSource;
+	}
+	
+	private String readSpRequestEP(String sessionId) {
+		String spRequestEP="";
+		try
+		{
+			spRequestEP = (String)smConnService.readVariable(sessionId, "spRequestEP");
+			log.info("spRequestEP readed:"+spRequestEP);
+		}
+		catch (Exception ex)
+		{
+			String errorMsg= "Exception calling SM (getSessionData spRequestEP)  \n";
+			errorMsg += "Exception message:"+ex.getMessage()+"\n";
+			//model.addAttribute("ErrorMessage",errorMsg);
+			log.error(errorMsg);
+	        System.out.println("Devuelvo error "+errorMsg);
+	        
+			
+		}
+		return spRequestEP;
+	}
+	
+	//https://vm.project-seal.eu:9053/cl/list/Eidas
 
+	public String getEndpoint(  String apiCall, String msName)
+	{	
+		String endpoint ="";
+		//String msName ="";
+		
+		
+		
+		System.out.println("msName:"+msName);
+		MsMetadata msMetadata = msmtdlist.getMs(msName);
+		System.out.println("[prepareAndGoToId] msMetadata:"+msMetadata.toString());
+		List<PublishedApiType> list = msMetadata.getPublishedAPI();
+		for (PublishedApiType publishedApiType : list) {
+			if (publishedApiType.getApiCall().contains(apiCall))
+			{
+				endpoint = publishedApiType.getApiEndpoint();
+				break;
+			}
+		}
+		
+		return endpoint;
+	}
 }

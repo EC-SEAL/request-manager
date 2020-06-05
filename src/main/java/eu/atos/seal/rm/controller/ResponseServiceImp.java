@@ -1,6 +1,8 @@
 package eu.atos.seal.rm.controller;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,12 +13,18 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import eu.atos.seal.rm.model.ApiClassEnum;
 import eu.atos.seal.rm.model.AttributeSet;
 import eu.atos.seal.rm.model.AttributeSetList;
 import eu.atos.seal.rm.model.AttributeSetStatus;
 import eu.atos.seal.rm.model.EntityMetadata;
+import eu.atos.seal.rm.model.MsMetadata;
+import eu.atos.seal.rm.model.MsMetadataList;
+import eu.atos.seal.rm.model.PublishedApiType;
 import eu.atos.seal.rm.service.cm.ConfMngrConnService;
 import eu.atos.seal.rm.service.sm.SessionManagerConnService;
+import io.swagger.annotations.Api;
+
 import org.springframework.ui.Model;
 
 @Service
@@ -62,7 +70,7 @@ public class ResponseServiceImp implements ResponseService
 	        return "rmError";
 		}
 		
-	//  
+		//  
 		//	READ VARIABLE "dsResponse" 
 		//  
 		Object objSpRequest = null;
@@ -143,12 +151,16 @@ public class ResponseServiceImp implements ResponseService
 		}
 		
 		
-		String endPoint = null;
-		//  [TODO] Buscar endPoint
-		
-		
+		//  Looking for the  endpoint to redirect
+		// 
+		String msName = getMsName(model, sessionId, null);
+		String endPoint = getSpResponseEndpoint(model, msName,cmConnService);
+		if (endPoint == null  || endPoint.contains("error"))
+		{
+			return "rmError";
+		}
+			
 		String tokenToSPms = "";
-		String msName="";
 		try
 		{
 			//tokenToSPms = smConnService.generateToken(sessionId,acmMsName,"SAMLms_0001");
@@ -168,6 +180,90 @@ public class ResponseServiceImp implements ResponseService
 		
 		return "redirectform";
 		//return null;
+	}
+	
+	private EntityMetadata readSpMetadata(Model model, String sessionId)
+			throws IOException, JsonParseException, JsonMappingException {
+		EntityMetadata spMetadata = null;
+		Object objSpMetadata = null;
+		try
+		{
+			objSpMetadata = smConnService.readVariable(sessionId, "spMetadata");
+		}
+		catch (Exception ex)
+		{
+			String errorMsg= "Exception calling SM (getSessionData spMetadata)  \n";
+			errorMsg += "Exception message:"+ex.getMessage()+"\n";
+			model.addAttribute("ErrorMessage",errorMsg);
+			log.error(errorMsg);
+	        System.out.println("Devuelvo error "+errorMsg);
+	        
+	        //return "acmError";
+		}
+		spMetadata = (new ObjectMapper()).readValue(objSpMetadata.toString(),EntityMetadata.class);
+		log.info("readSpMetadata: Reading spMetadata");
+		System.out.println("spMetadata:"+spMetadata.toString());
+		return spMetadata;
+	}
+	
+	public String getMsName(Model model, String sessionId,EntityMetadata spMetadata) throws IOException, JsonParseException, JsonMappingException
+	//public String getMsName(Model model, String sessionId) throws IOException, JsonParseException, JsonMappingException
+	{
+		
+		final String msName;
+		
+		
+		//EntityMetadata spMetadata;
+		if (spMetadata ==null)
+		{
+			spMetadata = readSpMetadata(model, sessionId);
+		}
+			
+		if (spMetadata.getMicroservice() == null || spMetadata.getMicroservice().size()==0)
+		{
+			// ERROR
+			String errorMsg= "Error getting microservice from spMetadata \n";
+			
+			//model.addAttribute("ErrorMessage",errorMsg);
+			log.error(errorMsg);
+	        return "rmError"; //[TODO]
+		}
+		msName = spMetadata.getMicroservice().get(0);
+		log.info ("spMetadata msName:"+msName);
+		return msName;
+	}
+	
+	public String getSpResponseEndpoint(Model model, String msName,  ConfMngrConnService cmService)
+	{
+		String endPoint = null;
+		
+		MsMetadataList spList= cmService.getMicroservicesByApiClass("SP");
+		
+		Optional<MsMetadata> msopt = spList.stream().filter(a->a.getMsId().equalsIgnoreCase(msName)).findAny();
+		//MsMetadata ms= null;
+		List<PublishedApiType> listPub;
+		if (msopt.isPresent())
+		{
+			listPub= msopt.get().getPublishedAPI();
+		}
+		else
+		{
+			System.out.println("Error ms not found");
+			return "error";//TODO
+		}
+		
+		Optional<PublishedApiType> pubOpt = listPub.stream().filter(a->(a.getApiClass()==ApiClassEnum.SP && a.getApiCall().contains("handleRes"))).findAny();
+		if (pubOpt.isPresent())
+		{
+			endPoint = pubOpt.get().getApiEndpoint();
+			System.out.println("Endpoint:"+endPoint);
+		}
+		else
+		{
+			System.out.println("Error endpoint not found");
+			return "error";//TODO
+		}
+		return endPoint;
 	}
 
 }
