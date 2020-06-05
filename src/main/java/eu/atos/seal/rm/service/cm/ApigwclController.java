@@ -6,7 +6,7 @@ import java.util.List;
 import eu.atos.seal.rm.model.EntityMetadata;
 import eu.atos.seal.rm.model.EntityMetadataList;
 import eu.atos.seal.rm.model.EntityMetadataPairList;
-import javafx.util.Pair;
+//import javafx.util.Pair;
 
 public interface ApigwclController {
 

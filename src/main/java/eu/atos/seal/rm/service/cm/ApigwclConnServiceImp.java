@@ -21,7 +21,7 @@ import eu.atos.seal.rm.model.EntityMetadataPairList;
 import eu.atos.seal.rm.service.network.NetworkServiceImpl;
 import eu.atos.seal.rm.service.param.KeyStoreService;
 import eu.atos.seal.rm.service.param.ParameterService;
-import javafx.util.Pair;
+//import javafx.util.Pair;
 
 //import org.apache.commons.lang3.tuple.Pair;
 
