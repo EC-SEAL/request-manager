@@ -1,3 +1,18 @@
+/**
+Copyright © 2020  Atos Spain SA. All rights reserved.
+This file is part of SEAL Request Manager (SEAL rm).
+SEAL rm is free software: you can redistribute it and/or modify it under the terms of EUPL 1.2.
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT ANY WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT, 
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
+DAMAGES OR OTHER LIABILITY, WHETHER IN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+See README file for the full disclaimer information and LICENSE file for full license information in the project root.
+
+@author Atos Research and Innovation, Atos SPAIN SA
+*/
+
 package eu.atos.seal.rm.controller;
 
 import java.io.IOException;
@@ -23,7 +38,6 @@ import eu.atos.seal.rm.model.MsMetadataList;
 import eu.atos.seal.rm.model.PublishedApiType;
 import eu.atos.seal.rm.service.cm.ConfMngrConnService;
 import eu.atos.seal.rm.service.sm.SessionManagerConnService;
-import io.swagger.annotations.Api;
 
 import org.springframework.ui.Model;
 
@@ -41,16 +55,12 @@ public class ResponseServiceImp implements ResponseService
 	@Override
 	public String rmResponse( String token, Model model) throws JsonParseException, JsonMappingException, IOException
 	{
-		// Revisar token recibido
+		// Check the token
 		//				 
 		if (token.endsWith("="))
-		{
 			token = token.replace("=", "");
-		}
 		if (token.startsWith("msToken="))
-		{
 			token = token.replace("msToken=", "");
-		}
 		
 		///
 		///	VALIDATE TOKEN
@@ -58,16 +68,16 @@ public class ResponseServiceImp implements ResponseService
 		String sessionId="";
 		try
 		{
-			sessionId = smConnService.validateToken( token);
+			sessionId = smConnService.validateToken(token);
 		}
 		catch (Exception ex)
 		{
-			String errorMsg= "Exception calling SM (validateToken) with token:"+token+"\n";
-			errorMsg += "1 Exception message:"+ex.getMessage()+"\n";
+			String errorMsg= "Exception calling SM (validateToken) with token: "+token+"\n";
+			errorMsg += "1 Exception message: "+ex.getMessage()+"\n";
 			//model.addAttribute("ErrorMessage",errorMsg);
-	        System.out.println("Devuelvo error "+errorMsg);
+	        log.info ("Returning error: "+errorMsg);
 	        
-	        return "rmError";
+	        return "rmError"; //TODO?
 		}
 		
 		//  
@@ -84,14 +94,13 @@ public class ResponseServiceImp implements ResponseService
 			String errorMsg= "Exception calling SM (getSessionData dsResponse)  \n";
 			errorMsg += "2 Exception message:"+ex.getMessage()+"\n";
 			//model.addAttribute("ErrorMessage",errorMsg);
-			log.error(errorMsg);
-	        System.out.println("Devuelvo error "+errorMsg);
+			log.info ("Returning error: "+errorMsg);
+			
 	        return "rmError";
 			
 		}
 		dsResponse = (new ObjectMapper()).readValue(objSpRequest.toString(),AttributeSet.class);
-		log.info("RequestAttributes: Reading dsResponse");
-		//System.out.println("spRequest:"+spRequest.toString() );
+		log.info("dsResponse: " + dsResponse.toString() );
 					
 		/// 
 		///	READ VARIABLE "dsMetadata" 
@@ -107,17 +116,17 @@ public class ResponseServiceImp implements ResponseService
 			String errorMsg= "Exception calling SM (getSessionData dsMetadata)  \n";
 			errorMsg += " 3 Exception message:"+ex.getMessage()+"\n";
 			//model.addAttribute("ErrorMessage",errorMsg);
-			log.error(errorMsg);
-	        System.out.println("Devuelvo error "+errorMsg);
+			log.info ("Returning error: "+errorMsg);
+			
 	        return "rmError"; 
 		}
 		dsMetadata = (new ObjectMapper()).readValue(objDsMetadata.toString(),EntityMetadata.class);
-		log.info("RequestAttributes: Reading dsMetadata");
+		log.info("dsMetadata: " + dsMetadata.toString());
 		
-		if (dsResponse.getStatus().getCode() == AttributeSetStatus.CodeEnum.ERROR)	// [TODO] Error especial revisar
+		if (dsResponse.getStatus().getCode() == AttributeSetStatus.CodeEnum.ERROR)	// [TODO] Special error?!
 		{	
-			//TODO Que hacer si recibo una respuesta erronea
-			log.error("dsResponse nos da un error");
+			//TODO ?
+			log.error("dsResponse returning error");
 			
 			return "rmError";
 //			if (dsResponse.getType() == TypeEnum.RESPONSE )
@@ -131,7 +140,9 @@ public class ResponseServiceImp implements ResponseService
 		
 		AttributeSet idpResponse = new AttributeSet();
 		idpResponse = dsResponse;
-		// Leo responseAssertions¿?
+		
+		
+		// Read responseAssertions first, and then update?? TO ASK!!!
 		
 		AttributeSetList responseAssertions= new AttributeSetList ();
 		responseAssertions.add(idpResponse);
@@ -146,14 +157,15 @@ public class ResponseServiceImp implements ResponseService
 			String errorMsg= "Exception calling SM (updateVariable responseAssertions)  \n";
 			errorMsg += "4 Exception message:"+ex.getMessage()+"\n";
 			//model.addAttribute("ErrorMessage",errorMsg);
-			log.error(errorMsg);
+			log.info ("Returning error: "+errorMsg);
+			
 	        return "rmError";
 		}
 		
 		
 		//  Looking for the  endpoint to redirect
 		// 
-		String msName = getMsName(model, sessionId, null);
+		String msName = getMsName(model, sessionId, null); // Returning the FIRST ONE! ***TO ASK
 		String endPoint = getSpResponseEndpoint(model, msName,cmConnService);
 		if (endPoint == null  || endPoint.contains("error"))
 		{
@@ -164,23 +176,26 @@ public class ResponseServiceImp implements ResponseService
 		try
 		{
 			//tokenToSPms = smConnService.generateToken(sessionId,acmMsName,"SAMLms_0001");
-			tokenToSPms = smConnService.generateToken(sessionId,msName);
+			tokenToSPms = smConnService.generateToken(sessionId,msName); 
 		}
 		catch (Exception ex)
 		{
-			String errorMsg= "responseAttributes: Exception calling SM (generateToken to"+msName+")  \n";
+			String errorMsg= "responseAttributes: Exception calling SM (generateToken to "+msName+")  \n";
 			errorMsg += "5 Exception message:"+ex.getMessage()+"\n";
 			//model.addAttribute("ErrorMessage",errorMsg);
-			log.error(errorMsg);
+			log.info ("Returning error: "+errorMsg);
+			
 	        return "rmError";
 		}
-		String url = endPoint;
+		
 		model.addAttribute("msToken", tokenToSPms);
-		model.addAttribute("UrlToRedirect", url);
+		model.addAttribute("UrlToRedirect", endPoint);
 		
 		return "redirectform";
 		//return null;
 	}
+	
+	
 	
 	private EntityMetadata readSpMetadata(Model model, String sessionId)
 			throws IOException, JsonParseException, JsonMappingException {
@@ -195,14 +210,13 @@ public class ResponseServiceImp implements ResponseService
 			String errorMsg= "Exception calling SM (getSessionData spMetadata)  \n";
 			errorMsg += "Exception message:"+ex.getMessage()+"\n";
 			model.addAttribute("ErrorMessage",errorMsg);
-			log.error(errorMsg);
-	        System.out.println("Devuelvo error "+errorMsg);
+			log.info ("Returning error: "+errorMsg);
 	        
-	        //return "acmError";
+	        //return "rmError";
 		}
 		spMetadata = (new ObjectMapper()).readValue(objSpMetadata.toString(),EntityMetadata.class);
-		log.info("readSpMetadata: Reading spMetadata");
-		System.out.println("spMetadata:"+spMetadata.toString());
+		log.info("spMetadata: " + spMetadata.toString());
+		
 		return spMetadata;
 	}
 	
@@ -214,22 +228,22 @@ public class ResponseServiceImp implements ResponseService
 		
 		
 		//EntityMetadata spMetadata;
-		if (spMetadata ==null)
-		{
+		if (spMetadata == null)
 			spMetadata = readSpMetadata(model, sessionId);
-		}
 			
-		if (spMetadata.getMicroservice() == null || spMetadata.getMicroservice().size()==0)
+		if (spMetadata.getMicroservice() == null || spMetadata.getMicroservice().size() == 0)
 		{
 			// ERROR
 			String errorMsg= "Error getting microservice from spMetadata \n";
 			
 			//model.addAttribute("ErrorMessage",errorMsg);
 			log.error(errorMsg);
+			
 	        return "rmError"; //[TODO]
 		}
-		msName = spMetadata.getMicroservice().get(0);
-		log.info ("spMetadata msName:"+msName);
+		msName = spMetadata.getMicroservice().get(0);  // Choosing the first one!! TO ASK
+		log.info ("spMetadata msName: "+msName);
+		
 		return msName;
 	}
 	
@@ -243,24 +257,23 @@ public class ResponseServiceImp implements ResponseService
 		//MsMetadata ms= null;
 		List<PublishedApiType> listPub;
 		if (msopt.isPresent())
-		{
-			listPub= msopt.get().getPublishedAPI();
-		}
+					listPub= msopt.get().getPublishedAPI();
 		else
 		{
-			System.out.println("Error ms not found");
+			log.info ("Error ms not found: " + msName);
+			
 			return "error";//TODO
 		}
 		
-		Optional<PublishedApiType> pubOpt = listPub.stream().filter(a->(a.getApiClass()==ApiClassEnum.SP && a.getApiCall().contains("handleRes"))).findAny();
+		Optional<PublishedApiType> pubOpt = listPub.stream().filter(a->(a.getApiClass()==ApiClassEnum.SP && a.getApiCall().contains("handleResponse"))).findAny();
 		if (pubOpt.isPresent())
 		{
 			endPoint = pubOpt.get().getApiEndpoint();
-			System.out.println("Endpoint:"+endPoint);
+			log.info ("Endpoint: " + endPoint);
 		}
 		else
 		{
-			System.out.println("Error endpoint not found");
+			log.info ("Error: endpoint for *handleResponse* not found.");
 			return "error";//TODO
 		}
 		return endPoint;

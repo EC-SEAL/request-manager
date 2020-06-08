@@ -1,6 +1,22 @@
+/**
+Copyright © 2020  Atos Spain SA. All rights reserved.
+This file is part of SEAL Request Manager (SEAL rm).
+SEAL rm is free software: you can redistribute it and/or modify it under the terms of EUPL 1.2.
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT ANY WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT, 
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
+DAMAGES OR OTHER LIABILITY, WHETHER IN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+See README file for the full disclaimer information and LICENSE file for full license information in the project root.
+
+@author Atos Research and Innovation, Atos SPAIN SA
+*/
+
 package eu.atos.seal.rm.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,28 +61,37 @@ public class ResponseApiController implements ResponseApi {
         this.request = request;
     }
 
-    //public ResponseEntity<Void> responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model) 
-    public String responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model) 
+    public ResponseEntity<Void> responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model) 
+   // public String responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model) 
     {
         log.info("responsePost called");
-    	String accept = request.getHeader("Accept");
-        
+    	
         try {
         	
 			String sReturn = responseService.rmResponse(msToken, model);
 			log.info("requestPost: sReturn="+sReturn);
 			
-			return sReturn;
+			//return sReturn;
+			return new ResponseEntity<Void>(HttpStatus.OK);
 			//return "redirectform";
+			
 		} 
         //catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | CertificateException
 		//		| InvalidKeySpecException | IOException e) {
 		catch (Exception e)
         {
-			e.printStackTrace();
+			log.error(e.getMessage());
+			
+			if (e.getMessage().contains(Integer.toString(HttpStatus.BAD_REQUEST.value()))) 
+	        	
+				return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
+        	
+        	else
+        		return new ResponseEntity<Void>(HttpStatus.UNAUTHORIZED);
+			
+			
 		}
-        log.info("responsePost return null");
-        return null;
+        
     }
 
 }
