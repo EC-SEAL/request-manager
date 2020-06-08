@@ -26,6 +26,6 @@ jobs:
             export CONTAINER_TAG=test;
         fi
       script:
-        - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+        - docker login -u "$DOCKER_USERNAME_MVJ" -p "$DOCKER_PASSWORD_MVJ"
         - docker build -t mvjatos/seal-rm:${CONTAINER_TAG} .
         - docker push mvjatos/seal-rm:${CONTAINER_TAG}
