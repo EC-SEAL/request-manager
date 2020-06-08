@@ -26,7 +26,6 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-11-07T15:11:31.760Z")
 
 @Controller
 public class ResponseApiController implements ResponseApi {
@@ -49,15 +48,13 @@ public class ResponseApiController implements ResponseApi {
     //public ResponseEntity<Void> responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model) 
     public String responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model) 
     {
-        log.debug("responsePost called");
-    	System.out.println("responsePost called");
+        log.info("responsePost called");
     	String accept = request.getHeader("Accept");
         
         try {
         	
 			String sReturn = responseService.rmResponse(msToken, model);
-			System.out.println("requestPost: sReturn="+sReturn);
-			log.debug("requestPost: sReturn="+sReturn);
+			log.info("requestPost: sReturn="+sReturn);
 			
 			return sReturn;
 			//return "redirectform";
@@ -68,7 +65,7 @@ public class ResponseApiController implements ResponseApi {
         {
 			e.printStackTrace();
 		}
-        System.out.println("responsePost return null");
+        log.info("responsePost return null");
         return null;
     }
 
