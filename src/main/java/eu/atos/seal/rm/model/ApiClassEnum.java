@@ -34,6 +34,8 @@ public enum ApiClassEnum
   
   LINKAPP ("LINKAPP"), // API Gateway Link
   
+  VC ("VC"), // Virtual Credentials
+  
   REVOKED("REVOKED"); // Revocation
   
   private String value;

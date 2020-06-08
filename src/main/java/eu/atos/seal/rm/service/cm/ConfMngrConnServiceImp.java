@@ -33,31 +33,31 @@ public class ConfMngrConnServiceImp implements ConfMngrConnService
 	
 	private final String cmUrl;
 		
-	@Value("${apigwcl.cm.getExternalEntitiesPath}")
+	@Value("${rm.cm.getExternalEntitiesPath}")
 	private String getExternalEntitiesPath;
 	
-	@Value("${apigwcl.cm.getEntityMetadataSetPath}")
+	@Value("${rm.cm.getEntityMetadataSetPath}")
 	private String[] getEntityMetadataSetPath;
 	
-	@Value("${apigwcl.cm.getEntityMetadataPath}")
+	@Value("${rm.cm.getEntityMetadataPath}")
 	private String[] getEntityMetadataPath;
 	
-	@Value("${apigwcl.cm.getAllMicroservicesPath}")
+	@Value("${rm.cm.getAllMicroservicesPath}")
 	private String getAllMicroservicesPath;
 	
-	@Value("${apigwcl.cm.getMicroservicesByApiClassPath}")
+	@Value("${rm.cm.getMicroservicesByApiClassPath}")
 	private String[] getMicroservicesByApiClassPath;
 	
-	@Value("${apigwcl.cm.getInternalsPath}")
+	@Value("${rm.cm.getInternalsPath}")
 	private String getInternalsPath;
 	
-	@Value("${apigwcl.cm.getConfigurationPath}")
+	@Value("${rm.cm.getConfigurationPath}")
 	private String[] getConfigurationPath;
 	
-	@Value("${apigwcl.cm.getAttributeSetByProfilePath}")
+	@Value("${rm.cm.getAttributeSetByProfilePath}")
 	private String[] getAttributeSetByProfilePath;
 	
-	@Value("${apigwcl.cm.getAttributeProfilesPath}")
+	@Value("${rm.cm.getAttributeProfilesPath}")
 	private String getAttributeProfilesPath;
 	
 	
