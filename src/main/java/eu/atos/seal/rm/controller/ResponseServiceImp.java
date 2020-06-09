@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import javax.servlet.http.HttpSession;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,7 @@ import eu.atos.seal.rm.model.MsMetadataList;
 import eu.atos.seal.rm.model.PublishedApiType;
 import eu.atos.seal.rm.service.cm.ConfMngrConnService;
 import eu.atos.seal.rm.service.sm.SessionManagerConnService;
+import eu.atos.seal.rm.model.AttributeTypeList;
 
 import org.springframework.ui.Model;
 
@@ -45,6 +48,9 @@ import org.springframework.ui.Model;
 public class ResponseServiceImp implements ResponseService
 {
 	private static final Logger log = LoggerFactory.getLogger(ResponseServiceImp.class);
+	
+	@Autowired
+	HttpSession session;
 	
 	@Autowired
 	private SessionManagerConnService smConnService;
@@ -55,6 +61,9 @@ public class ResponseServiceImp implements ResponseService
 	@Override
 	public String rmResponse( String token, Model model) throws JsonParseException, JsonMappingException, IOException
 	{
+		// spRequestEP: Null, auth_request, data_query
+		// NOT used *** spRequestSource: Discovery, PDS, SSI, eIDAS, eduGAIN
+		
 		// Check the token
 		//				 
 		if (token.endsWith("="))
@@ -138,14 +147,126 @@ public class ResponseServiceImp implements ResponseService
 		}
 		
 		
-		AttributeSet idpResponse = new AttributeSet();
-		idpResponse = dsResponse;
 		
-		
-		// Read responseAssertions first, and then update?? TO ASK!!!
-		
+		// Read responseAssertions first, and then update?? TO ASK!!! (Raquel says)		
 		AttributeSetList responseAssertions= new AttributeSetList ();
-		responseAssertions.add(idpResponse);
+				
+		//
+		//  Looking for the type of endpoint to redirect: spRequestEP
+		// 
+		String spRequestEP="";
+		try
+		{
+			spRequestEP = (String)smConnService.readVariable(sessionId, "spRequestEP");
+			log.info("spRequestEP readed:"+spRequestEP);
+		}
+		catch (Exception ex)
+		{
+			String errorMsg= "Exception calling SM (getSessionData spRequestEP)  \n";
+			errorMsg += "Exception message:"+ex.getMessage()+"\n";
+			//model.addAttribute("ErrorMessage",errorMsg);
+			log.info("Returning error "+errorMsg);
+		        
+			return "rmError";	
+		}
+			
+		if (spRequestEP.contains("auth")) { //auth_request
+			// Do nothing
+			log.info ("It's an auth request.");
+			
+			AttributeSet idpResponse = new AttributeSet();
+			idpResponse = dsResponse;
+			responseAssertions.add(idpResponse);
+			
+			ObjectMapper objMapper = new ObjectMapper();
+			try
+			{
+				smConnService.updateVariable(sessionId,"responseAssertions",objMapper.writeValueAsString(responseAssertions));
+			}
+			catch (Exception ex)
+			{
+				String errorMsg= "Exception calling SM (updateVariable responseAssertions)  \n";
+				errorMsg += "4 Exception message:"+ex.getMessage()+"\n";
+				//model.addAttribute("ErrorMessage",errorMsg);
+				log.info ("Returning error: "+errorMsg);
+				
+		        return "rmError";
+			}
+			
+			String msName = getMsName(model, sessionId, null); // Returning the FIRST ONE! ***
+			String endPoint = getSpResponseEndpoint(model, msName,cmConnService);
+			log.info ("UrlToRedirect: " + endPoint);
+			if (endPoint == null  || endPoint.contains("error"))
+			{
+				return "rmError";
+			}
+				
+			String tokenToSPms = "";
+			try
+			{
+				tokenToSPms = smConnService.generateToken(sessionId,msName); 
+			}
+			catch (Exception ex)
+			{
+				String errorMsg= "responseAttributes: Exception calling SM (generateToken to "+msName+")  \n";
+				errorMsg += "5 Exception message:"+ex.getMessage()+"\n";
+				//model.addAttribute("ErrorMessage",errorMsg);
+				log.info ("Returning error: "+errorMsg);
+				
+		        return "rmError";
+			}
+			
+			model.addAttribute("msToken", tokenToSPms);
+			model.addAttribute("UrlToRedirect", endPoint);
+			
+			return "redirectform";
+			
+		}
+		else if (spRequestEP.contains("data")) {// data_query
+			// Show and confirm sending response assertions
+			
+			// Reading the dataStore
+			// TODO
+			
+			// Open the GUI and sending the response assertions selected by the user
+			return prepareAndGotoResponseUI(  sessionId,  model); // TODO: dataStore sent
+			
+		}
+		else {
+			String errorMsg= "Error spRequestEP: " + spRequestEP;
+			log.info ("Returning error: "+errorMsg);
+			
+			return "rmError";
+		}
+		
+	}
+	
+	
+	
+	private String prepareAndGotoResponseUI( String sessionId, Model model) 
+//		      AttributeSet spRequest, AttributeSet authenticationSet, 
+//		      AttributeSetList responseAssertions,
+//		      String errorMessage) 
+
+{
+		// TODO
+		
+		return "redirect:../rm/response_client"; //TODO rest_api.controllers.client.MultiUIController!! and the related form.html
+}
+	
+	// ***Implementation of the ENDPOINT to be called from the form response_client!! /client/finishConsent
+	@Override
+	public String returnFromResponseUI(String sessionId, Model model) throws Exception 
+	{
+		//TODO
+		
+		// Read responseAssertions first, and then update?? TO ASK!!! (Raquel says)		
+		AttributeSetList responseAssertions= new AttributeSetList ();
+		// ** Expecting an @PostMapping ("response_client") in MultiUIController
+		AttributeTypeList attributesSendList = (AttributeTypeList) session.getAttribute("attributesConsentList");  //
+		AttributeSet consentResponse = new AttributeSet();
+		
+		responseAssertions.add(consentResponse);
 		
 		ObjectMapper objMapper = new ObjectMapper();
 		try
@@ -162,11 +283,9 @@ public class ResponseServiceImp implements ResponseService
 	        return "rmError";
 		}
 		
-		
-		//  Looking for the  endpoint to redirect
-		// 
-		String msName = getMsName(model, sessionId, null); // Returning the FIRST ONE! ***TO ASK
+		String msName = getMsName(model, sessionId, null); // Returning the FIRST ONE! ***
 		String endPoint = getSpResponseEndpoint(model, msName,cmConnService);
+		log.info ("UrlToRedirect: " + endPoint);
 		if (endPoint == null  || endPoint.contains("error"))
 		{
 			return "rmError";
@@ -175,7 +294,6 @@ public class ResponseServiceImp implements ResponseService
 		String tokenToSPms = "";
 		try
 		{
-			//tokenToSPms = smConnService.generateToken(sessionId,acmMsName,"SAMLms_0001");
 			tokenToSPms = smConnService.generateToken(sessionId,msName); 
 		}
 		catch (Exception ex)
@@ -192,7 +310,6 @@ public class ResponseServiceImp implements ResponseService
 		model.addAttribute("UrlToRedirect", endPoint);
 		
 		return "redirectform";
-		//return null;
 	}
 	
 	
@@ -265,11 +382,12 @@ public class ResponseServiceImp implements ResponseService
 			return "error";//TODO
 		}
 		
+		// sp/response *** TO UPDATE
 		Optional<PublishedApiType> pubOpt = listPub.stream().filter(a->(a.getApiClass()==ApiClassEnum.SP && a.getApiCall().contains("handleResponse"))).findAny();
 		if (pubOpt.isPresent())
 		{
 			endPoint = pubOpt.get().getApiEndpoint();
-			log.info ("Endpoint: " + endPoint);
+			//log.info ("Endpoint: " + endPoint);
 		}
 		else
 		{

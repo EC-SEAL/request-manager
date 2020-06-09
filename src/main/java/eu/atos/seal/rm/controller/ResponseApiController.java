@@ -25,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -35,6 +36,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.constraints.*;
 import javax.validation.Valid;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -60,6 +63,13 @@ public class ResponseApiController implements ResponseApi {
         this.objectMapper = objectMapper;
         this.request = request;
     }
+    
+    @GetMapping("/client/finishConsent")
+    public String finishConsent(String sessionId,Model model) throws Exception
+    {
+    	return responseService.returnFromResponseUI (sessionId, model);
+    }
+    
 
     public ResponseEntity<Void> responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model) 
    // public String responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model) 
