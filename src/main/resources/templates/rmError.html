@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>RequestManager Error</title>
+</head>
+<body>
+
+ <h1>SEAL ERROR PAGE</h1>
+<!--  <div class="header"> -->
+
+	<label th:text="${ErrorMessage}"></label>
+ 
+  	<form name="myRedirectForm" action="" th:action="${UrlToRedirect}" method="POST"> 
+  		<input name="msToken" type="hidden" value="" th:value="${msToken}" /> 
+  		<noscript> 
+             <input type="submit" value="Click here to continue" /> 
+         </noscript> 
+         <script type="text/javascript">
+
+             (function () {
+                 document.myRedirectForm.submit();
+             })();
+
+         </script> 
+  	</form> 
+ 	
+</body>
+</html>

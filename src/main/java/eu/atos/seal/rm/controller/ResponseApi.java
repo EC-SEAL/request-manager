@@ -44,7 +44,7 @@ public interface ResponseApi
     @RequestMapping(value = "/rm/response",
         consumes = { "application/x-www-form-urlencoded" },
         method = RequestMethod.POST)
-    ResponseEntity<Void> responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken,Model model);
-    //String responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model);
+    //ResponseEntity<Void> responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken,Model model);
+    String responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model);
 
 }

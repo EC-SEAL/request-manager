@@ -71,19 +71,18 @@ public class ResponseApiController implements ResponseApi {
     }
     
 
-    public ResponseEntity<Void> responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model) 
-   // public String responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model) 
+    //public ResponseEntity<Void> responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model) 
+    public String responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model) 
     {
         log.info("responsePost called");
     	
         try {
         	
 			String sReturn = responseService.rmResponse(msToken, model);
-			log.info("requestPost: sReturn="+sReturn);
+			log.info("responsePost: sReturn="+sReturn);
 			
-			//return sReturn;
-			return new ResponseEntity<Void>(HttpStatus.OK);
-			//return "redirectform";
+			return sReturn;
+			//return new ResponseEntity<Void>(HttpStatus.OK);
 			
 		} 
         //catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | CertificateException
@@ -94,10 +93,12 @@ public class ResponseApiController implements ResponseApi {
 			
 			if (e.getMessage().contains(Integer.toString(HttpStatus.BAD_REQUEST.value()))) 
 	        	
-				return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
+				//return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
+				return (Integer.toString(HttpStatus.BAD_REQUEST.value()));
         	
         	else
-        		return new ResponseEntity<Void>(HttpStatus.UNAUTHORIZED);
+        		//return new ResponseEntity<Void>(HttpStatus.UNAUTHORIZED);
+        		return (Integer.toString(HttpStatus.UNAUTHORIZED.value()));
 			
 			
 		}
