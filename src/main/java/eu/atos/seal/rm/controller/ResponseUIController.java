@@ -32,8 +32,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import eu.atos.seal.rm.model.AttributeType;
 import eu.atos.seal.rm.model.AttributeTypeList;
+import eu.atos.seal.rm.model.DSClient;
 import eu.atos.seal.rm.model.DataSet;
 import eu.atos.seal.rm.model.MsMetadata;
+import eu.atos.seal.rm.model.AttributeClient;
+import eu.atos.seal.rm.model.AttributeSet;
+import eu.atos.seal.rm.model.AttributeSetClient;
+import eu.atos.seal.rm.model.AttributeSetList;
 
 
 @Controller
@@ -41,20 +46,19 @@ public class ResponseUIController
 {
 	private static final Logger log = LoggerFactory.getLogger(ResponseUIController.class);
 	
-//    @GetMapping("idpRedirection")
-//    public String getIdpRedirection(HttpSession session, Model model) throws Exception
-//    {
-//        System.out.println("En MultiUIController.getIdpRedirection");
-//
-//        return "idpRedirect";
-//    }
-
     @GetMapping("response_client")
     public String getHtmlForm(HttpSession session, Model model) throws Exception
     {
     	//TODO
+ 
     	
-        EntityMetadataList apsList = (EntityMetadataList) session.getAttribute("apsList");
+//        EntityMetadataList apsList = (EntityMetadataList) session.getAttribute("apsList");
+        
+    	//** DataStore has a list of DataSets
+    	//** DataSet has a list of AttributeTypes
+    	//** The SPrequest has a list of requested AttributeTypes
+    	
+    	List<DataSet> dsList = (List<DataSet>) session.getAttribute("dsList"); // list of dataSets
         AttributeTypeList attributesRequestList = (AttributeTypeList) session
                 .getAttribute("attributesRequestList");
         AttributeTypeList attributesSendList = (AttributeTypeList) session
@@ -70,21 +74,21 @@ public class ResponseUIController
         String consentQuery = (String) session.getAttribute("consentQuery");
         String consentFinish = (String) session.getAttribute("consentFinish");
 
-        if (apsList == null || attributesRequestList == null || urlReturn == null
-                || urlFinishProcess == null)
+        if (dsList ==  null || attributesRequestList == null || attributesSendList == null || 
+        	urlReturn == null || urlFinishProcess == null)
         {
             throw new Exception("Data not initialize");
         }
 
-        List<APClient> apClientList = new ArrayList<APClient>();
+        List<DSClient> dsClientList = new ArrayList<DSClient>(); //APClient
 
-        for (int i = 0; i < apsList.size(); i++)
+        for (int i = 0; i < dsList.size(); i++)
         {
-            APClient apClient = APClient.getAPClientFrom(apsList.get(i), i);
-            apClientList.add(apClient);
+            DSClient dsClient = DSClient.getDSClientFrom(dsList.get(i), i);
+            dsClientList.add(dsClient);
         }
 
-        model.addAttribute("apsList", apClientList);
+        model.addAttribute("dsList", dsClientList);
 
         List<AttributeClient> attributeClientList = new ArrayList<AttributeClient>();
 
@@ -96,7 +100,7 @@ public class ResponseUIController
         }
 
         model.addAttribute("attributesRequestList", attributeClientList);
-
+        
         List<AttributeClient> attributeClientSendList = new ArrayList<AttributeClient>();
 
         if (attributesSendList != null)
@@ -349,7 +353,8 @@ public class ResponseUIController
     {
     	
     	//TODO
-    	
+
+    	/**
         int apIndex = Integer.parseInt(formData.get("apId").get(0));
         String[] attrRequestList = formData.get("attrRequestList").get(0).split(",");
         String[] attrSendList = formData.get("attrSendList").get(0).split(",");
@@ -441,5 +446,8 @@ public class ResponseUIController
         
         session.setAttribute("sessionId", session.getAttribute("sessionId"));
         return "redirect:" + urlReturn;
+        
+        **/
+    	return "redirect:";
     }
 }
