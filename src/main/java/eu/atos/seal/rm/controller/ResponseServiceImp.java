@@ -16,6 +16,7 @@ See README file for the full disclaimer information and LICENSE file for full li
 package eu.atos.seal.rm.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,6 +26,7 @@ import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -35,6 +37,7 @@ import eu.atos.seal.rm.model.ApiClassEnum;
 import eu.atos.seal.rm.model.AttributeSet;
 import eu.atos.seal.rm.model.AttributeSetList;
 import eu.atos.seal.rm.model.AttributeSetStatus;
+import eu.atos.seal.rm.model.AttributeType;
 import eu.atos.seal.rm.model.EntityMetadata;
 import eu.atos.seal.rm.model.MsMetadata;
 import eu.atos.seal.rm.model.MsMetadataList;
@@ -43,6 +46,7 @@ import eu.atos.seal.rm.service.cm.ConfMngrConnService;
 import eu.atos.seal.rm.service.sm.SessionManagerConnService;
 import eu.atos.seal.rm.model.DataStore;
 import eu.atos.seal.rm.model.AttributeTypeList;
+import eu.atos.seal.rm.model.DataSet;
 
 import org.springframework.ui.Model;
 
@@ -110,7 +114,8 @@ public class ResponseServiceImp implements ResponseService
 		
 			// Reading "dsResponse"
 			Object objSpRequest = null;
-			AttributeSet dsResponse = null;		
+			AttributeSet dsResponse = null;	
+			log.info("BEFORE dsResponse: ");
 			objSpRequest = smConnService.readVariable(sessionId, "dsResponse");	
 			dsResponse = (new ObjectMapper()).readValue(objSpRequest.toString(),AttributeSet.class);
 			log.info("dsResponse: " + dsResponse.toString() );
@@ -140,8 +145,12 @@ public class ResponseServiceImp implements ResponseService
 			EntityMetadata dsMetadata = null;
 			Object objDsMetadata = null;
 			objDsMetadata = smConnService.readVariable(sessionId, "dsMetadata");
-			dsMetadata = (new ObjectMapper()).readValue(objDsMetadata.toString(),EntityMetadata.class);
-			log.info("dsMetadata: " + dsMetadata.toString());
+			if (objDsMetadata != null) {
+				dsMetadata = (new ObjectMapper()).readValue(objDsMetadata.toString(),EntityMetadata.class);
+				log.info("dsMetadata: " + dsMetadata.toString());
+			}
+			else
+				log.info("****NULL dsMetadata!!****");
 		
 					
 			//
@@ -200,8 +209,8 @@ public class ResponseServiceImp implements ResponseService
 				
 				
 				// Open the GUI and sending the response assertions selected by the user
-				//return prepareAndGotoResponseUI( sessionId,  model, dataStore, null); // TODO: errorMsg?
-				return prepareAndGotoResponseUI( sessionId,  model, datastore, null); 
+				// TODO: errorMsg?
+				return prepareAndGotoResponseUI( sessionId,  model, null, datastore, null); // spRequest!!!!! TODO *****
 				
 			}
 			else {
@@ -229,14 +238,60 @@ public class ResponseServiceImp implements ResponseService
 	}
 	
 	
+	@Value("${rm.multiui.privacyPolicy}") //Defined in application.properties file
+    String privacyPolicy;
 	
+	@Value("${rm.multiui.consentFinish}") //Defined in application.properties file
+    String consentFinish;
+
 	private String prepareAndGotoResponseUI( String sessionId, Model model, 
-		      DataStore dataStore,
-		      String errorMessage) 
+			AttributeSet spRequest,
+		    DataStore dataStore,
+		    String errorMessage) 
 
 	{
 		// TODO
 		log.info("TODO prepareAndGotoResponseUI");
+		
+		// Filling dsList and attributeSendList
+		AttributeTypeList attributesSendList = new AttributeTypeList();
+		List<DataSet> dsList = new ArrayList<DataSet>();
+		for (DataSet aux_ds:dataStore.getClearData()) {
+			dsList.add(aux_ds);
+			
+			for (AttributeType aux_attr:aux_ds.getAttributes()) {
+				attributesSendList.add(aux_attr);
+			}
+		}
+		
+		// Filling attributesRequestList
+		AttributeTypeList attributesRequestList = new AttributeTypeList();
+		for ( AttributeType attrRequested : spRequest.getAttributes())
+		{
+			attributesRequestList.add(attrRequested);
+		}
+		
+		session.setAttribute("urlReturn", "response_client/return"); 		// Consenting: ACCEPT
+        session.setAttribute("urlFinishProcess", "response_client/finish"); // No consenting: REJECT
+        
+		session.setAttribute("dsList", dsList); 
+		session.setAttribute("attributesRequestList", attributesRequestList);
+		session.setAttribute("attributesSendList", attributesSendList);
+		//session.setAttribute("attributesConsentList", responseAssertions);
+		session.setAttribute("sessionId", sessionId);
+		if(errorMessage != null)
+			session.setAttribute("errorMessage", errorMessage);		
+		if (privacyPolicy != null)
+			session.setAttribute("privacyPolicy",privacyPolicy);
+		if (consentFinish != null)
+			session.setAttribute("consentFinish",consentFinish);
+		
+		
+		model.addAttribute("dsList", dsList);
+		model.addAttribute("attributesRequestList", attributesRequestList);
+		model.addAttribute("attributesSendList", attributesSendList);
+
+		
 		
 		return "redirect:../rm/response_client"; 
 		//TODO Move to rest_api.controllers.client.MultiUIController***?
@@ -245,18 +300,23 @@ public class ResponseServiceImp implements ResponseService
 	}
 	
 	
-	// ***Implementation of the ENDPOINT to be called from the form response_client!! /client/finishConsent
+	// ***Implementation of the ENDPOINT to be called from the form response_client!! "response_client/return"
 	@Override
 	public String returnFromResponseUI(String sessionId, Model model) throws Exception 
 	{
 		//TODO
 		
 		AttributeSetList responseAssertions= new AttributeSetList ();
-		// ** Expecting an @PostMapping ("response_client") in MultiUIController
-		AttributeTypeList attributesSendList = (AttributeTypeList) session.getAttribute("attributesConsentList");  //
-		AttributeSet consentResponse = new AttributeSet();
+		List<DataSet> dsConsentList = (List<DataSet>) session.getAttribute("dsConsentList");
+		log.info("dsConsentList: " + dsConsentList.toString());
 		
-		responseAssertions.add(consentResponse);
+		for (DataSet ds:dsConsentList) {
+			AttributeSet consentResponse = new AttributeSet();
+			consentResponse.setAttributes (ds.getAttributes());
+			
+			responseAssertions.add(consentResponse);			
+		}
+		
 		log.info ("responseAssertions just consented: " + responseAssertions.toString());
 		
 		ObjectMapper objMapper = new ObjectMapper();
@@ -297,6 +357,49 @@ public class ResponseServiceImp implements ResponseService
 		}
 	}
 	
+	
+	// ***Implementation of the ENDPOINT to be called from the form response_client!! "response_client/finish"
+	@Override
+	public String returnNothing (String sessionId, Model model) throws Exception 
+	{
+		ObjectMapper objMapper = new ObjectMapper();
+		String endPoint = null;
+		try
+		{
+			// Updating the responseAssertions consented by the user: none
+			smConnService.updateVariable(sessionId,"responseAssertions",objMapper.writeValueAsString(null));
+		
+			String msName = getMsName(model, sessionId, null); // Returning the FIRST ONE! ***
+			endPoint = getSpResponseEndpoint(model, msName,cmConnService);
+			log.info ("UrlToRedirect: " + endPoint);
+			if (endPoint == null  || endPoint.contains("error"))
+			{
+				model.addAttribute("ErrorMessage","SP endpoint not found");
+				return "fatalError";
+			}
+				
+			String tokenToSPms = "";
+			tokenToSPms = smConnService.generateToken(sessionId,msName); 
+		
+			model.addAttribute("msToken", tokenToSPms);
+			model.addAttribute("UrlToRedirect", endPoint);
+			
+			return "redirectform";
+		
+		}
+		catch (Exception ex)
+		{
+			String errorMsg= ex.getMessage()+"\n";
+			log.info ("Returning error: "+errorMsg);
+			
+			model.addAttribute("ErrorMessage",errorMsg);
+			if (endPoint != null) 
+	        	return "rmError"; 
+	        else
+	        	return "fatalError"; // Unknown endPoint...
+		}
+	}
+		
 	
 	
 	

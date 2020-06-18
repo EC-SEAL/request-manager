@@ -23,6 +23,9 @@ import org.springframework.ui.Model;
 
 public interface ResponseService
 {
-	public String returnFromResponseUI (String token, Model model) throws Exception;
+	
 	public String rmResponse( String token, Model model) throws JsonParseException, JsonMappingException, IOException;
+	
+	public String returnFromResponseUI (String token, Model model) throws Exception;
+	public String returnNothing (String token, Model model) throws Exception;
 }

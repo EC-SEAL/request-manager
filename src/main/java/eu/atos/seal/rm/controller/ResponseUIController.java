@@ -23,6 +23,7 @@ import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
@@ -36,11 +37,7 @@ import eu.atos.seal.rm.model.DSClient;
 import eu.atos.seal.rm.model.DataSet;
 import eu.atos.seal.rm.model.DataSetList;
 import eu.atos.seal.rm.model.DataSetListClient;
-import eu.atos.seal.rm.model.MsMetadata;
 import eu.atos.seal.rm.model.AttributeClient;
-import eu.atos.seal.rm.model.AttributeSet;
-import eu.atos.seal.rm.model.AttributeSetClient;
-import eu.atos.seal.rm.model.AttributeSetList;
 
 
 @Controller
@@ -341,10 +338,11 @@ public class ResponseUIController
 
         attributeSendList.add(attr1);
         attributeSendList.add(attr2);
+        attributeSendList.add(attr3);
         session.setAttribute("attributesSendList", attributeSendList);
 
-        session.setAttribute("urlReturn", "response_client/return");
-        session.setAttribute("urlFinishProcess", "response_client/finish");
+        session.setAttribute("urlReturn", "response_client/return"); 		// Consenting: ACCEPT
+        session.setAttribute("urlFinishProcess", "response_client/finish"); // No consenting: REJECT
 
         // Recolected consent attributes
         List<DataSet> dataSetConsentList = new ArrayList<DataSet>();
@@ -501,4 +499,6 @@ public class ResponseUIController
         
         
     }
+    
+    
 }

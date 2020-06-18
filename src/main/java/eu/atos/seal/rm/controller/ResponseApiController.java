@@ -64,9 +64,17 @@ public class ResponseApiController implements ResponseApi {
         this.request = request;
     }
     
-    @GetMapping("/client/finishConsent")
-    public String finishConsent(String sessionId,Model model) throws Exception
+    @GetMapping("response_client/finish")
+    public String rejectConsent(String sessionId,Model model) throws Exception
     {
+    	log.info("REJECT: Entering response_client/finish ...");
+    	return responseService.returnNothing (sessionId, model);
+    }
+    
+    @GetMapping("response_client/return")
+    public String acceptConsent (String sessionId,Model model) throws Exception
+    {
+    	log.info("ACCEPT: Entering response_client/return ...");
     	return responseService.returnFromResponseUI (sessionId, model);
     }
     
