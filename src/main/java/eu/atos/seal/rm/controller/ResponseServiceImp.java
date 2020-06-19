@@ -113,11 +113,11 @@ public class ResponseServiceImp implements ResponseService
 			model.addAttribute("msToken", tokenToSPms);
 		
 			// Reading "dsResponse"
-			Object objSpRequest = null;
+			Object objDsResponse = null;
 			AttributeSet dsResponse = null;	
 			log.info("BEFORE dsResponse: ");
-			objSpRequest = smConnService.readVariable(sessionId, "dsResponse");	
-			dsResponse = (new ObjectMapper()).readValue(objSpRequest.toString(),AttributeSet.class);
+			objDsResponse = smConnService.readVariable(sessionId, "dsResponse");	
+			dsResponse = (new ObjectMapper()).readValue(objDsResponse.toString(),AttributeSet.class);
 			log.info("dsResponse: " + dsResponse.toString() );
 			
 			// Building responseAssertions 
@@ -179,9 +179,9 @@ public class ResponseServiceImp implements ResponseService
 				// Reading the dataStore
 				DataStore dataStore = null;
 				Object objDatastore = null;
-					objDatastore = smConnService.readVariable(sessionId, "dataStore");
+				objDatastore = smConnService.readVariable(sessionId, "dataStore");
 				
-				// TESTING:
+				/* TESTING:
 				log.info("*** Testing: invented dataStore");
 				DataStore datastore = new DataStore();
 				datastore.setId("DS_" + UUID.randomUUID().toString());
@@ -191,9 +191,8 @@ public class ResponseServiceImp implements ResponseService
 				datastore.setSignatureAlgorithm("this is the signature algorithm");	
 				
 				datastore.setClearData(null);
-				// END TESTING
+				// END TESTING*/
 				
-				/* TO BE UNCOMMENTED*****
 				if (objDatastore != null) {
 					dataStore = (new ObjectMapper()).readValue(objDatastore.toString(),DataStore.class);
 					log.info("dataStore: " + dataStore.toString());
@@ -205,12 +204,17 @@ public class ResponseServiceImp implements ResponseService
 					model.addAttribute("ErrorMessage", errorMsg);
 					return "rmError";				
 				}
-				TO BE UNCOMMENTED*****/
+				
+				// Reading the spRequest
+				AttributeSet spRequest = null;
+				Object objSpRequest = null;
+				objSpRequest = smConnService.readVariable(sessionId, "spRequest");
+				spRequest = (new ObjectMapper()).readValue(objSpRequest.toString(),AttributeSet.class);
 				
 				
 				// Open the GUI and sending the response assertions selected by the user
 				// TODO: errorMsg?
-				return prepareAndGotoResponseUI( sessionId,  model, null, datastore, null); // spRequest!!!!! TODO *****
+				return prepareAndGotoResponseUI( sessionId,  model, spRequest, dataStore, null); 
 				
 			}
 			else {
@@ -250,8 +254,7 @@ public class ResponseServiceImp implements ResponseService
 		    String errorMessage) 
 
 	{
-		// TODO
-		log.info("TODO prepareAndGotoResponseUI");
+		log.info("prepareAndGotoResponseUI ...");
 		
 		// Filling dsList and attributeSendList
 		AttributeTypeList attributesSendList = new AttributeTypeList();
@@ -304,7 +307,6 @@ public class ResponseServiceImp implements ResponseService
 	@Override
 	public String returnFromResponseUI(String sessionId, Model model) throws Exception 
 	{
-		//TODO
 		
 		AttributeSetList responseAssertions= new AttributeSetList ();
 		List<DataSet> dsConsentList = (List<DataSet>) session.getAttribute("dsConsentList");

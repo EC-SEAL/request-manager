@@ -49,7 +49,7 @@ public class ResponseUIController
     public String getHtmlForm(HttpSession session, Model model) throws Exception
     {
     	//TODO
- 
+    	log.info ("GET response_client: getHtmlForm....");
     	
 //        EntityMetadataList apsList = (EntityMetadataList) session.getAttribute("apsList");
         
@@ -74,6 +74,7 @@ public class ResponseUIController
         String privacyPolicy = (String) session.getAttribute("privacyPolicy");
         //String consentQuery = (String) session.getAttribute("consentQuery");
         String consentFinish = (String) session.getAttribute("consentFinish");
+        String consentReturn = (String) session.getAttribute("consentReturn");
 
         if (dsList ==  null || attributesRequestList == null || attributesSendList == null || 
         	urlReturn == null || urlFinishProcess == null)
@@ -145,6 +146,7 @@ public class ResponseUIController
         model.addAttribute("dsConsentList", consentList);
 
         model.addAttribute("urlFinishProcess", urlFinishProcess);
+        model.addAttribute("urlReturn", urlReturn);
 
         if (infoMessage != null)
         {
@@ -158,6 +160,7 @@ public class ResponseUIController
         model.addAttribute("SPName", (SPName != null) ? SPName : "Service Provider");
         model.addAttribute("privacyPolicy", privacyPolicy);
         model.addAttribute("consentFinish", consentFinish);
+        model.addAttribute("consentReturn", consentReturn);
 
         return "responseForm";
     }
@@ -386,8 +389,9 @@ public class ResponseUIController
         session.setAttribute("privacyPolicy", "https://project-seal.eu/privacy-policy");
 //        session.setAttribute("consentQuery", "Click to consent to the above data query and to receive requested data." +
 //                " You are accepting the privacy policy conditions, please be sure you understand them.");
-        session.setAttribute("consentFinish", "Click to consent to return your above data to Service Provider and finish the process." +
-                " You are accepting the privacy policy conditions, please be sure you understand them.");
+        session.setAttribute("consentFinish", "Click to CANCEL the submission of your above data to Service Provider and finish the process.");
+        session.setAttribute("consentReturn", "Click to CONSENT to return your above data to Service Provider and finish the process." +
+                " You are accepting the privacy policy conditions, please be sure you understand them."); //TODO
 
         return "redirect:../response_client";
     }
@@ -399,7 +403,7 @@ public class ResponseUIController
     {
     	
     	//TODO
-
+    	log.info ("POST response_client: getRequest....");
     	
         int dsIndex = Integer.parseInt(formData.get("dsId").get(0));
         String[] attrRequestList = formData.get("attrRequestList").get(0).split(",");

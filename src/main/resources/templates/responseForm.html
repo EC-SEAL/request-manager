@@ -139,10 +139,18 @@
             </div>
         </div>
 
-        <form id="finish-form" class="consent-form" th:action="${urlFinishProcess}" method="get">
-            <input type="submit" class="consent-button" value="Finish"/>
+        <form id="rejecting-form" class="consent-form" th:action="${urlFinishProcess}" method="get">
+            <input type="submit" class="consent-button" value="Cancel"/>
             <p th:if="${consentFinish}" class="consent-text" th:text="${consentFinish}"></p>
             <p th:unless="${consentFinish}" class="consent-text finish-consent-text">
+                Click to cancel the submission of your above data to <span th:text="${SPName}">SP organisation</span>
+                and finish the process.</p>
+        </form>
+        
+        <form id="return-form" class="consent-form" th:action="${urlReturn}" method="get">
+            <input type="submit" class="consent-button" value="Accept"/>
+            <p th:if="${consentReturn}" class="consent-text" th:text="${consentReturn}"></p>
+            <p th:unless="${consentReturn}" class="consent-text finish-consent-text">
                 Click to consent to return your above data to <span th:text="${SPName}">SP organisation</span>
                 and finish the process.</p>
         </form>
