@@ -1,4 +1,11 @@
 package eu.atos.seal.rm.model;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.util.StringUtils;
+
 /**
  * Copyright © 2020  Atos Spain SA. All rights reserved.
 This file is part of SEAL Request Manager (SEAL rm).
@@ -21,6 +28,8 @@ public class DSClient
     private String displayName;
 
     private String logo;
+    
+    private List <AttributeClient> attrs;
 
     public int getIndex()
     {
@@ -51,6 +60,17 @@ public class DSClient
     {
         this.logo = logo;
     }
+    
+    public List<AttributeClient> getAttrs()
+    {
+        return attrs;
+    }
+
+    public void setAttrs(List<AttributeClient> attrs)
+    {
+        this.attrs = new ArrayList<AttributeClient>();
+        this.attrs = attrs;
+    }
 
     // TODO What to show? *** ASK
     public static DSClient getDSClientFrom(DataSet dataset, int index) 
@@ -59,6 +79,19 @@ public class DSClient
         dsClient.setIndex(index);
         dsClient.setDisplayName(dataset.getIssuerId());
         dsClient.setLogo(dataset.getSubjectId());
+        
+        List<AttributeClient> auxAttrs = new ArrayList<AttributeClient>();
+        int count = 0;
+        for (AttributeType attr: dataset.getAttributes()) {
+        	AttributeClient attrCl = new AttributeClient();
+        	attrCl.setIndex(count++);
+        	attrCl.setName(attr.getFriendlyName());
+        	attrCl.setValue(StringUtils.arrayToCommaDelimitedString(attr.getValues().toArray()));
+        	
+        	auxAttrs.add(attrCl);
+        }
+        
+        dsClient.setAttrs(auxAttrs);
 
         return dsClient;
     }

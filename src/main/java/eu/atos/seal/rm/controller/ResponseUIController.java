@@ -313,6 +313,7 @@ public class ResponseUIController
     	AttributeTypeList attributes2 = new AttributeTypeList();
     	AttributeType attr3 = new AttributeType();
     	attr3.setName("age");
+    	attr3.setFriendlyName("age");
     	attr3.setValues(Arrays.asList("25"));
         attributes2.add(attr3);
     	dataSet2.setAttributes (attributes2);
@@ -335,6 +336,7 @@ public class ResponseUIController
 
         attributeList.add(attr1);
         attributeList.add(attr2);
+        attributeList.add(attr3);
         session.setAttribute("attributesRequestList", attributeList);
 
         AttributeTypeList attributeSendList = new AttributeTypeList();

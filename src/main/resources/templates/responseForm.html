@@ -3,7 +3,7 @@
 <head>
     <title>SEAL Data Consent</title>
     <script type="application/javascript" th:src="@{js/jquery/jquery-3.3.1.js}"></script>
-    <script type="application/javascript" th:src="@{js/client.js}"></script>
+    <script type="application/javascript" th:src="@{js/responseClient.js}"></script>
     <link rel="stylesheet" type="text/css" th:href="@{css/client.css}"/>
 </head>
 <body>
@@ -20,7 +20,7 @@
 <div id="main-selector">
 
     <div id="requesting-data" class="main-content">
-        <h3 class="main-title"><span th:text="${SPName}">Service Provider</span> is requesting the following Personal Data</h3>
+        <h3 class="main-title"><span th:text="${SPName}">Service Provider</span> is REQUESTING the following Personal Data</h3>
 
         <div id="attributes-request-selector" class="data-box attributes-selector">
             <div class="header-data">
@@ -51,7 +51,7 @@
 
         <div id="attributes-send-selector" class="data-box attributes-selector">
             <div class="header-data">
-                <p>List of identity data to send in query</p>
+                <p>List of identity data OBTAINED</p>
                 <div class="buttons">
                     <input type="image" id="edit-send-attr" class="edit-img" th:src="@{images/edit.png}" alt="Edit"/>
                     <input type="image" id="update-send-attr" class="update-img" th:src="@{images/update.png}"
@@ -78,13 +78,19 @@
         </div>
 
         <div id="aps" class="data-box">
-            <h3>Select organisation to retrieve your data from:</h3>
+            <h3>This is your DATA STORE to retrieve your data from:</h3>
 
             <div id="ap-selector">
-                <div th:each="apClient : ${apsList}" th:attr="index=${apClient.index}"
-                     th:classappend="${apClient.index%2==0} ? odd : even">
-                    <span class="logo"><img th:src="${apClient.logo}"/></span>
-                    <span th:text="${apClient.displayName}"></span>
+                <div th:each="dsClient : ${dsList}" th:attr="index=${dsClient.index}"
+                     th:classappend="${dsClient.index%2==0} ? odd : even">
+                    <span th:text="${dsClient.logo}"></span>
+                    <span th:text="${dsClient.displayName}"></span>
+                
+                    <span th:each="attributeClient : ${dsClient.attrs}">
+    					<span th:text="${attributeClient.index} + ': ' + ${attributeClient.name} +'** '+ ${attributeClient.value}"></span>
+					</span>
+                    
+                    
                 </div>
             </div>
 
@@ -109,9 +115,9 @@
         <div id="attributes-consent">
 
             <div class="attributes-consent-selector data-box attributes-selector"
-                 th:each="attrConsent : ${attributesConsentList}">
+                 th:each="dsConsent : ${dsConsentList}">
                 <div class="header-data">
-                    <p th:text="${attrConsent.id}"></p>
+                    <p th:text="${dsConsent.id}"></p>
                     <div class="buttons">
                         <input type="image" class="edit-img edit-consent" th:src="@{images/edit.png}" alt="Edit"/>
                         <input type="image" class="update-img update-consent-attr" th:src="@{images/update.png}"
@@ -123,16 +129,16 @@
                 </div>
 
                 <ul class="attributes-consent-collected">
-                    <li th:each="attribute : ${attrConsent.attributeClientList}" th:attr="index=${attribute.index}">
+                    <li th:each="attribute : ${dsConsent.attributeClientList}" th:attr="index=${attribute.index}">
                         <span class="bold" th:text="${attribute.name}"></span>: <span
                             th:text="${attribute.value}"></span>
                     </li>
                 </ul>
 
                 <ul class="attributes-consent-selection">
-                    <li th:each="attribute : ${attrConsent.attributeClientList}">
+                    <li th:each="attribute : ${dsConsent.attributeClientList}">
                         <input type="checkbox" th:value="${attribute.index}" checked="true"
-                               th:name="${attrConsent.id}"/>
+                               th:name="${dsConsent.id}"/>
                         <label th:text="${attribute.name}"></label>
                     </li>
                 </ul>
