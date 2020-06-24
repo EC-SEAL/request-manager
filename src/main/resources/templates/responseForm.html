@@ -102,9 +102,7 @@
             <input type="hidden" name="attrRequestList" id="attr-request-list"/>
             <input type="hidden" name="attrSendList" id="attr-send-list"/>
             <input type="hidden" name="attrConsentList" id="attr-consent-list"/>
-            <input type="button" value="Send" id="send-request-button" class="consent-button"/>
-            <span th:if="${consentQuery}" class="consent-text" th:text="${consentQuery}"></span>
-            <span th:unless="${consentQuery}" class="consent-text">Click to consent to the above data query and to receive requested data.</span>
+            
         </form>
 
     </div>

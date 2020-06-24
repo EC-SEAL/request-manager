@@ -101,7 +101,7 @@ public class ResponseUIController
             attributeClientList.add(attributeClient);
         }
 
-        model.addAttribute("attributesRequestList", attributeClientList);// DONT KNOW IF NEEDED------TOASK
+        model.addAttribute("attributesRequestList", attributeClientList);// Necessary in order to filter the results to be shown
         
         List<AttributeClient> attributeClientSendList = new ArrayList<AttributeClient>();
 
@@ -398,7 +398,8 @@ public class ResponseUIController
         return "redirect:../response_client";
     }
     
-
+/* Not used. TO BE REMOVED
+ 
     @PostMapping("response_client")
     public String getRequest(@RequestBody MultiValueMap<String, String> formData,
             HttpSession session, Model model)
@@ -505,6 +506,6 @@ public class ResponseUIController
         
         
     }
-    
+ */   
     
 }
