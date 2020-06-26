@@ -273,14 +273,27 @@ public class ResponseServiceImp implements ResponseService
 		{
 			attributesRequestList.add(attrRequested);
 		}
-		
+		 
 		session.setAttribute("urlReturn", "response_client/return"); 		// Consenting: ACCEPT
         session.setAttribute("urlFinishProcess", "response_client/finish"); // No consenting: REJECT
         
 		session.setAttribute("dsList", dsList); 
 		session.setAttribute("attributesRequestList", attributesRequestList);
 		session.setAttribute("attributesSendList", attributesSendList);
-		//session.setAttribute("attributesConsentList", responseAssertions);
+		
+		//TODO: filtering with the requested attributes
+		AttributeSetList attributesConsentList = new AttributeSetList();
+		for (DataSet auxDs  : dsList) {
+			for (AttributeType auxAttr : auxDs.getAttributes()) {
+				AttributeSet attributeSet = new AttributeSet();
+				
+				attributesConsentList.add(attributeSet);
+			}
+		}
+		
+		
+		session.setAttribute("attributesConsentList", attributesConsentList);
+		
 		session.setAttribute("sessionId", sessionId);
 		if(errorMessage != null)
 			session.setAttribute("errorMessage", errorMessage);		
@@ -293,6 +306,7 @@ public class ResponseServiceImp implements ResponseService
 		model.addAttribute("dsList", dsList);
 		model.addAttribute("attributesRequestList", attributesRequestList);
 		model.addAttribute("attributesSendList", attributesSendList);
+		model.addAttribute("attributesConsentList", attributesConsentList);
 
 		
 		
@@ -309,7 +323,7 @@ public class ResponseServiceImp implements ResponseService
 	{
 		
 		AttributeSetList responseAssertions= new AttributeSetList ();
-		List<DataSet> dsConsentList = (List<DataSet>) session.getAttribute("dsConsentList");
+/*		List<DataSet> dsConsentList = (List<DataSet>) session.getAttribute("dsConsentList");
 		log.info("dsConsentList: " + dsConsentList.toString());
 		
 		for (DataSet ds:dsConsentList) {
@@ -318,6 +332,10 @@ public class ResponseServiceImp implements ResponseService
 			
 			responseAssertions.add(consentResponse);			
 		}
+*/
+		
+		log.info ("attributesConsentList: " + session.getAttribute("attributesConsentList").toString());
+		responseAssertions = (AttributeSetList)session.getAttribute("attributesConsentList");
 		
 		log.info ("responseAssertions just consented: " + responseAssertions.toString());
 		

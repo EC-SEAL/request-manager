@@ -102,6 +102,9 @@
             <input type="hidden" name="attrRequestList" id="attr-request-list"/>
             <input type="hidden" name="attrSendList" id="attr-send-list"/>
             <input type="hidden" name="attrConsentList" id="attr-consent-list"/>
+            <input type="button" value="Send" id="send-request-button" class="consent-button"/>
+            <span th:if="${consentQuery}" class="consent-text" th:text="${consentQuery}"></span>
+            <span th:unless="${consentQuery}" class="consent-text">Click to consent to the above data query and to receive requested data.</span>
             
         </form>
 
@@ -113,9 +116,9 @@
         <div id="attributes-consent">
 
             <div class="attributes-consent-selector data-box attributes-selector"
-                 th:each="dsConsent : ${dsConsentList}">
+                 th:each="attrConsent : ${attributesConsentList}">
                 <div class="header-data">
-                    <p th:text="${dsConsent.id}"></p>
+                    <p th:text="${attrConsent.id}"></p>
                     <div class="buttons">
                         <input type="image" class="edit-img edit-consent" th:src="@{images/edit.png}" alt="Edit"/>
                         <input type="image" class="update-img update-consent-attr" th:src="@{images/update.png}"
@@ -127,16 +130,16 @@
                 </div>
 
                 <ul class="attributes-consent-collected">
-                    <li th:each="attribute : ${dsConsent.attributeClientList}" th:attr="index=${attribute.index}">
+                    <li th:each="attribute : ${attrConsent.attributeClientList}" th:attr="index=${attribute.index}">
                         <span class="bold" th:text="${attribute.name}"></span>: <span
                             th:text="${attribute.value}"></span>
                     </li>
                 </ul>
 
                 <ul class="attributes-consent-selection">
-                    <li th:each="attribute : ${dsConsent.attributeClientList}">
+                    <li th:each="attribute : ${attrConsent.attributeClientList}">
                         <input type="checkbox" th:value="${attribute.index}" checked="true"
-                               th:name="${dsConsent.id}"/>
+                               th:name="${attrConsent.id}"/>
                         <label th:text="${attribute.name}"></label>
                     </li>
                 </ul>
@@ -152,7 +155,7 @@
         </form>
         
         <form id="return-form" class="consent-form" th:action="${urlReturn}" method="get">
-            <input type="submit" class="consent-button" value="Accept"/>
+            <input type="submit" id="send-request-button" class="consent-button" value="Accept"/>
             <p th:if="${consentReturn}" class="consent-text" th:text="${consentReturn}"></p>
             <p th:unless="${consentReturn}" class="consent-text finish-consent-text">
                 Click to consent to return your above data to <span th:text="${SPName}">SP organisation</span>

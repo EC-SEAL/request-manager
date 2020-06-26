@@ -9,14 +9,15 @@ $(document).ready(function()
 
 function apSelectorLogic()
 {
-    
+    $('#send-request-button').attr('disabled', 'true');
+
     $('#ap-selector div').click(function(event)
     {
         $('#ap-selector div').removeClass('onclick');
         $(this).addClass('onclick');
         $('#ap-id').val($(this).attr('index'));
         $('#ap-selected').html($(this).html());
-        
+        $('#send-request-button').removeAttr('disabled');
     })
 }
 
@@ -188,15 +189,23 @@ function updateConsentAttributesList()
 
     if (consentList != '') consentList = consentList.substr(1);
     $('#attr-consent-list').val(consentList);
+    
+    window.alert("attr-consent-list");
+    alert(consentList);
 }
 
 function sendRequestLogic()
 {
     updateRequestAttributesList();
     updateSendAttributesList();
-    updateConsentAttributesList(); //
+    //updateConsentAttributesList();
 
-    
+    $('#send-request-button').click(function()
+    {
+        updateConsentAttributesList();
+        $('#ap-form').submit();
+    });
+
     $('#send-request-cancel').click(function()
     {
         $('#send-request').hide();

@@ -38,6 +38,9 @@ import eu.atos.seal.rm.model.DataSet;
 import eu.atos.seal.rm.model.DataSetList;
 import eu.atos.seal.rm.model.DataSetListClient;
 import eu.atos.seal.rm.model.AttributeClient;
+import eu.atos.seal.rm.model.AttributeSet;
+import eu.atos.seal.rm.model.AttributeSetClient;
+import eu.atos.seal.rm.model.AttributeSetList;
 
 
 @Controller
@@ -62,17 +65,18 @@ public class ResponseUIController
                 .getAttribute("attributesRequestList");
         AttributeTypeList attributesSendList = (AttributeTypeList) session
                 .getAttribute("attributesSendList");
-//        AttributeSetList attributesConsentList = (AttributeSetList) session
-//                .getAttribute("attributesConsentList");
-        List<DataSet> dsConsentList = (List<DataSet>) session
-                .getAttribute("dsConsentList");
+        AttributeSetList attributesConsentList = (AttributeSetList) session
+                .getAttribute("attributesConsentList");
+//        List<DataSet> dsConsentList = (List<DataSet>) session
+//                .getAttribute("dsConsentList");
+        
         String urlReturn = (String) session.getAttribute("urlReturn");
         String urlFinishProcess = (String) session.getAttribute("urlFinishProcess");
         String infoMessage = (String) session.getAttribute("infoMessage");
         String errorMessage = (String) session.getAttribute("errorMessage");
         String SPName = (String) session.getAttribute("SPName");
         String privacyPolicy = (String) session.getAttribute("privacyPolicy");
-        //String consentQuery = (String) session.getAttribute("consentQuery");
+        String consentQuery = (String) session.getAttribute("consentQuery");
         String consentFinish = (String) session.getAttribute("consentFinish");
         String consentReturn = (String) session.getAttribute("consentReturn");
 
@@ -117,33 +121,87 @@ public class ResponseUIController
 
         model.addAttribute("attributesSendList", attributeClientSendList);  
 
-        List<DataSetListClient> consentList = new ArrayList<DataSetListClient>();
+//        List<DataSetListClient> consentList = new ArrayList<DataSetListClient>();
+//
+//        if (dsConsentList != null)
+//        {
+//            for (DataSet dataSet : dsConsentList)
+//            {
+//                DataSetListClient dataSetListClient = new DataSetListClient();  // AttributeSetClient --> DataSetListClient
+//                dataSetListClient.setId(dataSet.getIssuerId());
+//
+//                List<AttributeClient> aux = new ArrayList<AttributeClient>();
+//                if (dataSet.getAttributes() != null)
+//                {
+//                    for (int i = 0; i < dataSet.getAttributes().size(); i++)
+//                    {
+//                        AttributeClient attributeClient = AttributeClient
+//                                .getAttributeClientFrom(dataSet.getAttributes().get(i), i);
+//                        aux.add(attributeClient);
+//                    }
+//
+//                    dataSetListClient.setAttributeClientList(aux);
+//                }
+//                consentList.add(dataSetListClient);
+//            }
+//        }
+        
+        List<AttributeSetClient> consentList = new ArrayList<AttributeSetClient>();
 
-        if (dsConsentList != null)
+        if (attributesConsentList != null)
         {
-            for (DataSet dataSet : dsConsentList)
+            for (AttributeSet attributeSet : attributesConsentList)
             {
-                DataSetListClient dataSetListClient = new DataSetListClient();  // AttributeSetClient --> DataSetListClient
-                dataSetListClient.setId(dataSet.getIssuerId());
+                AttributeSetClient attributeSetClient = new AttributeSetClient();
+                attributeSetClient.setId(attributeSet.getIssuer());
 
                 List<AttributeClient> aux = new ArrayList<AttributeClient>();
-                if (dataSet.getAttributes() != null)
+                if (attributeSet.getAttributes() != null)
                 {
-                    for (int i = 0; i < dataSet.getAttributes().size(); i++)
+                    for (int i = 0; i < attributeSet.getAttributes().size(); i++)
                     {
                         AttributeClient attributeClient = AttributeClient
-                                .getAttributeClientFrom(dataSet.getAttributes().get(i), i);
+                                .getAttributeClientFrom(attributeSet.getAttributes().get(i), i);
                         aux.add(attributeClient);
                     }
 
-                    dataSetListClient.setAttributeClientList(aux);
+                    attributeSetClient.setAttributeClientList(aux);
                 }
-                consentList.add(dataSetListClient);
+                consentList.add(attributeSetClient);
             }
         }
-
-        //model.addAttribute("attributesConsentList", consentList);
-        model.addAttribute("dsConsentList", consentList);
+        
+        
+        for (int i = 0; i < dsList.size(); i++)
+        {
+            DSClient dsClient = DSClient.getDSClientFrom(dsList.get(i), i);
+            dsClientList.add(dsClient);
+            
+            
+//            AttributeSetClient attributeSetClient = new AttributeSetClient();
+//            attributeSetClient.setId(dsList.get(i).getIssuerId());
+//            
+//            List<AttributeClient> aux = new ArrayList<AttributeClient>();
+//            if (dsList.get(i).getAttributes() != null)
+//            {
+//            	List<AttributeType> auxAttrs = dsList.get(i).getAttributes();
+//                for (int k = 0; k < auxAttrs.size(); k++)
+//                {
+//                    AttributeClient attributeClient = AttributeClient
+//                            .getAttributeClientFrom(auxAttrs.get(k), k);
+//                    aux.add(attributeClient);
+//                }
+//
+//                attributeSetClient.setAttributeClientList(aux);
+//            }
+//            consentList.add(attributeSetClient);
+            
+            
+        }
+        log.info("consentList: " + consentList.toString());
+ 
+        model.addAttribute("attributesConsentList", consentList);
+//        model.addAttribute("dsConsentList", consentList);
 
         model.addAttribute("urlFinishProcess", urlFinishProcess);
         model.addAttribute("urlReturn", urlReturn);
@@ -160,9 +218,12 @@ public class ResponseUIController
         model.addAttribute("SPName", (SPName != null) ? SPName : "Service Provider");
         model.addAttribute("privacyPolicy", privacyPolicy);
         model.addAttribute("consentFinish", consentFinish);
-        model.addAttribute("consentReturn", consentReturn);
+        model.addAttribute("consentQuery", consentQuery);
+        
+        
 
         return "responseForm";
+        
     }
 
     // TESTING
@@ -350,7 +411,7 @@ public class ResponseUIController
         session.setAttribute("urlFinishProcess", "response_client/finish"); // No consenting: REJECT
 
         // Recolected consent attributes
-        List<DataSet> dataSetConsentList = new ArrayList<DataSet>();
+/*        List<DataSet> dataSetConsentList = new ArrayList<DataSet>();
         DataSet consentDataSet1 = new DataSet();
         consentDataSet1.setId("6c0f70a8-f32b-4535-b5f6-0d596c52813a");
         consentDataSet1.setType("type");
@@ -361,6 +422,7 @@ public class ResponseUIController
         consentDataSet1.setExpiration("2020-12-06T19:45:16Z");
     	
     	AttributeTypeList consentAttributes1 = new AttributeTypeList();
+    	consentAttributes1.add(attr1);
     	consentAttributes1.add(attr2);
     	consentDataSet1.setAttributes (consentAttributes1);
     	consentDataSet1.setCategories(dataSet1.getCategories());
@@ -384,13 +446,60 @@ public class ResponseUIController
         dataSetConsentList.add(consentDataSet1);
         dataSetConsentList.add(consentDataSet2);
         session.setAttribute("dsConsentList", dataSetConsentList);
+*/
+
+        
+        AttributeSetList consentList = new AttributeSetList();
+
+        AttributeSet attributeSet1 = new AttributeSet();
+        attributeSet1.setIssuer("attr-set-1-id.com");
+        attributeSet1.setId("set1");
+        
+        List<AttributeType> attributeConsentList1 = new ArrayList<AttributeType>();
+
+        AttributeType attrCons1 = new AttributeType();
+        attrCons1.setName("studies");
+        attrCons1.setFriendlyName("Studies degree");
+        attrCons1.setValues(Arrays.asList("Computer degree"));
+        attributeConsentList1.add(attrCons1);
+
+        AttributeType attrCons2 = new AttributeType();
+        attrCons2.setName("course");
+        attrCons2.setValues(Arrays.asList("1", "2"));
+        attributeConsentList1.add(attrCons2);
+
+        attributeSet1.setAttributes(attributeConsentList1);
+        consentList.add(attributeSet1);
+
+        AttributeSet attributeSet2 = new AttributeSet();
+        attributeSet2.setIssuer("attr-set-2-id.com");
+        attributeSet2.setId("set2");
+
+        List<AttributeType> attributeConsentList2 = new ArrayList<AttributeType>();
+
+        AttributeType attrCons3 = new AttributeType();
+        attrCons3.setName("studies");
+        attrCons3.setFriendlyName("Studies degree");
+        attrCons3.setValues(Arrays.asList("Mathematics degree"));
+        attributeConsentList2.add(attrCons3);
+
+        AttributeType attrCons4 = new AttributeType();
+        attrCons4.setName("course");
+        attrCons4.setValues(Arrays.asList("2"));
+        attributeConsentList2.add(attrCons4);
+
+        attributeSet2.setAttributes(attributeConsentList2);
+        consentList.add(attributeSet2);
+
+
+        session.setAttribute("attributesConsentList", consentList);
 
         session.setAttribute("errorMessage", "An error has ocurred");
         session.setAttribute("infoMessage", "This is an information message");
 
         session.setAttribute("privacyPolicy", "https://project-seal.eu/privacy-policy");
-//        session.setAttribute("consentQuery", "Click to consent to the above data query and to receive requested data." +
-//                " You are accepting the privacy policy conditions, please be sure you understand them.");
+        session.setAttribute("consentQuery", "Click to consent to the above data query and to receive requested data." +
+                " You are accepting the privacy policy conditions, please be sure you understand them.");
         session.setAttribute("consentFinish", "Click to CANCEL the submission of your above data to Service Provider and finish the process.");
         session.setAttribute("consentReturn", "Click to CONSENT to return your above data to Service Provider and finish the process." +
                 " You are accepting the privacy policy conditions, please be sure you understand them."); //TODO
@@ -398,7 +507,7 @@ public class ResponseUIController
         return "redirect:../response_client";
     }
     
-/* Not used. TO BE REMOVED
+
  
     @PostMapping("response_client")
     public String getRequest(@RequestBody MultiValueMap<String, String> formData,
@@ -408,32 +517,36 @@ public class ResponseUIController
     	//TODO
     	log.info ("POST response_client: getRequest....");
     	
-        int dsIndex = Integer.parseInt(formData.get("dsId").get(0));
+        //int dsIndex = Integer.parseInt(formData.get("dsId").get(0));
         String[] attrRequestList = formData.get("attrRequestList").get(0).split(",");
         String[] attrSendList = formData.get("attrSendList").get(0).split(",");
-        //String attrConsent = formData.get("attrConsentList").get(0);
-        String dsConsent = formData.get("dsConsentList").get(0);
+        String attrConsent = formData.get("attrConsentList").get(0);
+//        String dsConsent = formData.get("dsConsentList").get(0);
+        
+        log.info("FORMDATA __attrConsent: " + attrConsent);
 
         List<DataSet> dsList = (List<DataSet>) session.getAttribute("dsList");
         AttributeTypeList attributesRequestList = (AttributeTypeList) session
                 .getAttribute("attributesRequestList");
         AttributeTypeList attributesSendList = (AttributeTypeList) session
                 .getAttribute("attributesSendList");
-//        AttributeSetList attributesConsentList = (AttributeSetList) session
-//                .getAttribute("attributesConsentList");
-        List<DataSet> dsConsentList = (List<DataSet>) session
-                .getAttribute("dsConsentList");
+        AttributeSetList attributesConsentList = (AttributeSetList) session
+                .getAttribute("attributesConsentList");
+//        List<DataSet> dsConsentList = (List<DataSet>) session
+//                .getAttribute("dsConsentList");
+        
+        log.info("SESSION __attributesConsentList: " + attributesConsentList.toString());
 
         String urlReturn = (String) session.getAttribute("urlReturn");
 
-        List<DataSet> dsListNew = new ArrayList<DataSet>();
-        try
-        {
-            dsListNew.add(dsList.get(dsIndex));
-        }
-        catch (Exception e)
-        {
-        }
+//        List<DataSet> dsListNew = new ArrayList<DataSet>();
+//        try
+//        {
+//            dsListNew.add(dsList.get(dsIndex));
+//        }
+//        catch (Exception e)
+//        {
+//        }
 
         AttributeTypeList attributesRequestListNew = new AttributeTypeList();
         for (String index : attrRequestList)
@@ -459,21 +572,55 @@ public class ResponseUIController
             }
         }
 
-        DataSetList dsConsentListNew = new DataSetList();
+//        DataSetList dsConsentListNew = new DataSetList();
+//
+//        if (dsConsent != null && !dsConsent.equals(""))
+//        {
+//            String[] attributeSets = dsConsent.split("#");
+//            for (String attributeSet : attributeSets)
+//            {
+//                String[] aux = attributeSet.split(":");
+//                String id = aux[0];
+//                String[] indexes = aux[1].split(",");
+//                DataSet consentNew = null;
+//
+//                for (DataSet consent : dsConsentList)
+//                {
+//                    if (consent.getId().equals(id))
+//                    {
+//                        consentNew = consent;
+//                        List<AttributeType> attrs = new ArrayList<AttributeType>();
+//                        for (String index : indexes)
+//                        {
+//                            attrs.add(consent.getAttributes().get(Integer.parseInt(index)));
+//                        }
+//                        consentNew.setAttributes(attrs);
+//                        break;
+//                    }
+//                }
+//                if (consentNew != null)
+//                {
+//                    dsConsentListNew.add(consentNew);
+//                }
+//            }
+//        }
+        
+        AttributeSetList attributesConsentListNew = new AttributeSetList();
 
-        if (dsConsent != null && !dsConsent.equals(""))
+        if (attrConsent != null && !attrConsent.equals(""))
         {
-            String[] attributeSets = dsConsent.split("#");
+            String[] attributeSets = attrConsent.split("#");
             for (String attributeSet : attributeSets)
             {
                 String[] aux = attributeSet.split(":");
                 String id = aux[0];
                 String[] indexes = aux[1].split(",");
-                DataSet consentNew = null;
+                AttributeSet consentNew = null;
 
-                for (DataSet consent : dsConsentList)
+                for (AttributeSet consent : attributesConsentList)
                 {
-                    if (consent.getId().equals(id))
+                    //if (consent.getId().equals(id))
+                    if (consent.getIssuer().equals(id))
                     {
                         consentNew = consent;
                         List<AttributeType> attrs = new ArrayList<AttributeType>();
@@ -487,17 +634,18 @@ public class ResponseUIController
                 }
                 if (consentNew != null)
                 {
-                    dsConsentListNew.add(consentNew);
+                    attributesConsentListNew.add(consentNew);
                 }
             }
         }
 
-        session.setAttribute("dsList", dsListNew);
+//        session.setAttribute("dsList", dsListNew);
         session.setAttribute("attributesRequestList", attributesRequestListNew);
         session.setAttribute("attributesSendList", attributesSendListNew);
-        //session.setAttribute("attributesConsentList", attributesConsentListNew);
-        session.setAttribute("dsConsentList", dsConsentListNew);
+        session.setAttribute("attributesConsentList", attributesConsentListNew);
+        //session.setAttribute("dsConsentList", dsConsentListNew);
 
+        log.info("||||| attributesConsentListNew: " + attributesConsentListNew.toString());
         log.info ("||||| urlReturn:" + urlReturn);
         log.info("||||| sessionId:" + session.getAttribute("sessionId"));
         
@@ -506,6 +654,6 @@ public class ResponseUIController
         
         
     }
- */   
+  
     
 }
