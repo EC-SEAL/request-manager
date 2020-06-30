@@ -3,13 +3,13 @@
 <head>
     <title>SEAL Data Consent</title>
     <script type="application/javascript" th:src="@{js/jquery/jquery-3.3.1.js}"></script>
-    <script type="application/javascript" th:src="@{js/responseClient.js}"></script>
-    <link rel="stylesheet" type="text/css" th:href="@{css/client.css}"/>
+    <script type="application/javascript" th:src="@{js/responseClient_test.js}"></script>
+    <link rel="stylesheet" type="text/css" th:href="@{css_test/client.css}"/>
 </head>
 <body>
 
 <div class="header">
-    <img th:src="@{images/header.png}"/>
+    <img th:src="@{images_test/header.png}"/>
 </div>
 
 <div id="messages">
@@ -26,10 +26,10 @@
             <div class="header-data">
                 <p>List of data to query</p>
                 <div class="buttons">
-                    <input type="image" id="edit-request-attr" class="edit-img" th:src="@{images/edit.png}" alt="Edit"/>
-                    <input type="image" id="update-request-attr" class="update-img" th:src="@{images/update.png}"
+                    <input type="image" id="edit-request-attr" class="edit-img" th:src="@{images_test/edit.png}" alt="Edit"/>
+                    <input type="image" id="update-request-attr" class="update-img" th:src="@{images_test/update.png}"
                            alt="Update"/>
-                    <input type="image" id="update-request-attr-cancel" class="cancel-img" th:src="@{images/cancel.png}"
+                    <input type="image" id="update-request-attr-cancel" class="cancel-img" th:src="@{images_test/cancel.png}"
                            alt="Cancel"/>
                 </div>
                 <div class="clear"></div>
@@ -53,10 +53,10 @@
             <div class="header-data">
                 <p>List of identity data OBTAINED</p>
                 <div class="buttons">
-                    <input type="image" id="edit-send-attr" class="edit-img" th:src="@{images/edit.png}" alt="Edit"/>
-                    <input type="image" id="update-send-attr" class="update-img" th:src="@{images/update.png}"
+                    <input type="image" id="edit-send-attr" class="edit-img" th:src="@{images_test/edit.png}" alt="Edit"/>
+                    <input type="image" id="update-send-attr" class="update-img" th:src="@{images_test/update.png}"
                            alt="Update"/>
-                    <input type="image" id="update-send-attr-cancel" class="cancel-img" th:src="@{images/cancel.png}"
+                    <input type="image" id="update-send-attr-cancel" class="cancel-img" th:src="@{images_test/cancel.png}"
                            alt="Cancel"/>
                 </div>
                 <div class="clear"></div>
@@ -120,10 +120,10 @@
                 <div class="header-data">
                     <p th:text="${attrConsent.id}"></p>
                     <div class="buttons">
-                        <input type="image" class="edit-img edit-consent" th:src="@{images/edit.png}" alt="Edit"/>
-                        <input type="image" class="update-img update-consent-attr" th:src="@{images/update.png}"
+                        <input type="image" class="edit-img edit-consent" th:src="@{images_test/edit.png}" alt="Edit"/>
+                        <input type="image" class="update-img update-consent-attr" th:src="@{images_test/update.png}"
                                alt="Update"/>
-                        <input type="image" class="cancel-img update-consent-attr-cancel" th:src="@{images/cancel.png}"
+                        <input type="image" class="cancel-img update-consent-attr-cancel" th:src="@{images_test/cancel.png}"
                                alt="Cancel"/>
                     </div>
                     <div class="clear"></div>
@@ -177,7 +177,7 @@
 </div>
 
 <div id="footer">
-    <img th:src="@{images/footer.png}"/>
+    <img th:src="@{images_test/footer.png}"/>
 </div>
 
 </body>

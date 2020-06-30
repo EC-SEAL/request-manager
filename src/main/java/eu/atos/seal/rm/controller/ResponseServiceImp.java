@@ -33,8 +33,10 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+
 import eu.atos.seal.rm.model.ApiClassEnum;
 import eu.atos.seal.rm.model.AttributeSet;
+import eu.atos.seal.rm.model.AttributeSet.*;
 import eu.atos.seal.rm.model.AttributeSetList;
 import eu.atos.seal.rm.model.AttributeSetStatus;
 import eu.atos.seal.rm.model.AttributeType;
@@ -256,7 +258,8 @@ public class ResponseServiceImp implements ResponseService
 	{
 		log.info("prepareAndGotoResponseUI ...");
 		
-		// Filling dsList and attributeSendList
+		// Filling dsList 
+		// and attributeSendList--> NOT NECESSARY TODO
 		AttributeTypeList attributesSendList = new AttributeTypeList();
 		List<DataSet> dsList = new ArrayList<DataSet>();
 		for (DataSet aux_ds:dataStore.getClearData()) {
@@ -267,7 +270,7 @@ public class ResponseServiceImp implements ResponseService
 			}
 		}
 		
-		// Filling attributesRequestList
+		// Filling attributesRequestList --> NOT NECESSARY TODO
 		AttributeTypeList attributesRequestList = new AttributeTypeList();
 		for ( AttributeType attrRequested : spRequest.getAttributes())
 		{
@@ -277,21 +280,50 @@ public class ResponseServiceImp implements ResponseService
 		session.setAttribute("urlReturn", "response_client/return"); 		// Consenting: ACCEPT
         session.setAttribute("urlFinishProcess", "response_client/finish"); // No consenting: REJECT
         
-		session.setAttribute("dsList", dsList); 
-		session.setAttribute("attributesRequestList", attributesRequestList);
-		session.setAttribute("attributesSendList", attributesSendList);
+		session.setAttribute("dsList", dsList); // TO REMOVE???
+		session.setAttribute("attributesRequestList", attributesRequestList); //TO REMOVE
+		session.setAttribute("attributesSendList", attributesSendList); //TO REMOVE
 		
-		//TODO: filtering with the requested attributes
 		AttributeSetList attributesConsentList = new AttributeSetList();
 		for (DataSet auxDs  : dsList) {
+			//Filtering with the requested attributes
+			List<AttributeType> attrs = new ArrayList<AttributeType>();
+			boolean found = false;
 			for (AttributeType auxAttr : auxDs.getAttributes()) {
+				for (AttributeType reqAttr : attributesRequestList) {
+					if (reqAttr.getFriendlyName().contains(auxAttr.getFriendlyName()) || 
+						reqAttr.getName().contains(auxAttr.getName())) {
+						found = true;
+						break;
+					}	
+				}
+				if (found) {				
+					attrs.add(auxAttr);	
+					found = false;
+				}				
+			}
+			if (attrs.size() != 0) {
+				
 				AttributeSet attributeSet = new AttributeSet();
+				attributeSet.setId(auxDs.getId());
+				attributeSet.setIssuer(auxDs.getIssuerId());
+				attributeSet.setType(TypeEnum.REQUEST);
+				attributeSet.setStatus(null);
+				attributeSet.setRecipient("RECIPIENT__TOASK");
+				attributeSet.setLoa(auxDs.getLoa());
+				attributeSet.setNotAfter(auxDs.getExpiration());
+				attributeSet.setNotBefore(auxDs.getIssued());
+				attributeSet.setProperties(auxDs.getProperties());
+				attributeSet.setInResponseTo("INRESPONSETO__TOASK");
+				// Not necessary all the above settings...
+				
+				attributeSet.setAttributes(attrs);
 				
 				attributesConsentList.add(attributeSet);
-			}
-		}
+			}			
+		}		
 		
-		
+		log.info("attributesConsentList: " + attributesConsentList);
 		session.setAttribute("attributesConsentList", attributesConsentList);
 		
 		session.setAttribute("sessionId", sessionId);
