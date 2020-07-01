@@ -47,16 +47,16 @@ div.main-content {
     margin-bottom: 6em;
 }
 
-#esmo-info {
+#seal-info {
     text-align: center;
     font-size: 12px;
 }
 
-#esmo-info p {
+#seal-info p {
     margin: 0;
 }
 
-#esmo-info a, #esmo-info a:active, #esmo-info a:visited {
+#seal-info a, #seal-info a:active, #seal-info a:visited {
     text-decoration: none;
     color: #833B8F;
 }
