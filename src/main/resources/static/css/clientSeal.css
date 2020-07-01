@@ -180,6 +180,9 @@ li.not-sending {
     max-height: 15px;
     max-width: 40px;
 }
+.btn{
+	margin-top: 2em;
+}
 
 
 .list-group-item+.list-group-item {
@@ -206,7 +209,6 @@ li.not-sending {
 .btn-info {
 	border-color: #293989;
 	margin-bottom: 0.25em;
-	margin-top: 1.2em;
 	background-color: #293989;
 }
 
