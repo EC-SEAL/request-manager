@@ -259,18 +259,18 @@ public class ResponseServiceImp implements ResponseService
 		log.info("prepareAndGotoResponseUI ...");
 		
 		// Filling dsList 
-		// and attributeSendList--> NOT NECESSARY TODO
-		AttributeTypeList attributesSendList = new AttributeTypeList();
+		// and attributeSendList--> NOT NECESSARY 
+//		AttributeTypeList attributesSendList = new AttributeTypeList();
 		List<DataSet> dsList = new ArrayList<DataSet>();
 		for (DataSet aux_ds:dataStore.getClearData()) {
 			dsList.add(aux_ds);
-			
-			for (AttributeType aux_attr:aux_ds.getAttributes()) {
-				attributesSendList.add(aux_attr);
-			}
+//			
+//			for (AttributeType aux_attr:aux_ds.getAttributes()) {
+//				attributesSendList.add(aux_attr);
+//			}
 		}
 		
-		// Filling attributesRequestList --> NOT NECESSARY TODO
+		// Filling attributesRequestList: for filtering. See bellow. 
 		AttributeTypeList attributesRequestList = new AttributeTypeList();
 		for ( AttributeType attrRequested : spRequest.getAttributes())
 		{
@@ -281,8 +281,8 @@ public class ResponseServiceImp implements ResponseService
         session.setAttribute("urlFinishProcess", "response_client/finish"); // No consenting: REJECT
         
 		session.setAttribute("dsList", dsList); // TO REMOVE???
-		session.setAttribute("attributesRequestList", attributesRequestList); //TO REMOVE
-		session.setAttribute("attributesSendList", attributesSendList); //TO REMOVE
+//		session.setAttribute("attributesRequestList", attributesRequestList); //TO REMOVE
+//		session.setAttribute("attributesSendList", attributesSendList); //TO REMOVE
 		
 		AttributeSetList attributesConsentList = new AttributeSetList();
 		for (DataSet auxDs  : dsList) {
@@ -336,8 +336,8 @@ public class ResponseServiceImp implements ResponseService
 		
 		
 		model.addAttribute("dsList", dsList);
-		model.addAttribute("attributesRequestList", attributesRequestList);
-		model.addAttribute("attributesSendList", attributesSendList);
+//		model.addAttribute("attributesRequestList", attributesRequestList);
+//		model.addAttribute("attributesSendList", attributesSendList);
 		model.addAttribute("attributesConsentList", attributesConsentList);
 
 		
