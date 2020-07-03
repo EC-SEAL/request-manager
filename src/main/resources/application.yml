@@ -49,4 +49,11 @@ rm.cm:
    getMicroservicesByApiClassPath: /cm/metadata/microservices/, apiClass
    getInternalsPath: /cm/metadata/internal/
    getConfigurationPath: /cm/metadata/internal/, confId
+
+##  
+## TO ASK
+##
+rm.multiui:
+  privacyPolicy: ${URL_PRIVACY_POLICY}
+  consentFinish: ${TEXT_CONSENT_FINISH}
    

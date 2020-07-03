@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>SEAL DATA RESPONSE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+,02
+<link rel="stylesheet" type="text/css" th:href="@{css/clientSeal.css}" />
+</head>
+<body>
+
+	<!-- Navigation -->
+	<nav class="navbar navbar-expand-lg navbar-light  static-top">
+		<div class="container">
+			<a class="navbar-brand" href="#"> <img
+				th:src="@{images/logo.png}" alt="" />
+			</a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse"
+				data-target="#navbarResponsive" aria-controls="navbarResponsive"
+				aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarResponsive">
+				<ul class="navbar-nav ml-auto">
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+
+
+	<div id="main-selector" class="container">
+		<div id="messages">
+			<div class="alert alert-info" role="alert">
+				<span th:text="${infoMessage}">></span>
+			</div>
+			<div class="alert alert-danger" role="alert">
+				<span th:text="${errorMessage}"></span>
+			</div>
+		</div>
+
+		<div class="row justify-content-md-center">
+
+			<div id="retrieved-data" class="col-md-6">
+				<div class="card main-split">
+
+					<strong>
+						<p class="main-title">Personal Data Retrieved</p>
+					</strong>
+
+					<div id="attributes-consent">
+
+						<div
+							class="attributes-consent-selector data-box attributes-selector"
+							th:each="attrConsent : ${attributesConsentList}">
+							<div class="card">
+								<div class="card-header">
+									<span th:text="${attrConsent.id}"></span>
+								</div>
+								<div class="card-body">
+									<ul class="attributes-consent-selection">
+										<li th:each="attribute : ${attrConsent.attributeClientList}">
+											<input type="checkbox" th:value="${attribute.index}"
+											checked="true" th:name="${attrConsent.id}"/> <label> <span
+											th:text="|${attribute.name} : ${attribute.value}|"></span>
+											</label>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+					<form id="finish-form" class="consent-form"
+						th:action="${urlFinishProcess}" method="get">
+						<p th:unless="${consentReturn}"
+							class="consent-text finish-consent-text">
+							Click to consent to return this data to <span th:text="${SPName}"></span>
+						</p>
+						<input type="submit" class="btn btn-info" value="Accept" />
+						<input type="submit" class="btn btn-danger" value="Reject" />
+					</form>
+
+					<div id="card-footer">
+
+						<div id="info-left">
+							<svg class="bi bi-shield-fill" width="2em" height="2em"
+								viewBox="0 0 16 16" fill="currentColor"
+								xmlns="http://www.w3.org/2000/svg">
+			  <path fill-rule="evenodd"
+									d="M5.187 1.025C6.23.749 7.337.5 8 .5c.662 0 1.77.249 2.813.525a61.09 61.09 0 012.772.815c.528.168.926.623 1.003 1.184.573 4.197-.756 7.307-2.367 9.365a11.191 11.191 0 01-2.418 2.3 6.942 6.942 0 01-1.007.586c-.27.124-.558.225-.796.225s-.526-.101-.796-.225a6.908 6.908 0 01-1.007-.586 11.192 11.192 0 01-2.417-2.3C2.167 10.331.839 7.221 1.412 3.024A1.454 1.454 0 012.415 1.84a61.11 61.11 0 012.772-.815z"
+									clip-rule="evenodd" />
+			</svg>
+							<span>  Privacy Policy </span>
+						</div>
+
+						<div id="info-right">
+							<svg class="bi bi-info-circle" width="3em" height="2em"
+								viewBox="0 0 16 16" fill="currentColor"
+								xmlns="http://www.w3.org/2000/svg">
+			  <path fill-rule="evenodd"
+									d="M8 15A7 7 0 108 1a7 7 0 000 14zm0 1A8 8 0 108 0a8 8 0 000 16z"
+									clip-rule="evenodd" />
+			  <path
+									d="M8.93 6.588l-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588z" />
+			  <circle cx="8" cy="4.5" r="1" />
+			</svg>
+							<span> Info </span>
+						</div>
+
+					</div>
+				</div>
+
+
+			</div>
+
+		</div>
+
+	</div>
+
+	<footer id="footer-info" class="page-footer font-small teal pt-4">
+
+		<!--  <a id="policy" href="#" th:href="${privacyPolicy}">Privacy Policy</a>
+
+    <div id="seal-info">
+        <p>To find out more about seal please visit:</p>
+        <a href="http://www.seal-project.eu/">http://www.seal-project.eu/</a>
+    </div>
+    
+     -->
+
+		<!-- Footer Elements -->
+		<div class="container">
+
+			<!--Grid row-->
+			<div class="row d-flex justify-content-center">
+
+				<img style="display: inline; margin: 0 5px;" title="heartica_logo"
+					src="data:image/png;base64,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"
+					alt="" height="50" />
+
+				<!--Grid column-->
+				<div class="col-md-6">
+
+
+					<div class="view-content">
+						<div class="views-row">
+							<p>Co-financed by the Connecting Europe Facility (CEF) of the
+								European Union.&nbsp;Grant Agreement No
+								INEA/CEF/ICT/A2018/1633170</p>
+							<!--<p>Co-financed by the Connecting Europe Facility of the European Union</p>-->
+
+						</div>
+
+					</div>
+
+				</div>
+				<!--Grid column-->
+				<ul>
+					<li><a href="/node/132">Cookies</a></li>
+					<li><a href="/node/133">Titularity</a></li>
+					<li><a href="/node/134">Privacy Policy</a></li>
+				</ul>
+
+
+			</div>
+			<!--Grid row-->
+			<div id="seal-info">
+				<p>To find out more about Seal please visit:</p>
+				<a href="http://www.seal-project.eu/">https://www.project-seal.eu/</a>
+			</div>
+
+		</div>
+
+	</footer>
+
+
+
+</body>
+</html>
