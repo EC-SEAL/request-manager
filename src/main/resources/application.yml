@@ -1,0 +1,59 @@
+###
+# Copyright © 2020  Atos Spain SA. All rights reserved.
+# This file is part of SEAL Request Manager (SEAL rm).
+# SEAL rm is free software: you can redistribute it and/or modify it under the terms of EUPL 1.2.
+# THE SOFTWARE IS PROVIDED \u201CAS IS\u201D, WITHOUT ANY WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT, 
+# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
+# DAMAGES OR OTHER LIABILITY, WHETHER IN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+# See README file for the full disclaimer information and LICENSE file for full license information in the project root.
+#
+# @author Atos Research and Innovation, Atos SPAIN SA
+###
+
+springfox:
+  documentation.swagger.v2.path: /api-docs
+
+spring:
+  jackson:
+    date-format: eu.atos.seal.rm.RFC3339DateFormat
+    serialization.WRITE_DATES_AS_TIMESTAMPS: false
+  mvc.view.prefix: /templates/
+  mvc.view.suffix: .html    
+  
+server:   
+   port: 8063
+   port.http: 8060
+   ssl:
+    enabled: true
+    key-store: ${SSL_KEYSTORE_PATH}
+    key-store-password: ${SSL_STORE_PASS}
+    key-password: ${SSL_KEY_PASS}
+    key-alias: ${SSL_CERT_ALIAS}
+    
+   #contextPath: /
+   #key-store: ${KEYSTORE_PATH}
+   
+##
+## SEAL configuration manager. To be read from environment variables (dockerization)
+##
+rm.cm:
+   getAttributeProfilesPath: /cm/metadata/attributes/
+   getAttributeSetByProfilePath: /cm/metadata/attributes/, attrProfileId
+   getExternalEntitiesPath: /cm/metadata/externalEntities/
+   getEntityMetadataSetPath: /cm/metadata/externalEntities/, collectionId
+   getEntityMetadataPath: /cm/metadata/externalEntities/, collectionId, entityId
+   getAllMicroservicesPath: /cm/metadata/microservices/
+   getMicroservicesByApiClassPath: /cm/metadata/microservices/, apiClass
+   getInternalsPath: /cm/metadata/internal/
+   getConfigurationPath: /cm/metadata/internal/, confId
+
+##  
+## TO ASK
+##
+rm.multiui:
+  privacyPolicy: ${URL_PRIVACY_POLICY}
+  consentFinish: ${TEXT_CONSENT_FINISH}
+   
