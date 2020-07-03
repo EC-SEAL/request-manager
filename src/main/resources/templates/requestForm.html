@@ -3,8 +3,6 @@
 <head>
 <title>seal Data Query</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<script type="application/javascript"
-	th:src="@{js/jquery/jquery-3.3.1.js}"></script>
 <script type="application/javascript" th:src="@{js/client1.js}"></script>
 
 <link rel="stylesheet"
@@ -39,13 +37,6 @@
 				aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
-			<div class="collapse navbar-collapse" id="navbarResponsive">
-				<ul class="navbar-nav ml-auto">
-					<li class="nav-item active"><a class="nav-link" href="#">Home
-							<span class="sr-only">(current)</span>
-					</a></li>
-				</ul>
-			</div>
 		</div>
 	</nav>
 
@@ -73,13 +64,6 @@
 
 					<div id="attributes-request-selector"
 						class="data-box attributes-selector">
-						<ul id="selected-attributes-request" class="list-group">
-							<li class="list-group-item"
-								th:each="attributeRequest, iStat : ${attributesRequestList}"
-								th:attr="index=${attributeRequest.index}"
-								th:text="${attributeRequest.name}"></li>
-						</ul>
-
 						<ul id="attributes-request-selection">
 							<li th:each="attributeRequest : ${attributesRequestList}"><input
 								type="checkbox" th:value="${attributeRequest.index}"
@@ -109,15 +93,16 @@
 
 					<form id="finish-form" class="" th:action="${urlFinishProcess}"
 						method="get">
-						<input type="submit" class="btn btn-info" value="Submit"
+						<input type="submit" class="btn btn-info" value="Accept"
 							id="submitConsentRequest" />
+						<input type="submit" class="btn btn-danger" value="Reject" />
 						<p th:if="${consentFinish}" class="consent-text"
 							th:text="${consentFinish}"></p>
 						<p th:unless="${consentFinish}"
 							class="consent-text finish-consent-text">Click to consent to
 							this request</p>
 					</form>
-
+					
 					<div id="card-footer">
 
 						<div id="info-left">
@@ -150,7 +135,7 @@
 
 
 				</div>
-			</div>s
+			</div>
 
 		</div>
 
@@ -158,14 +143,6 @@
 
 	<footer id="footer-info" class="page-footer font-small teal pt-4">
 
-		<!--  <a id="policy" href="#" th:href="${privacyPolicy}">Privacy Policy</a>
-
-    <div id="seal-info">
-        <p>To find out more about seal please visit:</p>
-        <a href="http://www.seal-project.eu/">http://www.seal-project.eu/</a>
-    </div>
-    
-     -->
 
 		<!-- Footer Elements -->
 		<div class="container">
