@@ -14,10 +14,7 @@ See README file for the full disclaimer information and LICENSE file for full li
 @author Atos Research and Innovation, Atos SPAIN SA
 */
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
@@ -32,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import eu.atos.seal.rm.model.AttributeType;
 import eu.atos.seal.rm.model.AttributeTypeList;
-import eu.atos.seal.rm.model.DataSet;
+import eu.atos.seal.rm.model.EntityMetadata;
 import eu.atos.seal.rm.model.AttributeClient;
 import eu.atos.seal.rm.model.AttributeSet;
 import eu.atos.seal.rm.model.AttributeSetClient;
@@ -58,15 +55,12 @@ public class RequestUIController
         String privacyPolicy = (String) session.getAttribute("privacyPolicy");
         String consentQuery = (String) session.getAttribute("consentQuery");
         String consentFinish = (String) session.getAttribute("consentFinish");
-        String consentReturn = (String) session.getAttribute("consentReturn");
 
-        if ( attributesRequestList == null ||   
-        	urlReturn == null || urlFinishProcess == null)
-        {
-            throw new Exception("Data not initialize");
-        }
-
-
+      //  if ( attributesRequestList == null ||   
+      //  	urlReturn == null || urlFinishProcess == null)
+      //  {
+      //      throw new Exception("Data not initialize");
+      //  }
 
         List<AttributeClient> attributeClientList = new ArrayList<AttributeClient>();
 
@@ -76,8 +70,7 @@ public class RequestUIController
                     .getAttributeClientFrom(attributesRequestList.get(i), i);
             attributeClientList.add(attributeClient);
         }
-
-        model.addAttribute("attributesRequestList", attributeClientList);// Necessary in order to filter the results to be shown
+        model.addAttribute("attributesRequestList", attributeClientList);
         
         List<AttributeClient> attributeClientSendList = new ArrayList<AttributeClient>();
         model.addAttribute("attributesSendList", attributeClientSendList);  
@@ -101,19 +94,19 @@ public class RequestUIController
         model.addAttribute("consentFinish", consentFinish);
         model.addAttribute("consentQuery", consentQuery);
         
+        EntityMetadata em1 = new EntityMetadata();
 
         return "requestForm";
         
     }
 
-    // TESTING
     @GetMapping("request_client/init")
     public String initSessionParams(HttpSession session)
     {
     	AttributeTypeList attributes = new AttributeTypeList();
     	
     	// Set attribute 1
-    	AttributeType attr1 = new AttributeType();
+    	AttributeType attr1 = new AttributeType();	
     	attr1.setName("http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName");
     	attr1.setFriendlyName("CurrentGivenName");
     	attr1.setEncoding("plain");
@@ -134,138 +127,42 @@ public class RequestUIController
     	// Set attribute3
     	AttributeType attr3 = new AttributeType();
     	attr3.setName("Age");
-    	attr3.setFriendlyName("Age");
-    	attr3.setValues(Arrays.asList("25"));
+    	attr3.setFriendlyName("Age"); 
 
         AttributeTypeList attributeList = new AttributeTypeList();
+        
 
         attributeList.add(attr1);
         attributeList.add(attr2);
         attributeList.add(attr3);
-        session.setAttribute("attributesRequestList", attributeList);
-
-        AttributeTypeList attributeSendList = new AttributeTypeList();
-
-        attributeSendList.add(attr1);
-        attributeSendList.add(attr2);
-        attributeSendList.add(attr3);
-        session.setAttribute("attributesSendList", attributeSendList);
-
-        session.setAttribute("urlReturn", "response_client/return"); 		
-        session.setAttribute("urlFinishProcess", "response_client/finish"); 
         
-        AttributeSetList consentList = new AttributeSetList();
-        List<AttributeType> attributeConsentList2 = new ArrayList<AttributeType>();
-        AttributeType attrCons4 = new AttributeType();
-        attrCons4.setName("course");
-        attrCons4.setValues(Arrays.asList("2"));
-        attributeConsentList2.add(attrCons4);
-
-        session.setAttribute("attributesConsentList", consentList);
-
+        
+        session.setAttribute("attributesRequestList", attributeList);
+        session.setAttribute("urlReturn", "response_client"); 		
+        session.setAttribute("urlFinishProcess", "request_client"); 
+        
         session.setAttribute("errorMessage", "An error has ocurred");
         session.setAttribute("infoMessage", "This is an information message");
-
         session.setAttribute("privacyPolicy", "https://project-seal.eu/privacy-policy");
         session.setAttribute("consentQuery", "Click to consent to the above data query and to receive requested data." +
                 " You are accepting the privacy policy conditions, please be sure you understand them.");
-        //session.setAttribute("consentFinish", "Click to CANCEL the submission of your above data to Service Provider and finish the process.");
         session.setAttribute("consentReturn", "Click to CONSENT to return your above data to Service Provider and finish the process." +
                 " You are accepting the privacy policy conditions, please be sure you understand them."); 
 
         return "redirect:../request_client";
     }
     
-
- 
+    
     @PostMapping("request_client")
     public String getRequest(@RequestBody MultiValueMap<String, String> formData,
             HttpSession session, Model model)
     {
     	
     	
-        String[] attrRequestList = formData.get("attrRequestList").get(0).split(",");
-        String[] attrSendList = formData.get("attrSendList").get(0).split(",");
-        String attrConsent = formData.get("attrConsentList").get(0);
+        List<String> attrRequestList = formData.get("attrRequestList");
+        System.out.println("The following source has been selected"+ attrRequestList.toString());
         
-
-        List<DataSet> dsList = (List<DataSet>) session.getAttribute("dsList");
-        AttributeTypeList attributesRequestList = (AttributeTypeList) session
-                .getAttribute("attributesRequestList");
-        AttributeTypeList attributesSendList = (AttributeTypeList) session
-                .getAttribute("attributesSendList");
-        AttributeSetList attributesConsentList = (AttributeSetList) session
-                .getAttribute("attributesConsentList");
-
-        String urlReturn = (String) session.getAttribute("urlReturn");
-
-
-        AttributeTypeList attributesRequestListNew = new AttributeTypeList();
-        for (String index : attrRequestList)
-        {
-            try
-            {
-                attributesRequestListNew.add(attributesRequestList.get(Integer.parseInt(index)));
-            }
-            catch (Exception e)
-            {
-            }
-        }
-
-        AttributeTypeList attributesSendListNew = new AttributeTypeList();
-        for (String index : attrSendList)
-        {
-            try
-            {
-                attributesSendListNew.add(attributesSendList.get(Integer.parseInt(index)));
-            }
-            catch (Exception e)
-            {
-            }
-        }
-        
-        AttributeSetList attributesConsentListNew = new AttributeSetList();
-
-        if (attrConsent != null && !attrConsent.equals(""))
-        {
-            String[] attributeSets = attrConsent.split("#");
-            for (String attributeSet : attributeSets)
-            {
-                String[] aux = attributeSet.split(":");
-                String id = aux[0];
-                String[] indexes = aux[1].split(",");
-                AttributeSet consentNew = null;
-
-                for (AttributeSet consent : attributesConsentList)
-                {
-                    if (consent.getIssuer().equals(id))
-                    {
-                        consentNew = consent;
-                        List<AttributeType> attrs = new ArrayList<AttributeType>();
-                        for (String index : indexes)
-                        {
-                            attrs.add(consent.getAttributes().get(Integer.parseInt(index)));
-                        }
-                        consentNew.setAttributes(attrs);
-                        break;
-                    }
-                }
-                if (consentNew != null)
-                {
-                    attributesConsentListNew.add(consentNew);
-                }
-            }
-        }
-
-        session.setAttribute("attributesRequestList", attributesRequestListNew);
-
-        log.info("||||| attributesConsentListNew: " + attributesConsentListNew.toString());
-        log.info ("||||| urlReturn:" + urlReturn);
-        log.info("||||| sessionId:" + session.getAttribute("sessionId"));
-        
-        session.setAttribute("sessionId", session.getAttribute("sessionId"));
-        return "redirect:" + urlReturn;
-        
+        return "rm_redirection"; // not sure how to follow from here.
         
     }
   

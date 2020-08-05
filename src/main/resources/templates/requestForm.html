@@ -3,9 +3,6 @@
 <head>
 <title>seal Data Query</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<script type="application/javascript"
-	th:src="@{js/jquery/jquery-3.3.1.js}"></script>
-<script type="application/javascript" th:src="@{js/client1.js}"></script>
 
 <link rel="stylesheet"
 	href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
@@ -24,6 +21,12 @@
 	src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
 	integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
 	crossorigin="anonymous"></script>
+
+<script
+	src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+	integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+	crossorigin="anonymous"></script>
+	
 <link rel="stylesheet" type="text/css" th:href="@{css/clientSeal.css}" />
 </head>
 <body>
@@ -41,6 +44,7 @@
 			</button>
 		</div>
 	</nav>
+
 
 
 
@@ -77,24 +81,25 @@
 					<strong>
 						<p>Select Data query source</p>
 					</strong>
-					<div class="list-group" id="list-tab" role="tablist">
-						<a class="list-group-item list-group-item-action active"
-							id="list-home-list" data-toggle="list" href="#list-home"
+					<div class="list-group data-query-list" id="list-tab" role="tablist">
+						<a class="list-group-item list-group-item-action data-query-source active"
+							id="edugain-selector" data-toggle="list" href="#list-home"
 							role="tab" aria-controls="home">eduGAIN</a> <a
-							class="list-group-item list-group-item-action"
-							id="list-profile-list" data-toggle="list" href="#list-profile"
+							class="list-group-item data-query-source list-group-item-action"
+							id="eidas-selector" data-toggle="list" href="#list-profile"
 							role="tab" aria-controls="profile">eIDAS</a> <a
-							class="list-group-item list-group-item-action"
-							id="list-messages-list" data-toggle="list" href="#list-messages"
+							class="list-group-item data-query-source list-group-item-action"
+							id="pds-selector" data-toggle="list" href="#list-messages"
 							role="tab" aria-controls="messages">Personal Data Store</a> <a
-							class="list-group-item list-group-item-action"
-							id="list-settings-list" data-toggle="list" href="#list-settings"
+							class="list-group-item data-query-source list-group-item-action"
+							id="ssi-selector" data-toggle="list" href="#list-settings"
 							role="tab" aria-controls="settings">SSI Wallet</a>
 					</div>
 
 
 					<form id="finish-form" class="" th:action="${urlFinishProcess}"
-						method="get">
+						method="post">
+						<input type="hidden" name="attrRequestList" id="attr-request-list"/>
 						<input type="submit" class="btn btn-info" value="Accept"
 							id="submitConsentRequest" />
 						<input type="submit" class="btn btn-danger" value="Reject" />
@@ -188,6 +193,15 @@
 			</div>
 
 		</div>
+			
+	<script> 
+	$(".data-query-list a").click(function(){
+
+		let id = $(this).attr('id')
+		$("#attr-request-list").val(id);
+
+		});
+	</script>
 
 	</footer>
 
