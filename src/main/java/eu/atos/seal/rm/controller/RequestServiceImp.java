@@ -3,6 +3,9 @@ package eu.atos.seal.rm.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -62,7 +65,42 @@ public class RequestServiceImp implements RequestService
 	MsMetadataList msmtdlist = null;
 
 	private Model model=null;
+
 	
+	
+    @PostMapping("request_client")
+    public String getRequest(@RequestBody MultiValueMap<String, String> formData,
+            HttpSession session, Model model)
+    {
+    	
+    	System.out.println("Received request from UI" + formData);
+    	
+        String[] attrRequestList = formData.get("attrRequestList").get(0).split(",");
+        
+        AttributeTypeList attributesRequestList = (AttributeTypeList) session
+                .getAttribute("attributesRequestList");
+
+        String urlReturn = (String) session.getAttribute("urlReturn");
+
+
+        AttributeTypeList attributesRequestListNew = new AttributeTypeList();
+        for (String index : attrRequestList)
+        {
+            try
+            {
+                attributesRequestListNew.add(attributesRequestList.get(Integer.parseInt(index)));
+            }
+            catch (Exception e)
+            {
+            }
+        }
+        
+        session.setAttribute("attributesRequestList", attributesRequestListNew);        
+        session.setAttribute("sessionId", session.getAttribute("sessionId"));
+        return "redirect:" + urlReturn;
+        
+        
+    }
 	@Override
 	public String rmRequest(String token, Model model) throws JsonParseException, JsonMappingException, IOException, UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, CertificateException, InvalidKeySpecException
 	{
@@ -237,7 +275,7 @@ public class RequestServiceImp implements RequestService
 		/// 
 		if (spRequestEP.contains("auth"))
 		{
-			if (spRequestSource.contains("Discovery"))
+		if (spRequestSource.contains("Discovery"))
 			{
 				return goToSelectIdpUI();
 			}
@@ -248,14 +286,15 @@ public class RequestServiceImp implements RequestService
 		}
 		else //data_query or null ¿puede ser null?
 		{
-			if (spRequestSource.contains("Discovery"))
+
+		if (spRequestSource.contains("Discovery"))
 			{
 				return goToSelectApUI(model, spRequest,spMetadata,sourceList);
 			}
 			else
-			{
 				return prepareAndGoToAP(sessionId, spRequest,spMetadata,spRequestSource);
-			}
+		
+		}
 		}
 //		
 //		
@@ -369,10 +408,6 @@ public class RequestServiceImp implements RequestService
 		
 		
 		
-		
-		//return null;
-	}
-
 
 	
 
@@ -387,6 +422,7 @@ public class RequestServiceImp implements RequestService
 		
 		
 		EntityMetadata authMetadata0 = cmConnService.getEntityMetadata("AUTHSOURCE", spRequestSource); // Reading the AUTHSOURCEmetadata.json
+
 		String msName = authMetadata0.getMicroservice().get(0);
 		String endpoint= getEndpoint("auth",msName);
 		
@@ -577,20 +613,23 @@ public class RequestServiceImp implements RequestService
 		//Rellenar atributos con la spRequest
 		// y ponerla en la vble de sesion: attributeRequestList
 		AttributeTypeList attributeRequestList = new AttributeTypeList();
+
 		attributeRequestList.addAll(spRequest.getAttributes());
-		session.setAttribute("attributeRequestList", attributeRequestList);
-		
+		session.setAttribute("attributesRequestList", attributeRequestList);
+		System.out.println("This is  name: " + attributeRequestList.get(0).getName()	);
+		System.out.println("This is friendly name: " + attributeRequestList.get(0).getFriendlyName());
+
 		//Rellenar spMetadata
 		//con la vble spMetadata
 		session.setAttribute("spMetadata", spMetadata);
 		
-		return "redirect:../rm/client";  //REVIEW
+		return "redirect:../request_client";  //REVIEW
 	}
 
 	private String goToSelectIdpUI() {
 		// TODO Auto-generated method stub
 		log.info("en goToSelectIdpUI");
-		return null;
+		return "redirect:../request_client";
 	}	
 	
 	//Auxiliary methods

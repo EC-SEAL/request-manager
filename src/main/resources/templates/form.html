@@ -54,13 +54,14 @@
             <ul id="selected-attributes-request" class="list-group">
                 <li class="list-group-item"  th:each="attributeRequest, iStat : ${attributesRequestList}"
                     th:attr="index=${attributeRequest.index}"
-                    th:text="${attributeRequest.name}"></li>
+                    th:text="${attributeRequest.friendlyName}"></li>
+
             </ul>
 
             <ul id="attributes-request-selection">
                 <li th:each="attributeRequest : ${attributesRequestList}">
                     <input type="checkbox" th:value="${attributeRequest.index}" checked="true"/>
-                    <label th:text="${attributeRequest.name}"></label>
+                    <label th:text="${attributeRequest.friendlyName}"></label>
                 </li>
             </ul>
         </div>

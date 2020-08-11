@@ -14,6 +14,7 @@ See README file for the full disclaimer information and LICENSE file for full li
 @author Atos Research and Innovation, Atos SPAIN SA
 */
 import java.util.ArrayList;
+
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
@@ -31,14 +32,18 @@ import eu.atos.seal.rm.model.AttributeType;
 import eu.atos.seal.rm.model.AttributeTypeList;
 import eu.atos.seal.rm.model.EntityMetadata;
 import eu.atos.seal.rm.model.AttributeClient;
+import eu.atos.seal.rm.model.AttributeSet;
 import eu.atos.seal.rm.model.AttributeSetClient;
-
+import eu.atos.seal.rm.model.AttributeSetList;
+import eu.atos.seal.rm.model.AttributeSetClient;
 
 
 @Controller
 public class RequestUIController
 {
 	private static final Logger log = LoggerFactory.getLogger(RequestUIController.class);
+
+	
 	
     @GetMapping("request_client")
     public String getHtmlForm(HttpSession session, Model model) throws Exception
@@ -55,11 +60,12 @@ public class RequestUIController
         String consentQuery = (String) session.getAttribute("consentQuery");
         String consentFinish = (String) session.getAttribute("consentFinish");
 
-        if ( attributesRequestList == null ||   
-        	urlReturn == null || urlFinishProcess == null)
-        {
-            throw new Exception("Data not initialize");
-        }
+      //  if ( attributesRequestList == null ||   
+      //  	urlReturn == null || urlFinishProcess == null)
+      //  {
+      //      throw new Exception("Data not initialize");
+      //  }
+
 
         List<AttributeClient> attributeClientList = new ArrayList<AttributeClient>();
 
@@ -105,7 +111,8 @@ public class RequestUIController
     	AttributeTypeList attributes = new AttributeTypeList();
     	
     	// Set attribute 1
-    	AttributeType attr1 = new AttributeType();
+
+    	AttributeType attr1 = new AttributeType();	
     	attr1.setName("http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName");
     	attr1.setFriendlyName("CurrentGivenName");
     	attr1.setEncoding("plain");
@@ -129,8 +136,7 @@ public class RequestUIController
     	attr3.setFriendlyName("Age"); 
 
         AttributeTypeList attributeList = new AttributeTypeList();
-        
-        EntityMetadata em = new EntityMetadata();
+
 
         attributeList.add(attr1);
         attributeList.add(attr2);
@@ -138,8 +144,8 @@ public class RequestUIController
         
         
         session.setAttribute("attributesRequestList", attributeList);
-        session.setAttribute("urlReturn", "response_client/return"); 		
-        session.setAttribute("urlFinishProcess", "response_client/finish"); 
+        session.setAttribute("urlReturn", "response_client"); 		
+        session.setAttribute("urlFinishProcess", "request_client"); 
         
         session.setAttribute("errorMessage", "An error has ocurred");
         session.setAttribute("infoMessage", "This is an information message");
@@ -152,39 +158,14 @@ public class RequestUIController
         return "redirect:../request_client";
     }
     
-
- 
     @PostMapping("request_client")
     public String getRequest(@RequestBody MultiValueMap<String, String> formData,
             HttpSession session, Model model)
     {
-    	
-    	
-        String[] attrRequestList = formData.get("attrRequestList").get(0).split(",");
+        List<String> attrRequestList = formData.get("attrRequestList");
+        System.out.println("The following source has been selected"+ attrRequestList.toString());
         
-        AttributeTypeList attributesRequestList = (AttributeTypeList) session
-                .getAttribute("attributesRequestList");
-
-        String urlReturn = (String) session.getAttribute("urlReturn");
-
-
-        AttributeTypeList attributesRequestListNew = new AttributeTypeList();
-        for (String index : attrRequestList)
-        {
-            try
-            {
-                attributesRequestListNew.add(attributesRequestList.get(Integer.parseInt(index)));
-            }
-            catch (Exception e)
-            {
-            }
-        }
-        
-        session.setAttribute("attributesRequestList", attributesRequestListNew);        
-        session.setAttribute("sessionId", session.getAttribute("sessionId"));
-        return "redirect:" + urlReturn;
-        
-        
+        return "rm_redirection"; // Need input to decide on where to redirect from here.
     }
   
     
