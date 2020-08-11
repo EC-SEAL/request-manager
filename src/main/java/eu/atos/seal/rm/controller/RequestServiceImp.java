@@ -277,7 +277,7 @@ public class RequestServiceImp implements RequestService
 		{
 		if (spRequestSource.contains("Discovery"))
 			{
-				return goToSelectIdpUI();
+				return goToSelectApUI(model, spRequest,spMetadata,sourceList);
 			}
 			else  //Should be eIDAS of eduGAIN
 			{
