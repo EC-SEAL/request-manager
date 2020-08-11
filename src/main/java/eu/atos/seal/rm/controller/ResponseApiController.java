@@ -16,7 +16,6 @@ See README file for the full disclaimer information and LICENSE file for full li
 package eu.atos.seal.rm.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +36,6 @@ import javax.validation.constraints.*;
 import javax.validation.Valid;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -83,6 +81,7 @@ public class ResponseApiController implements ResponseApi {
     public String responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model) 
     {
         log.info("responsePost called");
+<<<<<<< request-cbg
     	
         try {
         	
@@ -91,12 +90,12 @@ public class ResponseApiController implements ResponseApi {
 			
 			return sReturn;
 			//return new ResponseEntity<Void>(HttpStatus.OK);
-			
 		} 
         //catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | CertificateException
 		//		| InvalidKeySpecException | IOException e) {
 		catch (Exception e)
         {
+<<<<<<< request-cbg
 			log.error(e.getMessage());
 			
 			if (e.getMessage().contains(Integer.toString(HttpStatus.BAD_REQUEST.value()))) 
@@ -111,6 +110,12 @@ public class ResponseApiController implements ResponseApi {
 			
 		}
         
+=======
+			e.printStackTrace();
+		}
+        log.info("responsePost return null");
+        return null;
+>>>>>>> request
     }
 
 }

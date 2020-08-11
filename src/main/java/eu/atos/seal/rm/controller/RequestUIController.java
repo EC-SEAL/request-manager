@@ -30,10 +30,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import eu.atos.seal.rm.model.AttributeType;
 import eu.atos.seal.rm.model.AttributeTypeList;
 import eu.atos.seal.rm.model.EntityMetadata;
-import eu.atos.seal.rm.model.AttributeClient;
+import eu.atos.seal.rm.model.AttributeClient
 import eu.atos.seal.rm.model.AttributeSet;
 import eu.atos.seal.rm.model.AttributeSetClient;
 import eu.atos.seal.rm.model.AttributeSetList;
+import eu.atos.seal.rm.model.AttributeSetClient;
 
 
 @Controller
@@ -61,6 +62,7 @@ public class RequestUIController
       //  {
       //      throw new Exception("Data not initialize");
       //  }
+
 
         List<AttributeClient> attributeClientList = new ArrayList<AttributeClient>();
 
@@ -106,6 +108,7 @@ public class RequestUIController
     	AttributeTypeList attributes = new AttributeTypeList();
     	
     	// Set attribute 1
+
     	AttributeType attr1 = new AttributeType();	
     	attr1.setName("http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName");
     	attr1.setFriendlyName("CurrentGivenName");
@@ -130,7 +133,7 @@ public class RequestUIController
     	attr3.setFriendlyName("Age"); 
 
         AttributeTypeList attributeList = new AttributeTypeList();
-        
+
 
         attributeList.add(attr1);
         attributeList.add(attr2);
@@ -152,18 +155,14 @@ public class RequestUIController
         return "redirect:../request_client";
     }
     
-    
     @PostMapping("request_client")
     public String getRequest(@RequestBody MultiValueMap<String, String> formData,
             HttpSession session, Model model)
     {
-    	
-    	
         List<String> attrRequestList = formData.get("attrRequestList");
         System.out.println("The following source has been selected"+ attrRequestList.toString());
         
         return "rm_redirection"; // Need input to decide on where to redirect from here.
-        
     }
   
     

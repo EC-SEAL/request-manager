@@ -65,8 +65,7 @@ public class RequestServiceImp implements RequestService
 	MsMetadataList msmtdlist = null;
 
 	private Model model=null;
-	
-	
+
 	
 	
     @PostMapping("request_client")
@@ -102,9 +101,6 @@ public class RequestServiceImp implements RequestService
         
         
     }
-	
-	
-	
 	@Override
 	public String rmRequest(String token, Model model) throws JsonParseException, JsonMappingException, IOException, UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, CertificateException, InvalidKeySpecException
 	{
@@ -279,9 +275,9 @@ public class RequestServiceImp implements RequestService
 		/// 
 		if (spRequestEP.contains("auth"))
 		{
-			if (spRequestSource.contains("iscovery"))
+		if (spRequestSource.contains("Discovery"))
 			{
-				return goToSelectApUI(model, spRequest,spMetadata,sourceList);
+				return goToSelectIdpUI(;
 			}
 			else  //Should be eIDAS of eduGAIN
 			{
@@ -290,7 +286,8 @@ public class RequestServiceImp implements RequestService
 		}
 		else //data_query or null ¿puede ser null?
 		{
-			if (spRequestSource.contains("iscovery"))
+
+		if (spRequestSource.contains("Discovery"))
 			{
 				return goToSelectApUI(model, spRequest,spMetadata,sourceList);
 			}
@@ -411,12 +408,6 @@ public class RequestServiceImp implements RequestService
 		
 		
 		
-		
-		//return null;
-	}
-	
-	// Falta un método "from UI", lee las variables de sesión del formulario, y llama a prepare and gotoidp, con el spRequestSource fijado".
-	
 
 	
 
@@ -431,7 +422,7 @@ public class RequestServiceImp implements RequestService
 		
 		
 		EntityMetadata authMetadata0 = cmConnService.getEntityMetadata("AUTHSOURCE", spRequestSource); // Reading the AUTHSOURCEmetadata.json
-		System.out.println("This is the spRequestSource: " + spRequestSource);
+
 		String msName = authMetadata0.getMicroservice().get(0);
 		String endpoint= getEndpoint("auth",msName);
 		
@@ -627,6 +618,7 @@ public class RequestServiceImp implements RequestService
 		session.setAttribute("attributesRequestList", attributeRequestList);
 		System.out.println("This is  name: " + attributeRequestList.get(0).getName()	);
 		System.out.println("This is friendly name: " + attributeRequestList.get(0).getFriendlyName());
+
 		//Rellenar spMetadata
 		//con la vble spMetadata
 		session.setAttribute("spMetadata", spMetadata);
