@@ -162,7 +162,7 @@ public class RequestUIController
         List<String> attrRequestList = formData.get("attrRequestList");
         System.out.println("The following source has been selected"+ attrRequestList.toString());
         
-        return "rm_redirection"; // not sure how to follow from here.
+        return "rm_redirection"; // Need input to decide on where to redirect from here.
         
     }
   
