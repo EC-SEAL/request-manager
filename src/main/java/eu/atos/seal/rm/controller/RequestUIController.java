@@ -14,6 +14,7 @@ See README file for the full disclaimer information and LICENSE file for full li
 @author Atos Research and Innovation, Atos SPAIN SA
 */
 import java.util.ArrayList;
+
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
@@ -30,7 +31,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import eu.atos.seal.rm.model.AttributeType;
 import eu.atos.seal.rm.model.AttributeTypeList;
 import eu.atos.seal.rm.model.EntityMetadata;
-import eu.atos.seal.rm.model.AttributeClient
+import eu.atos.seal.rm.model.AttributeClient;
 import eu.atos.seal.rm.model.AttributeSet;
 import eu.atos.seal.rm.model.AttributeSetClient;
 import eu.atos.seal.rm.model.AttributeSetList;
@@ -41,6 +42,8 @@ import eu.atos.seal.rm.model.AttributeSetClient;
 public class RequestUIController
 {
 	private static final Logger log = LoggerFactory.getLogger(RequestUIController.class);
+
+	
 	
     @GetMapping("request_client")
     public String getHtmlForm(HttpSession session, Model model) throws Exception

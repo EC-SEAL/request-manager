@@ -81,7 +81,7 @@ public class ResponseApiController implements ResponseApi {
     public String responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model) 
     {
         log.info("responsePost called");
-<<<<<<< request-cbg
+
     	
         try {
         	
@@ -95,7 +95,7 @@ public class ResponseApiController implements ResponseApi {
 		//		| InvalidKeySpecException | IOException e) {
 		catch (Exception e)
         {
-<<<<<<< request-cbg
+
 			log.error(e.getMessage());
 			
 			if (e.getMessage().contains(Integer.toString(HttpStatus.BAD_REQUEST.value()))) 
@@ -109,13 +109,6 @@ public class ResponseApiController implements ResponseApi {
 			
 			
 		}
-        
-=======
-			e.printStackTrace();
-		}
-        log.info("responsePost return null");
-        return null;
->>>>>>> request
     }
 
 }

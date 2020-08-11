@@ -277,7 +277,7 @@ public class RequestServiceImp implements RequestService
 		{
 		if (spRequestSource.contains("Discovery"))
 			{
-				return goToSelectIdpUI(;
+				return goToSelectIdpUI();
 			}
 			else  //Should be eIDAS of eduGAIN
 			{
@@ -292,9 +292,9 @@ public class RequestServiceImp implements RequestService
 				return goToSelectApUI(model, spRequest,spMetadata,sourceList);
 			}
 			else
-			{
 				return prepareAndGoToAP(sessionId, spRequest,spMetadata,spRequestSource);
-			}
+		
+		}
 		}
 //		
 //		
