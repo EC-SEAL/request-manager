@@ -47,6 +47,8 @@ import eu.atos.seal.rm.model.PublishedApiType;
 import eu.atos.seal.rm.service.cm.ConfMngrConnService;
 import eu.atos.seal.rm.service.sm.SessionManagerConnService;
 import eu.atos.seal.rm.model.DataStore;
+//import eu.atos.seal.rm.model.DataStoreObject;
+import eu.atos.seal.rm.model.DataStoreObjectList;
 import eu.atos.seal.rm.model.AttributeTypeList;
 import eu.atos.seal.rm.model.DataSet;
 
@@ -179,9 +181,8 @@ public class ResponseServiceImp implements ResponseService
 				// Show and confirm sending response assertions
 				
 				// Reading the dataStore
-				DataStore dataStore = null;
-				Object objDatastore = null;
-				objDatastore = smConnService.readVariable(sessionId, "dataStore");
+				DataStoreObjectList ds = null;
+				Object objDatastore = smConnService.readDS(sessionId);
 				
 				/* TESTING:
 				log.info("*** Testing: invented dataStore");
@@ -196,8 +197,8 @@ public class ResponseServiceImp implements ResponseService
 				// END TESTING*/
 				
 				if (objDatastore != null) {
-					dataStore = (new ObjectMapper()).readValue(objDatastore.toString(),DataStore.class);
-					log.info("dataStore: " + dataStore.toString());
+					ds = (new ObjectMapper()).readValue(objDatastore.toString(),DataStoreObjectList.class);
+					log.info("dataStore: " + ds.toString());
 				}
 				else {
 					String errorMsg= "dataStore: not exist";
@@ -216,7 +217,11 @@ public class ResponseServiceImp implements ResponseService
 				
 				// Open the GUI and sending the response assertions selected by the user
 				// TODO: errorMsg?
-				return prepareAndGotoResponseUI( sessionId,  model, spRequest, dataStore, null); 
+				
+				// TODO: dataStoreObjectList
+				// TODO: readDS returns everything. We need just the "dataSet"s: review the readDS
+				return prepareAndGotoResponseUI( sessionId,  model, spRequest, null // ds.get(0)....
+						, null); 
 				
 			}
 			else {

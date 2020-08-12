@@ -28,6 +28,10 @@ public interface SessionManagerConnService
 																			  FileNotFoundException, NoSuchAlgorithmException, 
 																			  CertificateException, InvalidKeySpecException, IOException ;
 	
+	public Object readDS( String sessionId) throws 	UnrecoverableKeyException, KeyStoreException, 
+	  												FileNotFoundException, NoSuchAlgorithmException, 
+	  												CertificateException, InvalidKeySpecException, IOException ;
+
 
 	public void deleteSession(String sessionId) throws UnrecoverableKeyException, KeyStoreException, 
 													   FileNotFoundException, NoSuchAlgorithmException, 
