@@ -27,10 +27,11 @@ public interface SessionManagerConnService
 	public Object readVariable( String sessionId, String variableName) throws UnrecoverableKeyException, KeyStoreException, 
 																			  FileNotFoundException, NoSuchAlgorithmException, 
 																			  CertificateException, InvalidKeySpecException, IOException ;
-	
-	public Object readDS( String sessionId) throws 	UnrecoverableKeyException, KeyStoreException, 
-	  												FileNotFoundException, NoSuchAlgorithmException, 
-	  												CertificateException, InvalidKeySpecException, IOException ;
+	// Returns the list of "dataSet"/"linkRequest" objects from the DataStore.
+	// If type is null, returns the complete DataStore.
+	public Object readDS( String sessionId, String type) throws UnrecoverableKeyException, KeyStoreException, 
+	  															FileNotFoundException, NoSuchAlgorithmException, 
+	  															CertificateException, InvalidKeySpecException, IOException ;
 
 
 	public void deleteSession(String sessionId) throws UnrecoverableKeyException, KeyStoreException, 

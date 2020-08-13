@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.servlet.http.HttpSession;
 
@@ -32,7 +31,8 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import eu.atos.seal.rm.model.ApiClassEnum;
 import eu.atos.seal.rm.model.AttributeSet;
@@ -46,7 +46,6 @@ import eu.atos.seal.rm.model.MsMetadataList;
 import eu.atos.seal.rm.model.PublishedApiType;
 import eu.atos.seal.rm.service.cm.ConfMngrConnService;
 import eu.atos.seal.rm.service.sm.SessionManagerConnService;
-import eu.atos.seal.rm.model.DataStore;
 //import eu.atos.seal.rm.model.DataStoreObject;
 import eu.atos.seal.rm.model.DataStoreObjectList;
 import eu.atos.seal.rm.model.AttributeTypeList;
@@ -180,25 +179,29 @@ public class ResponseServiceImp implements ResponseService
 			else if (spRequestEP.contains("data")) {// data_query
 				// Show and confirm sending response assertions
 				
-				// Reading the dataStore
+				// Reading the dataSets from the dataStore
 				DataStoreObjectList ds = null;
-				Object objDatastore = smConnService.readDS(sessionId);
+				Object objDatastore = smConnService.readDS(sessionId, "dataSet");
 				
 				/* TESTING:
-				log.info("*** Testing: invented dataStore");
-				DataStore datastore = new DataStore();
-				datastore.setId("DS_" + UUID.randomUUID().toString());
-				datastore.setEncryptedData(null);
-				datastore.setEncryptionAlgorithm("this is the encryption algorithm");
-				datastore.setSignature("this is the signature");
-				datastore.setSignatureAlgorithm("this is the signature algorithm");	
+				log.info("*** Testing: invented DataStoreObjectList");
 				
-				datastore.setClearData(null);
+				//TODO
+				DataStoreObjectList datastore = new DataStoreObjectList();
+				DataStoreObject dso = new DataStoreObject("DS_" + UUID.randomUUID().toString(), "dataSet", "the dataSet object");
+				dso.setId("DS_" + UUID.randomUUID().toString());
+				dso.setEncryptedData(null);
+				dso.setEncryptionAlgorithm("this is the encryption algorithm");
+				dso.setSignature("this is the signature");
+				dso.setSignatureAlgorithm("this is the signature algorithm");	
+				dso.setClearData(null);
+				
+				datastore.add (dso);
 				// END TESTING*/
 				
 				if (objDatastore != null) {
 					ds = (new ObjectMapper()).readValue(objDatastore.toString(),DataStoreObjectList.class);
-					log.info("dataStore: " + ds.toString());
+					log.info("dataSets stored: " + ds.toString());
 				}
 				else {
 					String errorMsg= "dataStore: not exist";
@@ -219,9 +222,7 @@ public class ResponseServiceImp implements ResponseService
 				// TODO: errorMsg?
 				
 				// TODO: dataStoreObjectList
-				// TODO: readDS returns everything. We need just the "dataSet"s: review the readDS
-				return prepareAndGotoResponseUI( sessionId,  model, spRequest, null // ds.get(0)....
-						, null); 
+				return prepareAndGotoResponseUI( sessionId,  model, spRequest, ds, null); 
 				
 			}
 			else {
@@ -257,7 +258,7 @@ public class ResponseServiceImp implements ResponseService
 
 	private String prepareAndGotoResponseUI( String sessionId, Model model, 
 			AttributeSet spRequest,
-		    DataStore dataStore,
+		    DataStoreObjectList dataStore,
 		    String errorMessage) 
 
 	{
@@ -267,6 +268,28 @@ public class ResponseServiceImp implements ResponseService
 		// and attributeSendList--> NOT NECESSARY 
 //		AttributeTypeList attributesSendList = new AttributeTypeList();
 		List<DataSet> dsList = new ArrayList<DataSet>();
+		dataStore.forEach ((dso)-> {
+			JsonObject myJSONdso = new JsonParser().parse(dso.toString()).getAsJsonObject();
+			log.info("myJSONdso: " + myJSONdso.toString());
+			
+			DataSet aux_ds = null;
+			try {
+				aux_ds = (new ObjectMapper()).readValue(myJSONdso.get("data").toString(),DataSet.class);
+			} catch (JsonParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JsonMappingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			dsList.add(aux_ds);
+			
+		});
+		
+/*	OLD	
 		for (DataSet aux_ds:dataStore.getClearData()) {
 			dsList.add(aux_ds);
 //			
@@ -274,7 +297,7 @@ public class ResponseServiceImp implements ResponseService
 //				attributesSendList.add(aux_attr);
 //			}
 		}
-		
+*/		
 		// Filling attributesRequestList: for filtering. See bellow. 
 		AttributeTypeList attributesRequestList = new AttributeTypeList();
 		for ( AttributeType attrRequested : spRequest.getAttributes())

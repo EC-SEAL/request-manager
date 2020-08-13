@@ -290,12 +290,16 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 	    //[TODO] �que devolvemos?
 	    return sessionVbles.get(variableName);
 	}
+	
 
+	// Returns the list of dataSet/linkRequest objects from the DataStore.
+	// If type is null, returns the complete DataStore.
 	@Override
-	public Object readDS(String sessionId) throws UnrecoverableKeyException, KeyStoreException, FileNotFoundException, NoSuchAlgorithmException, CertificateException, InvalidKeySpecException, IOException
+	public Object readDS(String sessionId, String type) throws UnrecoverableKeyException, KeyStoreException, FileNotFoundException, NoSuchAlgorithmException, CertificateException, InvalidKeySpecException, IOException
 	{
-		String service = "/sm/new/get";
-		//HashMap<String, Object> sessionVbles = new HashMap<String, Object>();
+		//String service = "/sm/new/get";
+		String service = "/sm/new/search";
+		
 		Object sessionVble = new Object();
 		
 		if (network == null)
@@ -304,11 +308,11 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 		}
 		List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
 	    urlParameters.add(new NameValuePair("sessionId",sessionId));
+	    urlParameters.add(new NameValuePair("type",type));
 	    
 	    SessionMngrResponse smResponse = null;
 	    try {
-	    	log.info("Sending new/getSessionData ...");
-	    	//response = network.sendGet(hostURL, service, urlParameters);
+	    	log.info("Sending new/search ...");
 	    	smResponse = network.sendGetSMResponse(hostURL, service, urlParameters, 1);
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
@@ -317,17 +321,16 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    //log.info("Response new/getSessionData:<"+smResponse.toString()+">");
+	    
 	    if (smResponse.getCode()== ResponseCode.OK)
 	    {
 	    	//sessionVbles = (HashMap<String, Object>) smResponse.getSessionData().getSessionVariables();
 	    	sessionVble = smResponse.getAdditionalData();
 	    	
-	    	log.info("sessionVble: "+ sessionVble.toString());
+	    	log.info("DS (only "+ type + " : "+ sessionVble.toString());
 	    }
 	    
 	    
-	    //return sessionVbles.get(variableName);
 	    return sessionVble;
 	}
 	
