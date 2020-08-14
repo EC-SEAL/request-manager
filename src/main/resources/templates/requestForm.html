@@ -1,12 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>SEAL DATA RESPONSE</title>
+<title>seal Data Query</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-<script type="application/javascript"
-	th:src="@{js/jquery/jquery-3.3.1.js}"></script>
-<script type="application/javascript" th:src="@{js/responseClient.js}"></script>
 
 <link rel="stylesheet"
 	href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
@@ -25,6 +21,12 @@
 	src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
 	integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
 	crossorigin="anonymous"></script>
+
+<script
+	src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+	integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+	crossorigin="anonymous"></script>
+	
 <link rel="stylesheet" type="text/css" th:href="@{css/clientSeal.css}" />
 </head>
 <body>
@@ -40,14 +42,8 @@
 				aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
-			<div class="collapse navbar-collapse" id="navbarResponsive">
-				<ul class="navbar-nav ml-auto">
-				</ul>
-			</div>
 		</div>
 	</nav>
-
-
 
 	<div id="main-selector" class="container">
 		<div id="messages">
@@ -60,77 +56,58 @@
 		</div>
 
 		<div class="row justify-content-md-center">
-
-			<div id="retrieved-data" class="col-md-6">
-				<div class="card main-split">
-
+			<div id="requesting-data" class="col-md-8">
+				<div class="card main-split shadow rounded">
 					<strong>
-						<p class="main-title">Personal Data Retrieved</p>
+						<p class="main-title">
+							<span th:text="${SPName}">Service Provider</span> is requesting
+							to query:
+						</p>
 					</strong>
 
-					<div id="attributes-consent">
-
-						<div
-							class="attributes-consent-selector data-box attributes-selector"
-							th:each="attrConsent : ${attributesConsentList}">
-							<div class="card">
-								<div class="card-header">
-
-									<p th:text="${attrConsent.id}"></p>
-									<div class="buttons">
-										<input type="hidden" class="update-img update-consent-attr" />
-									</div>
-								</div>
-<!-- 								<div class="card-body"> -->
-<!-- 									<ul class="attributes-consent-selection"> -->
-<!-- 										<li th:each="attribute : ${attrConsent.attributeClientList}"> -->
-<!-- 											<input type="checkbox" th:value="${attribute.index}" -->
-<!-- 											checked="true" th:name="${attrConsent.id}"/> <label> <span -->
-<!-- 											th:text="|${attribute.name} : ${attribute.value}|"></span> -->
-<!-- 											</label> -->
-<!-- 										</li> -->
-<!-- 									</ul> -->
-<!-- 								</div> -->
-							</div>
-							
-							<ul class="attributes-consent-selection">
-                    			<li th:each="attribute : ${attrConsent.attributeClientList}" th:attr="index=${attribute.index}">
-                    				<input type="checkbox" th:value="${attribute.index}" checked="true"
-                               			th:name="${attrConsent.id}"/>
-                        			<span class="bold" th:text="${attribute.name}"></span>: <span
-                            			th:text="${attribute.value}"></span>
-                    			</li>
-                			</ul>               			
-						</div>
+					<div id="attributes-request-selector"
+						class="data-box attributes-selector">
+						<ul id="attributes-request-selection">
+							<li th:each="attributeRequest : ${attributesRequestList}"><input
+								type="checkbox" th:value="${attributeRequest.index}"
+								checked="true" /> <label th:text="${attributeRequest.name}"></label>
+							</li>
+						</ul>
 					</div>
-					<form id="return-form" class="consent-form"
-						th:action="${urlReturn}" method="get">
-						<p th:if="${consentReturn}" class="consent-text" th:text="${consentReturn}"></p>
-            			<p th:unless="${consentReturn}" class="consent-text finish-consent-text">
-                			Click to consent to return your above data to <span th:text="${SPName}">SP organisation</span>
-                			and finish the process.</p>
-<!-- 						<input type="submit" class="btn btn-info" value="Accept" /> -->
-						<input type="button" value="Accept" id="send-request-button" class="consent-button"/>
-<!-- 							<input type="submit" value="Accept" id="send-request-button" class="btn btn-info"/> -->
-						
-					</form>
-					<form id="rejecting-form" class="consent-form"
-						th:action="${urlFinishProcess}" method="get">
-						<p th:if="${consentFinish}" class="consent-text" th:text="${consentFinish}"></p>
-            			<p th:unless="${consentFinish}" class="consent-text finish-consent-text">
-                			Click to cancel the submission of your above data to <span th:text="${SPName}">SP organisation</span>
-                			and finish the process.</p>
+
+					<strong>
+						<p>Select Data query source</p>
+					</strong>
+
+					<div class="list-group data-query-list" id="list-tab" role="tablist">
+						<a class="list-group-item list-group-item-action data-query-source active"
+							id="edugain-selector" data-toggle="list" href="#list-home"
+							role="tab" aria-controls="home">eduGAIN</a> <a
+							class="list-group-item data-query-source list-group-item-action"
+							id="eidas-selector" data-toggle="list" href="#list-profile"
+							role="tab" aria-controls="profile">eIDAS</a> <a
+							class="list-group-item data-query-source list-group-item-action"
+							id="pds-selector" data-toggle="list" href="#list-messages"
+							role="tab" aria-controls="messages">Personal Data Store</a> <a
+							class="list-group-item data-query-source list-group-item-action"
+							id="ssi-selector" data-toggle="list" href="#list-settings"
+							role="tab" aria-controls="settings">SSI Wallet</a>
+					</div>
+
+
+					<form id="finish-form" class="" th:action="${urlFinishProcess}"
+						method="post">
+						<input type="hidden" name="attrRequestList" id="attr-request-list"/>
+						<input type="submit" class="btn btn-info" value="Accept"
+							id="submitConsentRequest" />
 						<input type="submit" class="btn btn-danger" value="Reject" />
+						<p th:if="${consentFinish}" class="consent-text"
+							th:text="${consentFinish}"></p>
+						<p th:unless="${consentFinish}"
+							class="consent-text finish-consent-text">Click to consent to
+							this request</p>
 					</form>
 					
-
-					<form id="ap-form" class="consent-form" name="ap-form" method="POST">
-<!-- 			            <input type="hidden" name="apId" id="ap-id"/> -->
-<!-- 			            <input type="hidden" name="attrRequestList" id="attr-request-list"/> -->
-<!-- 			            <input type="hidden" name="attrSendList" id="attr-send-list"/> -->
-			            <input type="hidden" name="attrConsentList" id="attr-consent-list"/>			            
-			        </form>
-
 					<div id="card-footer">
 
 						<div id="info-left">
@@ -141,7 +118,7 @@
 									d="M5.187 1.025C6.23.749 7.337.5 8 .5c.662 0 1.77.249 2.813.525a61.09 61.09 0 012.772.815c.528.168.926.623 1.003 1.184.573 4.197-.756 7.307-2.367 9.365a11.191 11.191 0 01-2.418 2.3 6.942 6.942 0 01-1.007.586c-.27.124-.558.225-.796.225s-.526-.101-.796-.225a6.908 6.908 0 01-1.007-.586 11.192 11.192 0 01-2.417-2.3C2.167 10.331.839 7.221 1.412 3.024A1.454 1.454 0 012.415 1.84a61.11 61.11 0 012.772-.815z"
 									clip-rule="evenodd" />
 			</svg>
-							<span>  Privacy Policy </span>
+							<span> Privacy Policy </span>
 						</div>
 
 						<div id="info-right">
@@ -159,9 +136,10 @@
 						</div>
 
 					</div>
+
+
+
 				</div>
-
-
 			</div>
 
 		</div>
@@ -170,14 +148,6 @@
 
 	<footer id="footer-info" class="page-footer font-small teal pt-4">
 
-		<!--  <a id="policy" href="#" th:href="${privacyPolicy}">Privacy Policy</a>
-
-    <div id="seal-info">
-        <p>To find out more about seal please visit:</p>
-        <a href="http://www.seal-project.eu/">http://www.seal-project.eu/</a>
-    </div>
-    
-     -->
 
 		<!-- Footer Elements -->
 		<div class="container">
@@ -217,10 +187,20 @@
 			<!--Grid row-->
 			<div id="seal-info">
 				<p>To find out more about Seal please visit:</p>
-				<a href="https://www.project-seal.eu/">https://www.project-seal.eu/</a>
+				<a href="http://www.seal-project.eu/">https://www.project-seal.eu/</a>
 			</div>
 
 		</div>
+			
+	<script> 
+	$(".data-query-list a").click(function(){
+
+		let id = $(this).attr('id')
+		$("#attr-request-list").val(id);
+
+		});
+	</script>
+
 
 	</footer>
 

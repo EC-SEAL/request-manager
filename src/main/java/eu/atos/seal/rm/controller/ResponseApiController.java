@@ -38,6 +38,7 @@ import javax.validation.Valid;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+
 import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -91,12 +92,14 @@ public class ResponseApiController implements ResponseApi {
 			
 			return sReturn;
 			//return new ResponseEntity<Void>(HttpStatus.OK);
+
 			
 		} 
         //catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | CertificateException
 		//		| InvalidKeySpecException | IOException e) {
 		catch (Exception e)
         {
+
 			log.error(e.getMessage());
 			
 			if (e.getMessage().contains(Integer.toString(HttpStatus.BAD_REQUEST.value()))) 
@@ -110,6 +113,7 @@ public class ResponseApiController implements ResponseApi {
 			
 			
 		}
+
         
     }
 

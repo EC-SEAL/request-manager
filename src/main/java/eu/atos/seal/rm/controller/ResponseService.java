@@ -10,6 +10,7 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN ACTION OF CONTRACT, TORT OR OTHERWISE, AR
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 See README file for the full disclaimer information and LICENSE file for full license information in the project root.
 
+
 @author Atos Research and Innovation, Atos SPAIN SA
 */
 
@@ -28,4 +29,5 @@ public interface ResponseService
 	
 	public String returnFromResponseUI (String token, Model model) throws Exception;
 	public String returnNothing (String token, Model model) throws Exception;
+
 }

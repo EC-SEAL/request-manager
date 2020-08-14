@@ -149,10 +149,12 @@ public class ResponseUIController
         {
             DSClient dsClient = DSClient.getDSClientFrom(dsList.get(i), i);
             dsClientList.add(dsClient);
+
         }
         log.info("consentList: " + consentList.toString());
  
         model.addAttribute("attributesConsentList", consentList);
+
 
         model.addAttribute("urlFinishProcess", urlFinishProcess);
         model.addAttribute("urlReturn", urlReturn);
@@ -169,6 +171,7 @@ public class ResponseUIController
         model.addAttribute("SPName", (SPName != null) ? SPName : "Service Provider");
         model.addAttribute("privacyPolicy", privacyPolicy);
         model.addAttribute("consentFinish", consentFinish);
+
         //model.addAttribute("consentQuery", consentQuery);
         
         
@@ -475,6 +478,7 @@ public class ResponseUIController
         log.info("FORMDATA __attrConsent: " + attrConsent);
 
         List<DataSet> dsList = (List<DataSet>) session.getAttribute("dsList");
+
 //        AttributeTypeList attributesRequestList = (AttributeTypeList) session
 //                .getAttribute("attributesRequestList");
 //        AttributeTypeList attributesSendList = (AttributeTypeList) session
@@ -510,7 +514,6 @@ public class ResponseUIController
 //            {
 //            }
 //        }
-
 
         
         AttributeSetList attributesConsentListNew = new AttributeSetList();

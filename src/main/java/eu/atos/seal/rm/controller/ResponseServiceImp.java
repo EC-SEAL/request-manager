@@ -10,6 +10,7 @@ DAMAGES OR OTHER LIABILITY, WHETHER IN ACTION OF CONTRACT, TORT OR OTHERWISE, AR
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 See README file for the full disclaimer information and LICENSE file for full license information in the project root.
 
+
 @author Atos Research and Innovation, Atos SPAIN SA
 */
 
@@ -19,6 +20,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+
+import javax.servlet.http.HttpSession;
 
 import javax.servlet.http.HttpSession;
 
@@ -382,7 +386,7 @@ public class ResponseServiceImp implements ResponseService
 	public String returnFromResponseUI(String sessionId, Model model) throws Exception 
 	{
 		
-		AttributeSetList responseAssertions= new AttributeSetList ();
+		AttributeSetList responseAssertions= new AttributeSetList ();       
 /*		List<DataSet> dsConsentList = (List<DataSet>) session.getAttribute("dsConsentList");
 		log.info("dsConsentList: " + dsConsentList.toString());
 		
@@ -392,6 +396,7 @@ public class ResponseServiceImp implements ResponseService
 			
 			responseAssertions.add(consentResponse);			
 		}
+
 */
 		
 		log.info ("attributesConsentList: " + session.getAttribute("attributesConsentList").toString());
