@@ -4,7 +4,27 @@
 <title>SEAL DATA RESPONSE</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-,02
+<script type="application/javascript"
+	th:src="@{js/jquery/jquery-3.3.1.js}"></script>
+<script type="application/javascript" th:src="@{js/responseClient.js}"></script>
+
+<link rel="stylesheet"
+	href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+	integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk"
+	crossorigin="anonymous" />
+
+<!-- JS, Popper.js, and jQuery -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+	integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+	crossorigin="anonymous"></script>
+<script
+	src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+	integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+	crossorigin="anonymous"></script>
+<script
+	src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+	integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+	crossorigin="anonymous"></script>
 <link rel="stylesheet" type="text/css" th:href="@{css/clientSeal.css}" />
 </head>
 <body>
@@ -55,30 +75,61 @@
 							th:each="attrConsent : ${attributesConsentList}">
 							<div class="card">
 								<div class="card-header">
-									<span th:text="${attrConsent.id}"></span>
+
+									<p th:text="${attrConsent.id}"></p>
+									<div class="buttons">
+										<input type="hidden" class="update-img update-consent-attr" />
+									</div>
 								</div>
-								<div class="card-body">
-									<ul class="attributes-consent-selection">
-										<li th:each="attribute : ${attrConsent.attributeClientList}">
-											<input type="checkbox" th:value="${attribute.index}"
-											checked="true" th:name="${attrConsent.id}"/> <label> <span
-											th:text="|${attribute.name} : ${attribute.value}|"></span>
-											</label>
-										</li>
-									</ul>
-								</div>
+<!-- 								<div class="card-body"> -->
+<!-- 									<ul class="attributes-consent-selection"> -->
+<!-- 										<li th:each="attribute : ${attrConsent.attributeClientList}"> -->
+<!-- 											<input type="checkbox" th:value="${attribute.index}" -->
+<!-- 											checked="true" th:name="${attrConsent.id}"/> <label> <span -->
+<!-- 											th:text="|${attribute.name} : ${attribute.value}|"></span> -->
+<!-- 											</label> -->
+<!-- 										</li> -->
+<!-- 									</ul> -->
+<!-- 								</div> -->
 							</div>
+							
+							<ul class="attributes-consent-selection">
+                    			<li th:each="attribute : ${attrConsent.attributeClientList}" th:attr="index=${attribute.index}">
+                    				<input type="checkbox" th:value="${attribute.index}" checked="true"
+                               			th:name="${attrConsent.id}"/>
+                        			<span class="bold" th:text="${attribute.name}"></span>: <span
+                            			th:text="${attribute.value}"></span>
+                    			</li>
+                			</ul>               			
 						</div>
 					</div>
-					<form id="finish-form" class="consent-form"
+					<form id="return-form" class="consent-form"
+						th:action="${urlReturn}" method="get">
+						<p th:if="${consentReturn}" class="consent-text" th:text="${consentReturn}"></p>
+            			<p th:unless="${consentReturn}" class="consent-text finish-consent-text">
+                			Click to consent to return your above data to <span th:text="${SPName}">SP organisation</span>
+                			and finish the process.</p>
+<!-- 						<input type="submit" class="btn btn-info" value="Accept" /> -->
+						<input type="button" value="Accept" id="send-request-button" class="consent-button"/>
+<!-- 							<input type="submit" value="Accept" id="send-request-button" class="btn btn-info"/> -->
+						
+					</form>
+					<form id="rejecting-form" class="consent-form"
 						th:action="${urlFinishProcess}" method="get">
-						<p th:unless="${consentReturn}"
-							class="consent-text finish-consent-text">
-							Click to consent to return this data to <span th:text="${SPName}"></span>
-						</p>
-						<input type="submit" class="btn btn-info" value="Accept" />
+						<p th:if="${consentFinish}" class="consent-text" th:text="${consentFinish}"></p>
+            			<p th:unless="${consentFinish}" class="consent-text finish-consent-text">
+                			Click to cancel the submission of your above data to <span th:text="${SPName}">SP organisation</span>
+                			and finish the process.</p>
 						<input type="submit" class="btn btn-danger" value="Reject" />
 					</form>
+					
+
+					<form id="ap-form" class="consent-form" name="ap-form" method="POST">
+<!-- 			            <input type="hidden" name="apId" id="ap-id"/> -->
+<!-- 			            <input type="hidden" name="attrRequestList" id="attr-request-list"/> -->
+<!-- 			            <input type="hidden" name="attrSendList" id="attr-send-list"/> -->
+			            <input type="hidden" name="attrConsentList" id="attr-consent-list"/>			            
+			        </form>
 
 					<div id="card-footer">
 
@@ -165,8 +216,8 @@
 			</div>
 			<!--Grid row-->
 			<div id="seal-info">
-				<p>To find out more about Seal please visit:</p>
-				<a href="http://www.seal-project.eu/">https://www.project-seal.eu/</a>
+				<p>To find out more about Seal please visit:</p
+				<a href="https://www.project-seal.eu/">https://www.project-seal.eu/</a>
 			</div>
 
 		</div>

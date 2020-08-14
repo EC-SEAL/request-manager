@@ -2,61 +2,42 @@ body {
     margin : 0px;
     margin-left : auto;
     margin-right : auto;
-    background-color: #e9e9ef03;
+    width: 1000px;
     font: 14px arial, sans-serif;
 }
 
+#requesting-data {
+    float: left;
+}
 
+#retrieved-data {
+    float: right;
+}
 
 div.main-content {
     border: 1px solid #D5C3E0;
     width: 47.5%;
     margin: 10px 0 10px 0;
     padding:5px 10px 5px 10px;
+    height: 650px;
     position: relative;
 }
 
-.alert {
-	display:none;
-}
-
-.card.main-split {
-    padding: 3em;
-}
-
-.list-group-item:first-child {
-	border-color: #545b66;
-}
-
-.alert-info {
-    color: #ffffff;
-    background-color: #545B66;
-    border-color: #545B66;
-}
-
-.alert-danger {
-    color: #293988;
-    background-color: #e8b626;
-    border-color: #f5c6cb;
-}
 #footer-info {
     clear: both;
     padding-bottom: 5px;
-    width: 100%;
-    margin-block-start: auto;
-    margin-bottom: 6em;
 }
 
-#seal-info {
+#esmo-info {
     text-align: center;
     font-size: 12px;
 }
 
-#seal-info p {
+#esmo-info p {
     margin: 0;
 }
 
-#seal-info a, #seal-info a:active, #seal-info a:visited {
+#esmo-info a, #esmo-info a:active, #esmo-info a:visited {
     text-decoration: none;
     color: #833B8F;
 }
@@ -74,9 +55,15 @@ div.main-content h3 {
 }
 
 div.data-box {
+    border: 1px solid #D5C3E0;
     margin-bottom: 10px;
 }
 
+div.header-data {
+    border-bottom: 1px solid #D5C3E0;
+    padding: 5px 5px 0 5px;
+    background-color: #D5C3E0;
+}
 
 div.header-data p {
     float: left;
@@ -104,27 +91,14 @@ div.buttons input:hover {
 
 div.attributes-selector ul {
     overflow: auto;
+    max-height: 100px;
     list-style-type: none;
     padding: 0;
-    color: #545b66de;
     margin: 0;
-    margin-bottom: 2em;
 }
-.list-group-item+.list-group-item.active {
-    margin-top: -1px;
-    border-top-width: 1px;
-    border-width: 1.4px;
-    font-weight: 500;
-}
-
-
 
 div.attributes-selector li {
     padding: 5px 5px 2px 5px;
-}
-
-.pt-4, .py-4 {
-    padding-top: 5.5rem!important;
 }
 
 div.attributes-selector li input {
@@ -180,35 +154,20 @@ li.not-sending {
     max-height: 15px;
     max-width: 40px;
 }
-.btn{
-	margin-top: 2em;
-}
 
-
-.list-group-item+.list-group-item {
-	border-color: #545b66;
+.consent-form {
+    position: absolute;
+    bottom: 10px;
 }
 
 .consent-text {
-    color: #545b62ab;
+    float: right;
+    color: grey;
     width: 88%;
     padding-top: 3px;
     margin: 0 5px 0 0;
     max-height: 40px;
     overflow: auto;
-}
-
-.list-group-item.active {
-	background-color: #103399;
-}
-
-.client-group-item{
-	border-color: #E8B626;
-}
-
-.btn-info {
-	border-color: #293989;
-	background-color: #293989;
 }
 
 .finish-consent-text {
@@ -225,13 +184,10 @@ input.consent-button {
     height: 40px;
 }
 
-
-
 input.consent-button:disabled {
     background-color: #c3cbef;
     border-color: #c3cbef;
 }
-
 
 input.consent-button:hover:enabled {
     background-color: #9aa8e4;
@@ -242,34 +198,15 @@ input.consent-button:hover:enabled {
     font-weight: bold;
 }
 
-#finish-form {
-	margin-top:1em;
-}
-
-#attributes-consent {	
+#attributes-consent {
+    height: 500px;
     overflow: auto;
 }
 
 #messages {
     font-weight: bold;
-    padding: 30px 5px 5px 20px;
+    padding: 15px 5px 5px 20px;
 }
-
-
-#info-right {
-    float: right;
-    color: #545b66;
-}
-
-#info-left {
-    float: left;
-    color: #545b66;
-}
-
-#card-footer{
-	margin-top: 2em;
-}
-
 
 #messages .info {
     color: #283A8C;

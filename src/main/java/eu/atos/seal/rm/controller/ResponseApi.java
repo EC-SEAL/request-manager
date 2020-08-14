@@ -13,7 +13,6 @@ See README file for the full disclaimer information and LICENSE file for full li
 @author Atos Research and Innovation, Atos SPAIN SA
 */
 
-
 package eu.atos.seal.rm.controller;
 
 import io.swagger.annotations.*;
@@ -33,8 +32,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.List;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2019-11-07T15:11:31.760Z")
-
 
 @Api(value = "response", description = "the response API")
 public interface ResponseApi 
@@ -50,6 +47,6 @@ public interface ResponseApi
         method = RequestMethod.POST)
     //ResponseEntity<Void> responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken,Model model);
 
-    String responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken,Model model);
+    String responsePost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model);
 
 }

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>SEAL Data Consent</title>
+    <script type="application/javascript" th:src="@{js/jquery/jquery-3.3.1.js}"></script>
+    <script type="application/javascript" th:src="@{js/responseClient_test.js}"></script>
+    <link rel="stylesheet" type="text/css" th:href="@{css_test/client.css}"/>
+</head>
+<body>
+
+<div class="header">
+    <img th:src="@{images_test/header.png}"/>
+</div>
+
+<div id="messages">
+    <div class="info" th:text="${infoMessage}"></div>
+    <div class="error" th:text="${errorMessage}"></div>
+</div>
+
+<div id="main-selector">
+
+    <div id="requesting-data" class="main-content">
+        <h3 class="main-title"><span th:text="${SPName}">Service Provider</span> is REQUESTING the following Personal Data</h3>
+
+        <div id="attributes-request-selector" class="data-box attributes-selector">
+            <div class="header-data">
+                <p>List of data to query</p>
+                <div class="buttons">
+                    <input type="image" id="edit-request-attr" class="edit-img" th:src="@{images_test/edit.png}" alt="Edit"/>
+                    <input type="image" id="update-request-attr" class="update-img" th:src="@{images_test/update.png}"
+                           alt="Update"/>
+                    <input type="image" id="update-request-attr-cancel" class="cancel-img" th:src="@{images_test/cancel.png}"
+                           alt="Cancel"/>
+                </div>
+                <div class="clear"></div>
+            </div>
+
+            <ul id="selected-attributes-request">
+                <li th:each="attributeRequest, iStat : ${attributesRequestList}"
+                    th:attr="index=${attributeRequest.index}"
+                    th:text="${attributeRequest.name}"></li>
+            </ul>
+
+            <ul id="attributes-request-selection">
+                <li th:each="attributeRequest : ${attributesRequestList}">
+                    <input type="checkbox" th:value="${attributeRequest.index}" checked="true"/>
+                    <label th:text="${attributeRequest.name}"></label>
+                </li>
+            </ul>
+        </div>
+
+        <div id="attributes-send-selector" class="data-box attributes-selector">
+            <div class="header-data">
+                <p>List of identity data OBTAINED</p>
+                <div class="buttons">
+                    <input type="image" id="edit-send-attr" class="edit-img" th:src="@{images_test/edit.png}" alt="Edit"/>
+                    <input type="image" id="update-send-attr" class="update-img" th:src="@{images_test/update.png}"
+                           alt="Update"/>
+                    <input type="image" id="update-send-attr-cancel" class="cancel-img" th:src="@{images_test/cancel.png}"
+                           alt="Cancel"/>
+                </div>
+                <div class="clear"></div>
+            </div>
+
+            <ul id="selected-attributes-send">
+                <li th:each="attributeSend : ${attributesSendList}" th:attr="index=${attributeSend.index}">
+                    <span class="bold" th:text="${attributeSend.name}"></span>: <span
+                        th:text="${attributeSend.value}"></span>
+                </li>
+            </ul>
+
+            <ul id="attributes-send-selection">
+                <li th:each="attributeSend : ${attributesSendList}">
+                    <input type="checkbox" th:value="${attributeSend.index}" checked="true"/>
+                    <label th:text="${attributeSend.name}"></label>
+                </li>
+            </ul>
+        </div>
+
+        <div id="aps" class="data-box">
+            <h3>This is your DATA STORE to retrieve your data from:</h3>
+
+            <div id="ap-selector">
+                <div th:each="dsClient : ${dsList}" th:attr="index=${dsClient.index}"
+                     th:classappend="${dsClient.index%2==0} ? odd : even">
+                    <span th:text="${dsClient.logo}"></span>
+                    <span th:text="${dsClient.displayName}"></span>
+                
+                    <span th:each="attributeClient : ${dsClient.attrs}">
+    					<span th:text="${attributeClient.index} + ': ' + ${attributeClient.name} +'** '+ ${attributeClient.value}"></span>
+					</span>
+                    
+                    
+                </div>
+            </div>
+
+            <div id="ap-selected">&nbsp;</div>
+        </div>
+
+        <form id="ap-form" class="consent-form" name="ap-form" method="POST">
+            <input type="hidden" name="apId" id="ap-id"/>
+            <input type="hidden" name="attrRequestList" id="attr-request-list"/>
+            <input type="hidden" name="attrSendList" id="attr-send-list"/>
+            <input type="hidden" name="attrConsentList" id="attr-consent-list"/>
+            <input type="button" value="Send" id="send-request-button" class="consent-button"/>
+            <span th:if="${consentQuery}" class="consent-text" th:text="${consentQuery}"></span>
+            <span th:unless="${consentQuery}" class="consent-text">Click to consent to the above data query and to receive requested data.</span>
+            
+        </form>
+
+    </div>
+
+    <div id="retrieved-data" class="main-content">
+        <h3 class="main-title">Personal Data Retrieved</h3>
+
+        <div id="attributes-consent">
+
+            <div class="attributes-consent-selector data-box attributes-selector"
+                 th:each="attrConsent : ${attributesConsentList}">
+                <div class="header-data">
+                    <p th:text="${attrConsent.id}"></p>
+                    <div class="buttons">
+                        <input type="image" class="edit-img edit-consent" th:src="@{images_test/edit.png}" alt="Edit"/>
+                        <input type="image" class="update-img update-consent-attr" th:src="@{images_test/update.png}"
+                               alt="Update"/>
+                        <input type="image" class="cancel-img update-consent-attr-cancel" th:src="@{images_test/cancel.png}"
+                               alt="Cancel"/>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+
+                <ul class="attributes-consent-collected">
+                    <li th:each="attribute : ${attrConsent.attributeClientList}" th:attr="index=${attribute.index}">
+                        <span class="bold" th:text="${attribute.name}"></span>: <span
+                            th:text="${attribute.value}"></span>
+                    </li>
+                </ul>
+
+                <ul class="attributes-consent-selection">
+                    <li th:each="attribute : ${attrConsent.attributeClientList}">
+                        <input type="checkbox" th:value="${attribute.index}" checked="true"
+                               th:name="${attrConsent.id}"/>
+                        <label th:text="${attribute.name}"></label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <form id="rejecting-form" class="consent-form" th:action="${urlFinishProcess}" method="get">
+            <input type="submit" class="consent-button" value="Cancel"/>
+            <p th:if="${consentFinish}" class="consent-text" th:text="${consentFinish}"></p>
+            <p th:unless="${consentFinish}" class="consent-text finish-consent-text">
+                Click to cancel the submission of your above data to <span th:text="${SPName}">SP organisation</span>
+                and finish the process.</p>
+        </form>
+        
+        <form id="return-form" class="consent-form" th:action="${urlReturn}" method="get">
+            <input type="submit" id="send-request-button" class="consent-button" value="Accept"/>
+            <p th:if="${consentReturn}" class="consent-text" th:text="${consentReturn}"></p>
+            <p th:unless="${consentReturn}" class="consent-text finish-consent-text">
+                Click to consent to return your above data to <span th:text="${SPName}">SP organisation</span>
+                and finish the process.</p>
+        </form>
+
+    </div>
+
+</div>
+
+<div id="footer-info">
+
+    <a id="policy" href="#" th:href="${privacyPolicy}">Privacy Policy</a>
+
+    <div id="seal-info">
+        <p>To find out more about SEAL please visit:</p>
+        <a href="https://project-seal.eu//">https://project-seal.eu//</a>
+    </div>
+</div>
+
+<div id="footer">
+    <img th:src="@{images_test/footer.png}"/>
+</div>
+
+</body>
+</html>

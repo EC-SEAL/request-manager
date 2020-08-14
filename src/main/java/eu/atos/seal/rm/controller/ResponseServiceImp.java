@@ -9,6 +9,8 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 DAMAGES OR OTHER LIABILITY, WHETHER IN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 See README file for the full disclaimer information and LICENSE file for full license information in the project root.
+
+
 @author Atos Research and Innovation, Atos SPAIN SA
 */
 
@@ -22,6 +24,8 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpSession;
 
+import javax.servlet.http.HttpSession;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +35,12 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import eu.atos.seal.rm.model.ApiClassEnum;
 import eu.atos.seal.rm.model.AttributeSet;
+import eu.atos.seal.rm.model.AttributeSet.*;
 import eu.atos.seal.rm.model.AttributeSetList;
 import eu.atos.seal.rm.model.AttributeSetStatus;
 import eu.atos.seal.rm.model.AttributeType;
@@ -43,7 +50,8 @@ import eu.atos.seal.rm.model.MsMetadataList;
 import eu.atos.seal.rm.model.PublishedApiType;
 import eu.atos.seal.rm.service.cm.ConfMngrConnService;
 import eu.atos.seal.rm.service.sm.SessionManagerConnService;
-import eu.atos.seal.rm.model.DataStore;
+//import eu.atos.seal.rm.model.DataStoreObject;
+import eu.atos.seal.rm.model.DataStoreObjectList;
 import eu.atos.seal.rm.model.AttributeTypeList;
 import eu.atos.seal.rm.model.DataSet;
 
@@ -175,26 +183,29 @@ public class ResponseServiceImp implements ResponseService
 			else if (spRequestEP.contains("data")) {// data_query
 				// Show and confirm sending response assertions
 				
-				// Reading the dataStore
-				DataStore dataStore = null;
-				Object objDatastore = null;
-				objDatastore = smConnService.readVariable(sessionId, "dataStore");
+				// Reading the dataSets from the dataStore
+				DataStoreObjectList ds = null;
+				Object objDatastore = smConnService.readDS(sessionId, "dataSet");
 				
 				/* TESTING:
-				log.info("*** Testing: invented dataStore");
-				DataStore datastore = new DataStore();
-				datastore.setId("DS_" + UUID.randomUUID().toString());
-				datastore.setEncryptedData(null);
-				datastore.setEncryptionAlgorithm("this is the encryption algorithm");
-				datastore.setSignature("this is the signature");
-				datastore.setSignatureAlgorithm("this is the signature algorithm");	
+				log.info("*** Testing: invented DataStoreObjectList");
 				
-				datastore.setClearData(null);
+				//TODO
+				DataStoreObjectList datastore = new DataStoreObjectList();
+				DataStoreObject dso = new DataStoreObject("DS_" + UUID.randomUUID().toString(), "dataSet", "the dataSet object");
+				dso.setId("DS_" + UUID.randomUUID().toString());
+				dso.setEncryptedData(null);
+				dso.setEncryptionAlgorithm("this is the encryption algorithm");
+				dso.setSignature("this is the signature");
+				dso.setSignatureAlgorithm("this is the signature algorithm");	
+				dso.setClearData(null);
+				
+				datastore.add (dso);
 				// END TESTING*/
 				
 				if (objDatastore != null) {
-					dataStore = (new ObjectMapper()).readValue(objDatastore.toString(),DataStore.class);
-					log.info("dataStore: " + dataStore.toString());
+					ds = (new ObjectMapper()).readValue(objDatastore.toString(),DataStoreObjectList.class);
+					log.info("dataSets stored: " + ds.toString());
 				}
 				else {
 					String errorMsg= "dataStore: not exist";
@@ -213,7 +224,9 @@ public class ResponseServiceImp implements ResponseService
 				
 				// Open the GUI and sending the response assertions selected by the user
 				// TODO: errorMsg?
-				return prepareAndGotoResponseUI( sessionId,  model, spRequest, dataStore, null); 
+				
+				// TODO: dataStoreObjectList
+				return prepareAndGotoResponseUI( sessionId,  model, spRequest, ds, null); 
 				
 			}
 			else {
@@ -249,37 +262,102 @@ public class ResponseServiceImp implements ResponseService
 
 	private String prepareAndGotoResponseUI( String sessionId, Model model, 
 			AttributeSet spRequest,
-		    DataStore dataStore,
+		    DataStoreObjectList dataStore,
 		    String errorMessage) 
 
 	{
 		log.info("prepareAndGotoResponseUI ...");
 		
-		// Filling dsList and attributeSendList
-		AttributeTypeList attributesSendList = new AttributeTypeList();
+		// Filling dsList 
+		// and attributeSendList--> NOT NECESSARY 
+//		AttributeTypeList attributesSendList = new AttributeTypeList();
 		List<DataSet> dsList = new ArrayList<DataSet>();
-		for (DataSet aux_ds:dataStore.getClearData()) {
+		dataStore.forEach ((dso)-> {
+			JsonObject myJSONdso = new JsonParser().parse(dso.toString()).getAsJsonObject();
+			log.info("myJSONdso: " + myJSONdso.toString());
+			
+			DataSet aux_ds = null;
+			try {
+				aux_ds = (new ObjectMapper()).readValue(myJSONdso.get("data").toString(),DataSet.class);
+			} catch (JsonParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JsonMappingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			dsList.add(aux_ds);
 			
-			for (AttributeType aux_attr:aux_ds.getAttributes()) {
-				attributesSendList.add(aux_attr);
-			}
-		}
+		});
 		
-		// Filling attributesRequestList
+/*	OLD	
+		for (DataSet aux_ds:dataStore.getClearData()) {
+			dsList.add(aux_ds);
+//			
+//			for (AttributeType aux_attr:aux_ds.getAttributes()) {
+//				attributesSendList.add(aux_attr);
+//			}
+		}
+*/		
+		// Filling attributesRequestList: for filtering. See bellow. 
 		AttributeTypeList attributesRequestList = new AttributeTypeList();
 		for ( AttributeType attrRequested : spRequest.getAttributes())
 		{
 			attributesRequestList.add(attrRequested);
 		}
-		
+		 
 		session.setAttribute("urlReturn", "response_client/return"); 		// Consenting: ACCEPT
         session.setAttribute("urlFinishProcess", "response_client/finish"); // No consenting: REJECT
         
-		session.setAttribute("dsList", dsList); 
-		session.setAttribute("attributesRequestList", attributesRequestList);
-		session.setAttribute("attributesSendList", attributesSendList);
-		//session.setAttribute("attributesConsentList", responseAssertions);
+		session.setAttribute("dsList", dsList); // TO REMOVE???
+//		session.setAttribute("attributesRequestList", attributesRequestList); //TO REMOVE
+//		session.setAttribute("attributesSendList", attributesSendList); //TO REMOVE
+		
+		AttributeSetList attributesConsentList = new AttributeSetList();
+		for (DataSet auxDs  : dsList) {
+			//Filtering with the requested attributes
+			List<AttributeType> attrs = new ArrayList<AttributeType>();
+			boolean found = false;
+			for (AttributeType auxAttr : auxDs.getAttributes()) {
+				for (AttributeType reqAttr : attributesRequestList) {
+					if (reqAttr.getFriendlyName().contains(auxAttr.getFriendlyName()) || 
+						reqAttr.getName().contains(auxAttr.getName())) {
+						found = true;
+						break;
+					}	
+				}
+				if (found) {				
+					attrs.add(auxAttr);	
+					found = false;
+				}				
+			}
+			if (attrs.size() != 0) {
+				
+				AttributeSet attributeSet = new AttributeSet();
+				attributeSet.setId(auxDs.getId());
+				attributeSet.setIssuer(auxDs.getIssuerId());
+				attributeSet.setType(TypeEnum.REQUEST);
+				attributeSet.setStatus(null);
+				attributeSet.setRecipient("RECIPIENT__TOASK");
+				attributeSet.setLoa(auxDs.getLoa());
+				attributeSet.setNotAfter(auxDs.getExpiration());
+				attributeSet.setNotBefore(auxDs.getIssued());
+				attributeSet.setProperties(auxDs.getProperties());
+				attributeSet.setInResponseTo("INRESPONSETO__TOASK");
+				// Not necessary all the above settings...
+				
+				attributeSet.setAttributes(attrs);
+				
+				attributesConsentList.add(attributeSet);
+			}			
+		}		
+		
+		log.info("attributesConsentList: " + attributesConsentList);
+		session.setAttribute("attributesConsentList", attributesConsentList);
+		
 		session.setAttribute("sessionId", sessionId);
 		if(errorMessage != null)
 			session.setAttribute("errorMessage", errorMessage);		
@@ -290,8 +368,9 @@ public class ResponseServiceImp implements ResponseService
 		
 		
 		model.addAttribute("dsList", dsList);
-		model.addAttribute("attributesRequestList", attributesRequestList);
-		model.addAttribute("attributesSendList", attributesSendList);
+//		model.addAttribute("attributesRequestList", attributesRequestList);
+//		model.addAttribute("attributesSendList", attributesSendList);
+		model.addAttribute("attributesConsentList", attributesConsentList);
 
 		
 		
@@ -307,8 +386,8 @@ public class ResponseServiceImp implements ResponseService
 	public String returnFromResponseUI(String sessionId, Model model) throws Exception 
 	{
 		
-		AttributeSetList responseAssertions= new AttributeSetList ();
-		List<DataSet> dsConsentList = (List<DataSet>) session.getAttribute("dsConsentList");
+		AttributeSetList responseAssertions= new AttributeSetList ();       
+/*		List<DataSet> dsConsentList = (List<DataSet>) session.getAttribute("dsConsentList");
 		log.info("dsConsentList: " + dsConsentList.toString());
 		
 		for (DataSet ds:dsConsentList) {
@@ -317,6 +396,11 @@ public class ResponseServiceImp implements ResponseService
 			
 			responseAssertions.add(consentResponse);			
 		}
+
+*/
+		
+		log.info ("attributesConsentList: " + session.getAttribute("attributesConsentList").toString());
+		responseAssertions = (AttributeSetList)session.getAttribute("attributesConsentList");
 		
 		log.info ("responseAssertions just consented: " + responseAssertions.toString());
 		

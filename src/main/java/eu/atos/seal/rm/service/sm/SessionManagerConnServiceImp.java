@@ -1,71 +1,27 @@
 package eu.atos.seal.rm.service.sm;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.httpclient.NameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
-import org.springframework.util.ResourceUtils;
-import org.springframework.web.client.RestTemplate;
-//import org.tomitribe.auth.signatures.Algorithm;
-//import org.tomitribe.auth.signatures.Signature;
-//import org.tomitribe.auth.signatures.Signer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-//import com.sun.research.ws.wadl.Response;
-
-import eu.atos.seal.rm.model.SessionMngrResponse.CodeEnum;
-import eu.atos.seal.rm.model.EntityMetadata;
+import eu.atos.seal.rm.model.ResponseCode;
 import eu.atos.seal.rm.model.SessionMngrResponse;
 import eu.atos.seal.rm.model.UpdateDataRequest;
 import eu.atos.seal.rm.service.cm.ConfMngrConnService;
-import eu.atos.seal.rm.service.network.HttpSignatureServiceImpl;
 import eu.atos.seal.rm.service.network.NetworkServiceImpl;
 import eu.atos.seal.rm.service.param.KeyStoreService;
 import eu.atos.seal.rm.service.param.ParameterService;
@@ -102,17 +58,19 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 		this.keyStoreService = keyStoreServ;
 		this.confMngrService = confMngrConnService;
 		//EntityMetadata myLGW = null;
-//		String thisCL = confMngrService.getMicroservicesByApiClass("RM").get(0).getMsId(); // The unique client
-//		if (thisCL != null)
-//		{
-//        	sender = thisCL;
-//		}
-//        else
-//        {
-//        	sender = "CLms001";
-//        	log.error("HARDCODED sender! "+ sender);
-//		}
-		sender = "RMms001";
+		
+		String thisCL = confMngrService.getMicroservicesByApiClass("RM").get(0).getMsId(); // The unique client
+		if (thisCL != null)
+		{
+        	sender = thisCL;
+		}
+        else
+        {
+        	sender = "RMms001";
+        	log.error("HARDCODED sender! "+ sender);
+		}
+		
+		//sender = "RMms001";
 		
 	}
 	
@@ -189,7 +147,7 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
         
         String additionalData="";
         //System.out.println("SMresponse(generateToken):" +smResponse.toString());
-        if ( smResponse.getCode()==CodeEnum.NEW)
+        if ( smResponse.getCode()== ResponseCode.NEW)
         {
 	        System.out.println( "addDAta:"+ smResponse.getAdditionalData());
 	        additionalData = smResponse.getAdditionalData();
@@ -228,7 +186,7 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 	    //response = network.sendGet(hostURL, service, urlParameters);
 	    smResponse = network.sendGetSMResponse(hostURL, service, urlParameters,1);
 	    
-	    if ( smResponse.getCode()==CodeEnum.OK)
+	    if ( smResponse.getCode()== ResponseCode.OK)
 	    {
 	    	sessionID = smResponse.getSessionData().getSessionId();
 	    	System.out.println("SessionID:"+sessionID);
@@ -272,7 +230,7 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 			e.printStackTrace();
 		}
 	    System.out.println("Response getSessionData:<"+smResponse.toString()+">");
-	    if (smResponse.getCode()==CodeEnum.OK)
+	    if (smResponse.getCode()== ResponseCode.OK)
 	    {
 	    	sessionVbles = (HashMap<String, Object>) smResponse.getSessionData().getSessionVariables();
 	    }
@@ -316,7 +274,7 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 			e.printStackTrace();
 		}
 	    System.out.println("Response getSessionData:<"+smResponse.toString()+">");
-	    if (smResponse.getCode()==CodeEnum.OK)
+	    if (smResponse.getCode()== ResponseCode.OK)
 	    {
 	    	sessionVbles = (HashMap<String, Object>) smResponse.getSessionData().getSessionVariables();
 	    	
@@ -332,7 +290,49 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 	    //[TODO] �que devolvemos?
 	    return sessionVbles.get(variableName);
 	}
+	
 
+	// Returns the list of dataSet/linkRequest objects from the DataStore.
+	// If type is null, returns the complete DataStore.
+	@Override
+	public Object readDS(String sessionId, String type) throws UnrecoverableKeyException, KeyStoreException, FileNotFoundException, NoSuchAlgorithmException, CertificateException, InvalidKeySpecException, IOException
+	{
+		//String service = "/sm/new/get";
+		String service = "/sm/new/search";
+		
+		Object sessionVble = new Object();
+		
+		if (network == null)
+		{
+				network = new NetworkServiceImpl(keyStoreService);
+		}
+		List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
+	    urlParameters.add(new NameValuePair("sessionId",sessionId));
+	    urlParameters.add(new NameValuePair("type",type));
+	    
+	    SessionMngrResponse smResponse = null;
+	    try {
+	    	log.info("Sending new/search ...");
+	    	smResponse = network.sendGetSMResponse(hostURL, service, urlParameters, 1);
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    
+	    if (smResponse.getCode()== ResponseCode.OK)
+	    {
+	    	//sessionVbles = (HashMap<String, Object>) smResponse.getSessionData().getSessionVariables();
+	    	sessionVble = smResponse.getAdditionalData();
+	    	
+	    	log.info("DS (only "+ type + " : "+ sessionVble.toString());
+	    }
+	    
+	    
+	    return sessionVble;
+	}
 	
 	@Override
 	public void updateVariable(String sessionId, String varName, String varValue)
