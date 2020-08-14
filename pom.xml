@@ -102,5 +102,12 @@
        		<groupId>org.springframework.boot</groupId>
         	<artifactId>spring-boot-starter-thymeleaf</artifactId>
     	</dependency>
+    	
+    	<dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.12</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
 </project>

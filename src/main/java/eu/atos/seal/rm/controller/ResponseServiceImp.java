@@ -1,29 +1,55 @@
+/**
+Copyright © 2020  Atos Spain SA. All rights reserved.
+This file is part of SEAL Request Manager (SEAL rm).
+SEAL rm is free software: you can redistribute it and/or modify it under the terms of EUPL 1.2.
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT ANY WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT, 
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, 
+DAMAGES OR OTHER LIABILITY, WHETHER IN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+See README file for the full disclaimer information and LICENSE file for full license information in the project root.
+
+@author Atos Research and Innovation, Atos SPAIN SA
+*/
+
 package eu.atos.seal.rm.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import eu.atos.seal.rm.model.ApiClassEnum;
 import eu.atos.seal.rm.model.AttributeSet;
+import eu.atos.seal.rm.model.AttributeSet.*;
 import eu.atos.seal.rm.model.AttributeSetList;
 import eu.atos.seal.rm.model.AttributeSetStatus;
+import eu.atos.seal.rm.model.AttributeType;
 import eu.atos.seal.rm.model.EntityMetadata;
 import eu.atos.seal.rm.model.MsMetadata;
 import eu.atos.seal.rm.model.MsMetadataList;
 import eu.atos.seal.rm.model.PublishedApiType;
 import eu.atos.seal.rm.service.cm.ConfMngrConnService;
 import eu.atos.seal.rm.service.sm.SessionManagerConnService;
-import io.swagger.annotations.Api;
+//import eu.atos.seal.rm.model.DataStoreObject;
+import eu.atos.seal.rm.model.DataStoreObjectList;
+import eu.atos.seal.rm.model.AttributeTypeList;
+import eu.atos.seal.rm.model.DataSet;
 
 import org.springframework.ui.Model;
 
@@ -31,6 +57,9 @@ import org.springframework.ui.Model;
 public class ResponseServiceImp implements ResponseService
 {
 	private static final Logger log = LoggerFactory.getLogger(ResponseServiceImp.class);
+	
+	@Autowired
+	HttpSession session;
 	
 	@Autowired
 	private SessionManagerConnService smConnService;
@@ -41,147 +70,420 @@ public class ResponseServiceImp implements ResponseService
 	@Override
 	public String rmResponse( String token, Model model) throws JsonParseException, JsonMappingException, IOException
 	{
-		// Revisar token recibido
+		//UC 8.01, UC 8.03
+		
+		// spRequestEP: Null, auth_request, data_query
+		// NOT used *** spRequestSource: Discovery, PDS, SSI, eIDAS, eduGAIN
+		
+		
+		// ***
+		// *** SPms is going to read responseAssertions ***
+		// ***
+					
+		
+		// Check the token
 		//				 
 		if (token.endsWith("="))
-		{
 			token = token.replace("=", "");
-		}
 		if (token.startsWith("msToken="))
-		{
 			token = token.replace("msToken=", "");
-		}
-		
-		///
-		///	VALIDATE TOKEN
-		///
+
 		String sessionId="";
+		String endPoint = null;
+		String msName = null;
 		try
 		{
-			sessionId = smConnService.validateToken( token);
-		}
-		catch (Exception ex)
-		{
-			String errorMsg= "Exception calling SM (validateToken) with token:"+token+"\n";
-			errorMsg += "1 Exception message:"+ex.getMessage()+"\n";
-			//model.addAttribute("ErrorMessage",errorMsg);
-	        System.out.println("Devuelvo error "+errorMsg);
+			// Validate token
+			sessionId = smConnService.validateToken(token);
+			if (sessionId != null) {
+				msName = getMsName(model, sessionId, null); // Returning the FIRST ONE! ***
+				endPoint = getSpResponseEndpoint(model, msName,cmConnService);
+			}
+			
+			log.info ("UrlToRedirect: " + endPoint);
+			if (endPoint == null  || endPoint.contains("error"))
+			{
+				model.addAttribute("ErrorMessage", "SP endpoint not found");
+				return "fatalError"; // impossible to know the endPoint...
+			}
+			// EndPoint to redirect
+			model.addAttribute("UrlToRedirect", endPoint);
 	        
-	        return "rmError";
-		}
+			String tokenToSPms = "";		
+			tokenToSPms = smConnService.generateToken(sessionId,msName); 
 		
-		//  
-		//	READ VARIABLE "dsResponse" 
-		//  
-		Object objSpRequest = null;
-		AttributeSet dsResponse = null;
-		try
-		{
-			objSpRequest = smConnService.readVariable(sessionId, "dsResponse");
-		}
-		catch (Exception ex)
-		{
-			String errorMsg= "Exception calling SM (getSessionData dsResponse)  \n";
-			errorMsg += "2 Exception message:"+ex.getMessage()+"\n";
-			//model.addAttribute("ErrorMessage",errorMsg);
-			log.error(errorMsg);
-	        System.out.println("Devuelvo error "+errorMsg);
-	        return "rmError";
+			// msToken just generated
+			model.addAttribute("msToken", tokenToSPms);
+		
+			// Reading "dsResponse"
+			Object objDsResponse = null;
+			AttributeSet dsResponse = null;	
+			log.info("BEFORE dsResponse: ");
+			objDsResponse = smConnService.readVariable(sessionId, "dsResponse");	
+			dsResponse = (new ObjectMapper()).readValue(objDsResponse.toString(),AttributeSet.class);
+			log.info("dsResponse: " + dsResponse.toString() );
 			
-		}
-		dsResponse = (new ObjectMapper()).readValue(objSpRequest.toString(),AttributeSet.class);
-		log.info("RequestAttributes: Reading dsResponse");
-		//System.out.println("spRequest:"+spRequest.toString() );
-					
-		/// 
-		///	READ VARIABLE "dsMetadata" 
-		///  		 
-		EntityMetadata dsMetadata = null;
-		Object objDsMetadata = null;
-		try
-		{
-			objDsMetadata = smConnService.readVariable(sessionId, "dsMetadata");
-		}
-		catch (Exception ex)
-		{
-			String errorMsg= "Exception calling SM (getSessionData dsMetadata)  \n";
-			errorMsg += " 3 Exception message:"+ex.getMessage()+"\n";
-			//model.addAttribute("ErrorMessage",errorMsg);
-			log.error(errorMsg);
-	        System.out.println("Devuelvo error "+errorMsg);
-	        return "rmError"; 
-		}
-		dsMetadata = (new ObjectMapper()).readValue(objDsMetadata.toString(),EntityMetadata.class);
-		log.info("RequestAttributes: Reading dsMetadata");
-		
-		if (dsResponse.getStatus().getCode() == AttributeSetStatus.CodeEnum.ERROR)	// [TODO] Error especial revisar
-		{	
-			//TODO Que hacer si recibo una respuesta erronea
-			log.error("dsResponse nos da un error");
+			// Building responseAssertions 
+			AttributeSetList responseAssertions= new AttributeSetList ();
 			
-			return "rmError";
-//			if (dsResponse.getType() == TypeEnum.RESPONSE )
-//				return manageErrorInResponse(sessionId, dsResponse, dsMetadata, model);
-//			else //TypeEnum.AUTHRESPONSE
-//			{
-//				return manageIdpError(sessionId, dsResponse, dsMetadata, model);
-//			}
-		}
-		
-		
-		AttributeSet idpResponse = new AttributeSet();
-		idpResponse = dsResponse;
-		// Leo responseAssertions¿?
-		
-		AttributeSetList responseAssertions= new AttributeSetList ();
-		responseAssertions.add(idpResponse);
-		
-		ObjectMapper objMapper = new ObjectMapper();
-		try
-		{
+	// TO REMOVE:
+	//		AttributeSet idpResponse = new AttributeSet();
+	//		idpResponse = dsResponse;
+	//		responseAssertions.add(idpResponse);
+			
+			responseAssertions.add(dsResponse);
+			ObjectMapper objMapper = new ObjectMapper();
 			smConnService.updateVariable(sessionId,"responseAssertions",objMapper.writeValueAsString(responseAssertions));
-		}
-		catch (Exception ex)
-		{
-			String errorMsg= "Exception calling SM (updateVariable responseAssertions)  \n";
-			errorMsg += "4 Exception message:"+ex.getMessage()+"\n";
-			//model.addAttribute("ErrorMessage",errorMsg);
-			log.error(errorMsg);
-	        return "rmError";
-		}
-		
-		
-		//  Looking for the  endpoint to redirect
-		// 
-		String msName = getMsName(model, sessionId, null);
-		String endPoint = getSpResponseEndpoint(model, msName,cmConnService);
-		if (endPoint == null  || endPoint.contains("error"))
-		{
-			return "rmError";
-		}
 			
-		String tokenToSPms = "";
-		try
-		{
-			//tokenToSPms = smConnService.generateToken(sessionId,acmMsName,"SAMLms_0001");
-			tokenToSPms = smConnService.generateToken(sessionId,msName);
+			if (dsResponse.getStatus().getCode() == AttributeSetStatus.CodeEnum.ERROR)	// Returning error to the SPms
+			{	
+				log.error("dsResponse returning error");
+				
+				model.addAttribute("ErrorMessage", "dsResponse returning error");
+				return "rmError";
+			}
+
+			
+			// Reading "dsMetadata"... what for???
+			EntityMetadata dsMetadata = null;
+			Object objDsMetadata = null;
+			objDsMetadata = smConnService.readVariable(sessionId, "dsMetadata");
+			if (objDsMetadata != null) {
+				dsMetadata = (new ObjectMapper()).readValue(objDsMetadata.toString(),EntityMetadata.class);
+				log.info("dsMetadata: " + dsMetadata.toString());
+			}
+			else
+				log.info("****NULL dsMetadata!!****");
+		
+					
+			//
+			//  Looking for the kind of endpoint to redirect: spRequestEP
+			// 
+			String spRequestEP="";
+			spRequestEP = (String)smConnService.readVariable(sessionId, "spRequestEP");
+			log.info("spRequestEP just read: "+spRequestEP);
+	
+				
+			// TESTING:
+			//spRequestEP = "testing";
+			//spRequestEP = "data_query";
+			//log.info("*** TESTING spRequestEP: "+spRequestEP);
+			
+			if (spRequestEP.contains("auth")) { //auth_request
+				// Do nothing
+				log.info ("It's an auth request.");
+	
+				// Redirecting
+				return "redirectform";				
+			}
+			else if (spRequestEP.contains("data")) {// data_query
+				// Show and confirm sending response assertions
+				
+				// Reading the dataSets from the dataStore
+				DataStoreObjectList ds = null;
+				Object objDatastore = smConnService.readDS(sessionId, "dataSet");
+				
+				/* TESTING:
+				log.info("*** Testing: invented DataStoreObjectList");
+				
+				//TODO
+				DataStoreObjectList datastore = new DataStoreObjectList();
+				DataStoreObject dso = new DataStoreObject("DS_" + UUID.randomUUID().toString(), "dataSet", "the dataSet object");
+				dso.setId("DS_" + UUID.randomUUID().toString());
+				dso.setEncryptedData(null);
+				dso.setEncryptionAlgorithm("this is the encryption algorithm");
+				dso.setSignature("this is the signature");
+				dso.setSignatureAlgorithm("this is the signature algorithm");	
+				dso.setClearData(null);
+				
+				datastore.add (dso);
+				// END TESTING*/
+				
+				if (objDatastore != null) {
+					ds = (new ObjectMapper()).readValue(objDatastore.toString(),DataStoreObjectList.class);
+					log.info("dataSets stored: " + ds.toString());
+				}
+				else {
+					String errorMsg= "dataStore: not exist";
+					log.info ("Returning error: "+errorMsg);
+					
+					model.addAttribute("ErrorMessage", errorMsg);
+					return "rmError";				
+				}
+				
+				// Reading the spRequest
+				AttributeSet spRequest = null;
+				Object objSpRequest = null;
+				objSpRequest = smConnService.readVariable(sessionId, "spRequest");
+				spRequest = (new ObjectMapper()).readValue(objSpRequest.toString(),AttributeSet.class);
+				
+				
+				// Open the GUI and sending the response assertions selected by the user
+				// TODO: errorMsg?
+				
+				// TODO: dataStoreObjectList
+				return prepareAndGotoResponseUI( sessionId,  model, spRequest, ds, null); 
+				
+			}
+			else {
+				String errorMsg= "spRequestEP: " + spRequestEP;
+				log.info ("Returning error: "+errorMsg);
+				
+				model.addAttribute("ErrorMessage", errorMsg);
+				return "rmError";
+			}
+		
+		
 		}
 		catch (Exception ex)
 		{
-			String errorMsg= "responseAttributes: Exception calling SM (generateToken to"+msName+")  \n";
-			errorMsg += "5 Exception message:"+ex.getMessage()+"\n";
-			//model.addAttribute("ErrorMessage",errorMsg);
-			log.error(errorMsg);
-	        return "rmError";
+			String errorMsg= ex.getMessage()+"\n";
+			log.info ("Returning error: "+errorMsg);
+	        
+	        model.addAttribute("ErrorMessage", errorMsg);
+	        if (endPoint != null) 
+	        	return "rmError"; 
+	        else
+	        	return "fatalError"; // Unknown endPoint...
 		}
-		String url = endPoint;
-		model.addAttribute("msToken", tokenToSPms);
-		model.addAttribute("UrlToRedirect", url);
 		
-		return "redirectform";
-		//return null;
 	}
 	
+	
+	@Value("${rm.multiui.privacyPolicy}") //Defined in application.properties file
+    String privacyPolicy;
+	
+	@Value("${rm.multiui.consentFinish}") //Defined in application.properties file
+    String consentFinish;
+
+	private String prepareAndGotoResponseUI( String sessionId, Model model, 
+			AttributeSet spRequest,
+		    DataStoreObjectList dataStore,
+		    String errorMessage) 
+
+	{
+		log.info("prepareAndGotoResponseUI ...");
+		
+		// Filling dsList 
+		// and attributeSendList--> NOT NECESSARY 
+//		AttributeTypeList attributesSendList = new AttributeTypeList();
+		List<DataSet> dsList = new ArrayList<DataSet>();
+		dataStore.forEach ((dso)-> {
+			JsonObject myJSONdso = new JsonParser().parse(dso.toString()).getAsJsonObject();
+			log.info("myJSONdso: " + myJSONdso.toString());
+			
+			DataSet aux_ds = null;
+			try {
+				aux_ds = (new ObjectMapper()).readValue(myJSONdso.get("data").toString(),DataSet.class);
+			} catch (JsonParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JsonMappingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			dsList.add(aux_ds);
+			
+		});
+		
+/*	OLD	
+		for (DataSet aux_ds:dataStore.getClearData()) {
+			dsList.add(aux_ds);
+//			
+//			for (AttributeType aux_attr:aux_ds.getAttributes()) {
+//				attributesSendList.add(aux_attr);
+//			}
+		}
+*/		
+		// Filling attributesRequestList: for filtering. See bellow. 
+		AttributeTypeList attributesRequestList = new AttributeTypeList();
+		for ( AttributeType attrRequested : spRequest.getAttributes())
+		{
+			attributesRequestList.add(attrRequested);
+		}
+		 
+		session.setAttribute("urlReturn", "response_client/return"); 		// Consenting: ACCEPT
+        session.setAttribute("urlFinishProcess", "response_client/finish"); // No consenting: REJECT
+        
+		session.setAttribute("dsList", dsList); // TO REMOVE???
+//		session.setAttribute("attributesRequestList", attributesRequestList); //TO REMOVE
+//		session.setAttribute("attributesSendList", attributesSendList); //TO REMOVE
+		
+		AttributeSetList attributesConsentList = new AttributeSetList();
+		for (DataSet auxDs  : dsList) {
+			//Filtering with the requested attributes
+			List<AttributeType> attrs = new ArrayList<AttributeType>();
+			boolean found = false;
+			for (AttributeType auxAttr : auxDs.getAttributes()) {
+				for (AttributeType reqAttr : attributesRequestList) {
+					if (reqAttr.getFriendlyName().contains(auxAttr.getFriendlyName()) || 
+						reqAttr.getName().contains(auxAttr.getName())) {
+						found = true;
+						break;
+					}	
+				}
+				if (found) {				
+					attrs.add(auxAttr);	
+					found = false;
+				}				
+			}
+			if (attrs.size() != 0) {
+				
+				AttributeSet attributeSet = new AttributeSet();
+				attributeSet.setId(auxDs.getId());
+				attributeSet.setIssuer(auxDs.getIssuerId());
+				attributeSet.setType(TypeEnum.REQUEST);
+				attributeSet.setStatus(null);
+				attributeSet.setRecipient("RECIPIENT__TOASK");
+				attributeSet.setLoa(auxDs.getLoa());
+				attributeSet.setNotAfter(auxDs.getExpiration());
+				attributeSet.setNotBefore(auxDs.getIssued());
+				attributeSet.setProperties(auxDs.getProperties());
+				attributeSet.setInResponseTo("INRESPONSETO__TOASK");
+				// Not necessary all the above settings...
+				
+				attributeSet.setAttributes(attrs);
+				
+				attributesConsentList.add(attributeSet);
+			}			
+		}		
+		
+		log.info("attributesConsentList: " + attributesConsentList);
+		session.setAttribute("attributesConsentList", attributesConsentList);
+		
+		session.setAttribute("sessionId", sessionId);
+		if(errorMessage != null)
+			session.setAttribute("errorMessage", errorMessage);		
+		if (privacyPolicy != null)
+			session.setAttribute("privacyPolicy",privacyPolicy);
+		if (consentFinish != null)
+			session.setAttribute("consentFinish",consentFinish);
+		
+		
+		model.addAttribute("dsList", dsList);
+//		model.addAttribute("attributesRequestList", attributesRequestList);
+//		model.addAttribute("attributesSendList", attributesSendList);
+		model.addAttribute("attributesConsentList", attributesConsentList);
+
+		
+		
+		return "redirect:../rm/response_client"; 
+		//TODO Move to rest_api.controllers.client.MultiUIController***?
+		// ResponseUIController.java in this package by the moment.
+		// See the related responseForm.html
+	}
+	
+	
+	// ***Implementation of the ENDPOINT to be called from the form response_client!! "response_client/return"
+	@Override
+	public String returnFromResponseUI(String sessionId, Model model) throws Exception 
+	{
+		
+		AttributeSetList responseAssertions= new AttributeSetList ();
+/*		List<DataSet> dsConsentList = (List<DataSet>) session.getAttribute("dsConsentList");
+		log.info("dsConsentList: " + dsConsentList.toString());
+		
+		for (DataSet ds:dsConsentList) {
+			AttributeSet consentResponse = new AttributeSet();
+			consentResponse.setAttributes (ds.getAttributes());
+			
+			responseAssertions.add(consentResponse);			
+		}
+*/
+		
+		log.info ("attributesConsentList: " + session.getAttribute("attributesConsentList").toString());
+		responseAssertions = (AttributeSetList)session.getAttribute("attributesConsentList");
+		
+		log.info ("responseAssertions just consented: " + responseAssertions.toString());
+		
+		ObjectMapper objMapper = new ObjectMapper();
+		String endPoint = null;
+		try
+		{
+			// Updating the responseAssertions consented by the user.
+			smConnService.updateVariable(sessionId,"responseAssertions",objMapper.writeValueAsString(responseAssertions));
+		
+			String msName = getMsName(model, sessionId, null); // Returning the FIRST ONE! ***
+			endPoint = getSpResponseEndpoint(model, msName,cmConnService);
+			log.info ("UrlToRedirect: " + endPoint);
+			if (endPoint == null  || endPoint.contains("error"))
+			{
+				model.addAttribute("ErrorMessage","SP endpoint not found");
+				return "fatalError";
+			}
+				
+			String tokenToSPms = "";
+			tokenToSPms = smConnService.generateToken(sessionId,msName); 
+		
+			model.addAttribute("msToken", tokenToSPms);
+			model.addAttribute("UrlToRedirect", endPoint);
+			
+			return "redirectform";
+		
+		}
+		catch (Exception ex)
+		{
+			String errorMsg= ex.getMessage()+"\n";
+			log.info ("Returning error: "+errorMsg);
+			
+			model.addAttribute("ErrorMessage",errorMsg);
+			if (endPoint != null) 
+	        	return "rmError"; 
+	        else
+	        	return "fatalError"; // Unknown endPoint...
+		}
+	}
+	
+	
+	// ***Implementation of the ENDPOINT to be called from the form response_client!! "response_client/finish"
+	@Override
+	public String returnNothing (String sessionId, Model model) throws Exception 
+	{
+		ObjectMapper objMapper = new ObjectMapper();
+		String endPoint = null;
+		try
+		{
+			// Updating the responseAssertions consented by the user: none
+			smConnService.updateVariable(sessionId,"responseAssertions",objMapper.writeValueAsString(null));
+		
+			String msName = getMsName(model, sessionId, null); // Returning the FIRST ONE! ***
+			endPoint = getSpResponseEndpoint(model, msName,cmConnService);
+			log.info ("UrlToRedirect: " + endPoint);
+			if (endPoint == null  || endPoint.contains("error"))
+			{
+				model.addAttribute("ErrorMessage","SP endpoint not found");
+				return "fatalError";
+			}
+				
+			String tokenToSPms = "";
+			tokenToSPms = smConnService.generateToken(sessionId,msName); 
+		
+			model.addAttribute("msToken", tokenToSPms);
+			model.addAttribute("UrlToRedirect", endPoint);
+			
+			return "redirectform";
+		
+		}
+		catch (Exception ex)
+		{
+			String errorMsg= ex.getMessage()+"\n";
+			log.info ("Returning error: "+errorMsg);
+			
+			model.addAttribute("ErrorMessage",errorMsg);
+			if (endPoint != null) 
+	        	return "rmError"; 
+	        else
+	        	return "fatalError"; // Unknown endPoint...
+		}
+	}
+		
+	
+	
+	
+	// TO BE REFACTORED:
 	private EntityMetadata readSpMetadata(Model model, String sessionId)
 			throws IOException, JsonParseException, JsonMappingException {
 		EntityMetadata spMetadata = null;
@@ -195,17 +497,17 @@ public class ResponseServiceImp implements ResponseService
 			String errorMsg= "Exception calling SM (getSessionData spMetadata)  \n";
 			errorMsg += "Exception message:"+ex.getMessage()+"\n";
 			model.addAttribute("ErrorMessage",errorMsg);
-			log.error(errorMsg);
-	        System.out.println("Devuelvo error "+errorMsg);
+			log.info ("Returning error: "+errorMsg);
 	        
-	        //return "acmError";
+	        //return "rmError";
 		}
 		spMetadata = (new ObjectMapper()).readValue(objSpMetadata.toString(),EntityMetadata.class);
-		log.info("readSpMetadata: Reading spMetadata");
-		System.out.println("spMetadata:"+spMetadata.toString());
+		log.info("spMetadata: " + spMetadata.toString());
+		
 		return spMetadata;
 	}
 	
+	// TO BE REFACTORED:
 	public String getMsName(Model model, String sessionId,EntityMetadata spMetadata) throws IOException, JsonParseException, JsonMappingException
 	//public String getMsName(Model model, String sessionId) throws IOException, JsonParseException, JsonMappingException
 	{
@@ -214,25 +516,25 @@ public class ResponseServiceImp implements ResponseService
 		
 		
 		//EntityMetadata spMetadata;
-		if (spMetadata ==null)
-		{
+		if (spMetadata == null)
 			spMetadata = readSpMetadata(model, sessionId);
-		}
 			
-		if (spMetadata.getMicroservice() == null || spMetadata.getMicroservice().size()==0)
+		if (spMetadata.getMicroservice() == null || spMetadata.getMicroservice().size() == 0)
 		{
 			// ERROR
 			String errorMsg= "Error getting microservice from spMetadata \n";
-			
-			//model.addAttribute("ErrorMessage",errorMsg);
 			log.error(errorMsg);
-	        return "rmError"; //[TODO]
+			
+			model.addAttribute("ErrorMessage",errorMsg);
+	        return "fatalError"; 
 		}
-		msName = spMetadata.getMicroservice().get(0);
-		log.info ("spMetadata msName:"+msName);
+		msName = spMetadata.getMicroservice().get(0);  // Choosing the first one!! TO ASK
+		log.info ("spMetadata msName: "+msName);
+		
 		return msName;
 	}
 	
+	// TO BE REFACTORED:
 	public String getSpResponseEndpoint(Model model, String msName,  ConfMngrConnService cmService)
 	{
 		String endPoint = null;
@@ -243,24 +545,24 @@ public class ResponseServiceImp implements ResponseService
 		//MsMetadata ms= null;
 		List<PublishedApiType> listPub;
 		if (msopt.isPresent())
-		{
-			listPub= msopt.get().getPublishedAPI();
-		}
+					listPub= msopt.get().getPublishedAPI();
 		else
 		{
-			System.out.println("Error ms not found");
+			log.info ("Error ms not found: " + msName);
+			
 			return "error";//TODO
 		}
 		
-		Optional<PublishedApiType> pubOpt = listPub.stream().filter(a->(a.getApiClass()==ApiClassEnum.SP && a.getApiCall().contains("handleRes"))).findAny();
+		// sp/response *** TO UPDATE
+		Optional<PublishedApiType> pubOpt = listPub.stream().filter(a->(a.getApiClass()==ApiClassEnum.SP && a.getApiCall().contains("handleResponse"))).findAny();
 		if (pubOpt.isPresent())
 		{
 			endPoint = pubOpt.get().getApiEndpoint();
-			System.out.println("Endpoint:"+endPoint);
+			//log.info ("Endpoint: " + endPoint);
 		}
 		else
 		{
-			System.out.println("Error endpoint not found");
+			log.info ("Error: endpoint for *handleResponse* not found.");
 			return "error";//TODO
 		}
 		return endPoint;
