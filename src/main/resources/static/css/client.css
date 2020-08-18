@@ -144,6 +144,10 @@ li.not-sending {
     display: block;
 }
 
+#list-pds {
+	visibility: hidden;
+}
+
 .logo {
     display: inline-block;
     height: 15px;
