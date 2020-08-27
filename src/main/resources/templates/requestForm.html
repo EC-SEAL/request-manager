@@ -73,7 +73,7 @@
 						class="data-box attributes-selector">
 						<ul id="attributes-request-selection">
 							<li th:each="attributeRequest : ${attributesRequestList}"><input
-								type="checkbox" th:value="${attributeRequest.index}"
+								type="checkbox" class="attribute-request-checkbox" th:value="${attributeRequest.name}"
 								checked="true" /> <label th:text="${attributeRequest.name}"></label>
 							</li>
 						</ul>
@@ -115,8 +115,9 @@
 
 					<form id="finish-form" class="" th:action="${urlFinishProcess}"
 						method="post">
-						<input type="hidden" name="attrRequestList" id="attr-request-list"  value="edugain-selector"/>
-						<input type="hidden" name="pds-request-list" id="pds-request-list"  value="pds-mobile"/>
+						<input type="hidden" name="attrRequestList[]" id="attr-request-list"/>
+						<input type="hidden" name="requestSource" id="request-source"  value="edugain-selector"/>
+						<input type="hidden" name="pdsRequestSelection" id="pds-request-list"  value="pds-mobile"/>
 						<input type="submit" class="btn btn-info" value="Accept"
 							id="submitConsentRequest" />
 						<input type="submit" class="btn btn-danger" value="Reject" />
@@ -211,14 +212,6 @@
 
 		</div>
 			
-	<script> 
-	$(".data-query-list a").click(function(){
-
-		let id = $(this).attr('id')
-		$("#attr-request-list").val(id);
-
-		});
-	</script>
 
 
 	</footer>
