@@ -50,7 +50,7 @@ public class RequestUIController
 	
 	private static final Logger log = LoggerFactory.getLogger(RequestUIController.class);
 
-    @GetMapping("rm/request_client")
+    @GetMapping("request_client")
     public String getHtmlForm(HttpSession session, Model model) throws Exception
     {
         AttributeTypeList attributesRequestList = (AttributeTypeList) session
@@ -163,7 +163,7 @@ public class RequestUIController
         return "redirect:../request_client";
     }
     
-    @PostMapping("rm/request_client")
+    @PostMapping("request_client")
     public String getRequest(@RequestBody MultiValueMap<String, String> formData,
             HttpSession session, Model model)
     {

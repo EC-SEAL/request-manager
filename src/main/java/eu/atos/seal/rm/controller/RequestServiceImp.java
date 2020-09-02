@@ -654,8 +654,8 @@ public class RequestServiceImp implements RequestService
 		//Rellenar spMetadata
 		//con la vble spMetadata
 		session.setAttribute("spMetadata", spMetadata);
-		return "redirect:../rm/request_client";
-		//return "redirect:../request_client";  //REVIEW
+		//return "redirect:../rm/request_client";
+		return "redirect:../request_client";  //REVIEW
 	}
 
 	private String goToSelectIdpUI() {

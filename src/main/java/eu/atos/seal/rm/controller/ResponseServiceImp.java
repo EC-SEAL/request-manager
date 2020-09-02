@@ -447,6 +447,7 @@ public class ResponseServiceImp implements ResponseService
 	@Override
 	public String returnNothing (String sessionId, Model model) throws Exception 
 	{
+		sessionId= "f66d6165-aa4d-4e6a-898e-46faea16d6cf";
 		ObjectMapper objMapper = new ObjectMapper();
 		String endPoint = null;
 		try
@@ -468,6 +469,9 @@ public class ResponseServiceImp implements ResponseService
 		
 			model.addAttribute("msToken", tokenToSPms);
 			model.addAttribute("UrlToRedirect", endPoint);
+			
+			
+			
 			
 			return "redirectform";
 		
