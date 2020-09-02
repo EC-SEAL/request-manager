@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.atos.seal.rm.model.AttributeSet;
+import eu.atos.seal.rm.model.AttributeType;
 import eu.atos.seal.rm.model.AttributeTypeList;
 import eu.atos.seal.rm.model.DataStore;
 import eu.atos.seal.rm.model.EntityMetadata;
@@ -68,39 +69,43 @@ public class RequestServiceImp implements RequestService
 
 	
 	
-    @PostMapping("request_client")
-    public String getRequest(@RequestBody MultiValueMap<String, String> formData,
-            HttpSession session, Model model)
-    {
-    	
-    	System.out.println("Received request from UI" + formData);
-    	
-        String[] attrRequestList = formData.get("attrRequestList").get(0).split(",");
-        
-        AttributeTypeList attributesRequestList = (AttributeTypeList) session
-                .getAttribute("attributesRequestList");
-
-        String urlReturn = (String) session.getAttribute("urlReturn");
-
-
-        AttributeTypeList attributesRequestListNew = new AttributeTypeList();
-        for (String index : attrRequestList)
-        {
-            try
-            {
-                attributesRequestListNew.add(attributesRequestList.get(Integer.parseInt(index)));
-            }
-            catch (Exception e)
-            {
-            }
-        }
-        
-        session.setAttribute("attributesRequestList", attributesRequestListNew);        
-        session.setAttribute("sessionId", session.getAttribute("sessionId"));
-        return "redirect:" + urlReturn;
-        
-        
-    }
+//    @PostMapping("request_client")
+//    public String getRequest(@RequestBody MultiValueMap<String, String> formData,
+//            HttpSession session, Model model)
+//    {
+//    	
+//    	System.out.println("Received request from UI" + formData);
+//    	
+//        String[] attrRequestList = formData.get("attrRequestList").get(0).split(",");
+//        
+//        AttributeTypeList attributesRequestList = (AttributeTypeList) session
+//                .getAttribute("attributesRequestList");
+//
+//        String urlReturn = (String) session.getAttribute("urlReturn");
+//
+//
+//        AttributeTypeList attributesRequestListNew = new AttributeTypeList();
+//        for (String index : attrRequestList)
+//        {
+//            try
+//            {
+//                attributesRequestListNew.add(attributesRequestList.get(Integer.parseInt(index)));
+//            }
+//            catch (Exception e)
+//            {
+//            }
+//        }
+//        
+//        session.setAttribute("attributesRequestList", attributesRequestListNew);        
+//        session.setAttribute("sessionId", session.getAttribute("sessionId"));
+//        
+//        System.out.println("+++++++++++++++++++++             Redirect to :"+urlReturn);
+//        
+//        return "redirect:" + urlReturn;
+//        
+//        
+//    }
+    
 	@Override
 	public String rmRequest(String token, Model model) throws JsonParseException, JsonMappingException, IOException, UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, CertificateException, InvalidKeySpecException
 	{
@@ -275,27 +280,29 @@ public class RequestServiceImp implements RequestService
 		/// 
 		if (spRequestEP.contains("auth"))
 		{
-		if (spRequestSource.contains("Discovery"))
+			if (spRequestSource.contains("Discovery"))
 			{
-				return goToSelectApUI(model, spRequest,spMetadata,sourceList);
+				return goToSelectApUI(model, sessionId, spRequest,spMetadata,sourceList);
 			}
 			else  //Should be eIDAS of eduGAIN
 			{
-				return prepareAndGoToIdp(sessionId,spRequest,spMetadata,spRequestSource);
+				return prepareAndGoToIdp(sessionId,spRequest,spMetadata,spRequestSource,null);
 			}
 		}
 		else //data_query or null ¿puede ser null?
 		{
 
-		if (spRequestSource.contains("Discovery"))
+			if (spRequestSource.contains("Discovery"))
 			{
-				return goToSelectApUI(model, spRequest,spMetadata,sourceList);
+				return goToSelectApUI(model, sessionId, spRequest,spMetadata,sourceList);
 			}
 			else
+			{
 				return prepareAndGoToAP(sessionId, spRequest,spMetadata,spRequestSource);
-		
+			}
+			
 		}
-		}
+	}
 //		
 //		
 //		//
@@ -412,7 +419,7 @@ public class RequestServiceImp implements RequestService
 	
 
 
-	private String prepareAndGoToIdp(String sessionId, AttributeSet spRequest, EntityMetadata spMetadata, String spRequestSource) throws UnrecoverableKeyException, KeyStoreException, FileNotFoundException, NoSuchAlgorithmException, CertificateException, InvalidKeySpecException, IOException
+	private String prepareAndGoToIdp(String sessionId, AttributeSet spRequest, EntityMetadata spMetadata, String spRequestSource, List<String> attrRequestList) throws UnrecoverableKeyException, KeyStoreException, FileNotFoundException, NoSuchAlgorithmException, CertificateException, InvalidKeySpecException, IOException
 	{
 //		System.out.println("getEntityMetadataSet(idp)"+cmConnService.getEntityMetadataSet("IdP").toString());
 //		System.out.println("EntityMetadata(EIDAS)"+cmConnService.getEntityMetadata("AUTHSOURCE","EIDAS").toString());
@@ -492,7 +499,25 @@ public class RequestServiceImp implements RequestService
 			idpRequest.setRecipient( idpMetadata.getEntityId());
 		}
 		idpRequest.setLoa( spRequest.getLoa());
-		idpRequest.setAttributes(spRequest.getAttributes());
+		if (attrRequestList!=null && attrRequestList.size()>0)
+		{
+			System.out.println("+++++++++ Nueva lista de atributos");
+			List<AttributeType> newAttributeList = new AttributeTypeList();
+			for( AttributeType attribute:spRequest.getAttributes())
+			{
+				System.out.println("Friendly:"+attribute.getFriendlyName()+ " name:"+attribute.getName());
+				if (attrRequestList.contains(attribute.getFriendlyName()) || attrRequestList.contains(attribute.getName()))
+				{
+					newAttributeList.add(attribute);
+				}
+			}
+				
+			idpRequest.setAttributes(newAttributeList);
+		}
+		else
+		{
+			idpRequest.setAttributes(spRequest.getAttributes());
+		}
 		
 		
 		///
@@ -536,10 +561,13 @@ public class RequestServiceImp implements RequestService
 		
 		this.model.addAttribute("msToken", token);
 		this.model.addAttribute("UrlToRedirect", endpoint);
-		
-	
-		return "redirectform";
-		//return "redirect:/redirect.html";
+		session.setAttribute("UrlToRedirect", endpoint);
+		session.setAttribute("msToken", token);
+	    log.info("Endpoint: "+endpoint);
+	    log.info("model: "+model.toString());
+		return "/redirectform";
+		//return "redirect:/rm/redirectform.html";
+	    //return "redirect:/redirectionform";
 	}
 
 	private String prepareAndGoToAP(String sessionId, AttributeSet spRequest, EntityMetadata spMetadata, String spRequestSource) throws UnrecoverableKeyException, KeyStoreException, FileNotFoundException, NoSuchAlgorithmException, CertificateException, InvalidKeySpecException, IOException 
@@ -601,7 +629,7 @@ public class RequestServiceImp implements RequestService
 		return "redirectform";
 	}
 
-	private String goToSelectApUI(Model model, AttributeSet spRequest, EntityMetadata spMetadata, EntityMetadataList sourceList)
+	private String goToSelectApUI(Model model, String sessionId, AttributeSet spRequest, EntityMetadata spMetadata, EntityMetadataList sourceList)
 	{
 		// TODO Auto-generated method stub
 		log.info("en goToSelectApUI");
@@ -609,6 +637,10 @@ public class RequestServiceImp implements RequestService
 		// y ponerla en la variable sourceList
 		//EntityMetadataList sourceList = new EntityMetadataList();
 		session.setAttribute("sourceList",sourceList);
+		session.setAttribute("sessionId", sessionId);
+		String urlFinishProcess = "urlFinishProcess";
+		
+		session.setAttribute("urlFinishProcess", urlFinishProcess);
 		
 		//Rellenar atributos con la spRequest
 		// y ponerla en la vble de sesion: attributeRequestList
@@ -622,8 +654,8 @@ public class RequestServiceImp implements RequestService
 		//Rellenar spMetadata
 		//con la vble spMetadata
 		session.setAttribute("spMetadata", spMetadata);
-		
-		return "redirect:../request_client";  //REVIEW
+		return "redirect:../rm/request_client";
+		//return "redirect:../request_client";  //REVIEW
 	}
 
 	private String goToSelectIdpUI() {
@@ -631,6 +663,90 @@ public class RequestServiceImp implements RequestService
 		log.info("en goToSelectIdpUI");
 		return "redirect:../request_client";
 	}	
+	
+	@Override
+	public String returnFromUI(String sessionId, Model model, String requestSource, String pdsSource, List<String> attrRequestList)
+	{
+		AttributeSet spRequest = null;
+		EntityMetadata spMetadata = null;
+		
+		
+		// TODO Auto-generated method stub
+		System.out.println("En returnFromRequestUI");
+		
+		
+		try 
+		{
+			//  
+			//	READ VARIABLE "spRequest" 
+			//  
+			log.info("RequestAttributes: Reading spRequest");
+			spRequest = readSpRequest(sessionId);
+			
+			/// 
+			///	READ VARIABLE		 "spMetadata" 
+			/// 
+			log.info("RequestAttributes: Reading spMetadata");
+			spMetadata = readSpMetadata(sessionId);
+		} 
+		catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String spRequestSource ="";//Discovery, PDS, SSI, eIDAS, eduGAIN
+		//System.out.println("spRequest:"+spRequest.toString() );
+		if (requestSource.contains("eidas"))
+		{ 
+			spRequestSource = "eIDAS";
+			System.out.println("1.spRequestSource:"+spRequestSource);
+			try
+			{
+				 return this.prepareAndGoToIdp(sessionId, spRequest, spMetadata, spRequestSource,attrRequestList);
+			} catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | CertificateException
+					| InvalidKeySpecException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else if (requestSource.contains("edugain"))
+		{
+			spRequestSource = "eduGAIN";
+			System.out.println("2.spRequestSource:"+spRequestSource);
+			try
+			{
+				 return this.prepareAndGoToIdp(sessionId, spRequest, spMetadata, spRequestSource,attrRequestList);
+			} catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | CertificateException
+					| InvalidKeySpecException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else if (requestSource.contains("ssi"))
+		{
+			spRequestSource = "SSI";
+			System.out.println("3.spRequestSource:"+spRequestSource);
+		}
+		else if (requestSource.contains("pds"))
+		{
+			spRequestSource = "PDS";
+			System.out.println("4.spRequestSource:"+spRequestSource);
+		}
+		
+		
+		
+			
+		
+		return "algunSitio";
+	}
+	
 	
 	//Auxiliary methods
 	private String validateToken(String token)
@@ -726,7 +842,8 @@ public class RequestServiceImp implements RequestService
 		return spRequestSource;
 	}
 	
-	private String readSpRequestEP(String sessionId) {
+	private String readSpRequestEP(String sessionId) 
+	{
 		String spRequestEP="";
 		try
 		{
@@ -769,4 +886,6 @@ public class RequestServiceImp implements RequestService
 		
 		return endpoint;
 	}
+	
+	
 }

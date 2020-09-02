@@ -6,6 +6,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.List;
 
 import org.springframework.ui.Model;
 
@@ -16,4 +17,6 @@ public interface RequestService
 {
 
 	public String rmRequest(String token, Model model) throws JsonParseException, JsonMappingException, IOException, UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, CertificateException, InvalidKeySpecException;
+
+	public String returnFromUI(String sessionId, Model model, String requestSource, String pdsSource, List<String> attrRequestList);
 }

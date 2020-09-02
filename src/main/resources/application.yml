@@ -20,6 +20,8 @@ spring:
   jackson:
     date-format: eu.atos.seal.rm.RFC3339DateFormat
     serialization.WRITE_DATES_AS_TIMESTAMPS: false
+  thymeleaf.enabled: true
+  thymeleaf.check-template: false
   mvc.view.prefix: /templates/
   mvc.view.suffix: .html    
   

@@ -21,6 +21,7 @@ import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
@@ -38,14 +39,18 @@ import eu.atos.seal.rm.model.AttributeSetList;
 import eu.atos.seal.rm.model.AttributeSetClient;
 
 
+import eu.atos.seal.rm.controller.RequestService;
+
 @Controller
 public class RequestUIController
 {
+	/*
+	 * @Autowired private RequestService requestService;
+	 */
+	
 	private static final Logger log = LoggerFactory.getLogger(RequestUIController.class);
 
-	
-	
-    @GetMapping("request_client")
+    @GetMapping("rm/request_client")
     public String getHtmlForm(HttpSession session, Model model) throws Exception
     {
         AttributeTypeList attributesRequestList = (AttributeTypeList) session
@@ -158,15 +163,51 @@ public class RequestUIController
         return "redirect:../request_client";
     }
     
-    @PostMapping("request_client")
+    @PostMapping("rm/request_client")
     public String getRequest(@RequestBody MultiValueMap<String, String> formData,
             HttpSession session, Model model)
     {
-        List<String> attrRequestList = formData.get("attrRequestList");
-        System.out.println("The following source has been selected"+ attrRequestList.toString());
+    	
+    	
+    	String urlFinishProcess = (String) session.getAttribute("urlFinishProcess");
+    	model.addAttribute("urlFinishProcess", urlFinishProcess);
+        List<String> attrRequestList = formData.get("attrRequestList[]");
+        if (attrRequestList!=null)
+        {
+        	System.out.println("The following source has been selected"+ attrRequestList.toString());
+        }
+        /*else
+        {
+        	System.out.println("The following source has been selected null voy a redirectform ¿?");
+        	return "redirectform";
+        }*/
+    
+        List<String> requestSource= formData.get("requestSource");
+        List<String> pdsRequestSelection = formData.get("pdsRequestSelection");
+        if (requestSource != null)
+        	System.out.println("The following source has been selected"+ requestSource.toString());
+        if (requestSource !=null)
+        	System.out.println("The following source has been selected"+ pdsRequestSelection.toString());
+        String sessionId= null;
+        if (sessionId== null)
+		{
+			sessionId = (String) session.getAttribute("sessionId");
+			System.out.println("request_client:  sessionId:"+sessionId);
+		}
+        //return "rm_redirection"; // Need input to decide on where to redirect from here.
+        //return requestService.returnFromUI(sessionId, model,requestSource.get(0),pdsRequestSelection.get(0),attrRequestList);
+        session.setAttribute("sessionId", session.getAttribute("sessionId"));
+        session.setAttribute("requestSource",requestSource.get(0));
+        session.setAttribute("pdsSource", pdsRequestSelection.get(0));
         
-        return "rm_redirection"; // Need input to decide on where to redirect from here.
+        log.info("@@@@@@@@@@@@@@@En getRequest..... hago redirect");
+        return "redirect:urlFinishProcess";
     }
   
-    
+//    @PostMapping("redirectionform")
+//    public String getHtmlRedirectForm(HttpSession session, Model model) throws Exception
+//    {
+//    	log.info("en getHtmlRedirectForm");
+//    	return "redirectform";
+//    }
 }
