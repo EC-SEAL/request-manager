@@ -73,7 +73,7 @@
 						class="data-box attributes-selector">
 						<ul id="attributes-request-selection">
 							<li th:each="attributeRequest : ${attributesRequestList}"><input
-								type="checkbox" th:value="${attributeRequest.index}"
+								type="checkbox" class="attribute-request-checkbox" th:value="${attributeRequest.name}"
 								checked="true" /> <label th:text="${attributeRequest.name}"></label>
 							</li>
 						</ul>
@@ -113,19 +113,35 @@
 							role="tab" aria-controls="settings">One Drive</a>
 					</div>
 
-					<form id="finish-form" class="" th:action="${urlFinishProcess}"
-						method="post">
-						<input type="hidden" name="attrRequestList" id="attr-request-list"  value="edugain-selector"/>
-						<input type="hidden" name="pds-request-list" id="pds-request-list"  value="pds-mobile"/>
-						<input type="submit" class="btn btn-info" value="Accept"
-							id="submitConsentRequest" />
-						<input type="submit" class="btn btn-danger" value="Reject" />
-						<p th:if="${consentFinish}" class="consent-text"
-							th:text="${consentFinish}"></p>
-						<p th:unless="${consentFinish}"
-							class="consent-text finish-consent-text">Click to consent to
-							this request</p>
-					</form>
+<!-- 					<form id="finish-form" class="" th:action="${urlFinishProcess}" -->
+<!-- 						method="post"> -->
+<!-- 						<input type="hidden" name="attrRequestList[]" id="attr-request-list"/> -->
+<!-- 						<input type="hidden" name="requestSource" id="request-source"  value="edugain-selector"/> -->
+<!-- 						<input type="hidden" name="pdsRequestSelection" id="pds-request-list"  value="pds-mobile"/> -->
+<!-- 						<input type="submit" class="btn btn-info" value="Accept" -->
+<!-- 							id="submitConsentRequest" /> -->
+<!-- 						<input type="submit" class="btn btn-danger" value="Reject" /> -->
+<!-- 						<p th:if="${consentFinish}" class="consent-text" -->
+<!-- 							th:text="${consentFinish}"></p> -->
+<!-- 						<p th:unless="${consentFinish}" -->
+<!-- 							class="consent-text finish-consent-text">Click to consent to -->
+<!-- 							this request</p> -->
+<!-- 					</form> -->
+					
+					
+					<form id="ap-form" class="consent-form" name="ap-form" method="POST">
+<!-- 			            <input type="hidden" name="attrRequestList" id="attr-request-list"/> -->
+			            <input type="hidden" name="attrRequestList[]" id="attr-request-list"/>
+			            <input type="hidden" name="attrSendList" id="attr-send-list"/>
+						<input type="hidden" name="requestSource" id="request-source"  value="edugain-selector"/>
+						<input type="hidden" name="pdsRequestSelection" id="pds-request-list"  value="pds-mobile"/>
+			        
+			            <input type="button" id="send-request-button"  class="btn btn-info" value="Accept"/>
+			            <input type="button" id="send-request-cancel" class="btn btn-danger" value="Reject"/>
+			            <p th:if="${consentFinish}" class="consent-text" th:text="${consentFinish}"></p>
+        				<p th:unless="${consentFinish}" class="consent-text finish-consent-text">Click to consent to -->
+        											this request</p> 
+        			</form>
 					
 					<div id="card-footer">
 
@@ -211,14 +227,6 @@
 
 		</div>
 			
-	<script> 
-	$(".data-query-list a").click(function(){
-
-		let id = $(this).attr('id')
-		$("#attr-request-list").val(id);
-
-		});
-	</script>
 
 
 	</footer>
@@ -227,3 +235,15 @@
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+

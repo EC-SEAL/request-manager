@@ -144,8 +144,10 @@ public class RequestUIController
         
         
         session.setAttribute("attributesRequestList", attributeList);
-        session.setAttribute("urlReturn", "response_client"); 		
-        session.setAttribute("urlFinishProcess", "request_client"); 
+//        session.setAttribute("urlReturn", "response_client"); 		
+//        session.setAttribute("urlFinishProcess", "request_client"); 
+        session.setAttribute("urlReturn", "request_client/return"); 		// Consenting: ACCEPT
+        session.setAttribute("urlFinishProcess", "request_client/finish"); // No consenting: REJECT
         
         session.setAttribute("errorMessage", "An error has ocurred");
         session.setAttribute("infoMessage", "This is an information message");
@@ -162,10 +164,26 @@ public class RequestUIController
     public String getRequest(@RequestBody MultiValueMap<String, String> formData,
             HttpSession session, Model model)
     {
-        List<String> attrRequestList = formData.get("attrRequestList");
-        System.out.println("The following source has been selected"+ attrRequestList.toString());
+    	log.info("en getRequest:"+session.getAttribute("urlReturn"));
+    	String[] attrRequestList = formData.get("attrRequestList[]").get(0).split(",");
+//    	for (int i=0;i<attrRequestList.length;i++)
+//    	{
+//    		System.out.println("atrib"+i+":"+attrRequestList[i]);
+//    	}
+    	String requestSource = formData.get("requestSource").get(0);
+    	String pdsRequestSelection = formData.get("pdsRequestSelection").get(0);
+       	String urlReturn = (String) session.getAttribute("urlReturn");
+//        List<String> attrRequestList2 = formData.get("attrRequestList[]");
+//        System.out.println("The following source has been selected"+ attrRequestList2.toString());
+        log.info("requestSource: "+requestSource);
+        log.info("pdsRequestSource: "+pdsRequestSelection);
         
-        return "rm_redirection"; // Need input to decide on where to redirect from here.
+        session.setAttribute("sessionId", session.getAttribute("sessionId"));
+        session.setAttribute("attrRequestList", attrRequestList);
+        session.setAttribute("requestSource",requestSource);
+        session.setAttribute("pdsRequestSelection", pdsRequestSelection);
+        
+        return "redirect:" + urlReturn;
     }
   
     
