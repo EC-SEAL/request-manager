@@ -1161,8 +1161,8 @@ public class RequestServiceImp implements RequestService
 	{
 		
 		/* TESTING*/
-		sessionId = "8b3f3303-aa06-479e-a930-13691d5c6b4d"; // with session data
-		//sessionId = "ff98e851-bd76-47e7-9583-ab86907e1aa5"; //without session data, Error validating jwt, SM says.
+		//sessionId = "8b3f3303-aa06-479e-a930-13691d5c6b4d"; // with session data
+		//smConnService.updateVariable(sessionId, "ClientCallbackAddr", "https://vm.project-seal.eu:9063/rm/response");
 		/*END TESTING*/
 		
 		
@@ -1282,8 +1282,6 @@ public class RequestServiceImp implements RequestService
 		String tokenToSPms = "";
 		tokenToSPms = smConnService.generateToken(sessionId,msName); 
 		
-		smConnService.updateVariable(sessionId, "ClientCallbackAddr", "https://vm.project-seal.eu:9063/rm/response");
-
 		model.addAttribute("msToken", tokenToSPms);
 		model.addAttribute("UrlToRedirect", endpoint);
 		log.info("En redirectToIDP spRequestSource: "+spRequestSource);
