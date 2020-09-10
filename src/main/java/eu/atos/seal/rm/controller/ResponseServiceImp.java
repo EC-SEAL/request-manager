@@ -100,8 +100,12 @@ public class ResponseServiceImp implements ResponseService
 			// Validate token
 			sessionId = smConnService.validateToken(token);
 			if (sessionId != null) {
-				msName = getMsName(model, sessionId, null); // Returning the FIRST ONE! ***
-				endPoint = getSpResponseEndpoint(model, msName,cmConnService);
+				// Testing
+				//msName = getMsName(model, sessionId, null); // Returning the FIRST ONE! ***
+				//endPoint = getSpResponseEndpoint(model, msName,cmConnService);  // from spMetadata
+				msName = "SAMLms_0001";
+				endPoint = "https://stork.uji.es/esmoSPms/module.php/esmo/sp/response.php/esmo";				  
+				//Testing*/			
 			}
 			
 			log.info ("UrlToRedirect: " + endPoint);
@@ -118,65 +122,58 @@ public class ResponseServiceImp implements ResponseService
 		
 			// msToken just generated
 			model.addAttribute("msToken", tokenToSPms);
-		
-			// Reading "dsResponse"
-			Object objDsResponse = null;
-			AttributeSet dsResponse = null;	
-			log.info("BEFORE dsResponse: ");
-			objDsResponse = smConnService.readVariable(sessionId, "dsResponse");	
-			dsResponse = (new ObjectMapper()).readValue(objDsResponse.toString(),AttributeSet.class);
-			log.info("dsResponse: " + dsResponse.toString() );
-			
-			// Building responseAssertions 
-			AttributeSetList responseAssertions= new AttributeSetList ();
-			
-	// TO REMOVE:
-	//		AttributeSet idpResponse = new AttributeSet();
-	//		idpResponse = dsResponse;
-	//		responseAssertions.add(idpResponse);
-			
-			responseAssertions.add(dsResponse);
-			ObjectMapper objMapper = new ObjectMapper();
-			smConnService.updateVariable(sessionId,"responseAssertions",objMapper.writeValueAsString(responseAssertions));
-			
-			if (dsResponse.getStatus().getCode() == AttributeSetStatus.CodeEnum.ERROR)	// Returning error to the SPms
-			{	
-				log.error("dsResponse returning error");
-				
-				model.addAttribute("ErrorMessage", "dsResponse returning error");
-				return "rmError";
-			}
 
-			
-			// Reading "dsMetadata"... what for???
-			EntityMetadata dsMetadata = null;
-			Object objDsMetadata = null;
-			objDsMetadata = smConnService.readVariable(sessionId, "dsMetadata");
-			if (objDsMetadata != null) {
-				dsMetadata = (new ObjectMapper()).readValue(objDsMetadata.toString(),EntityMetadata.class);
-				log.info("dsMetadata: " + dsMetadata.toString());
-			}
-			else
-				log.info("****NULL dsMetadata!!****");
-		
-					
 			//
 			//  Looking for the kind of endpoint to redirect: spRequestEP
 			// 
 			String spRequestEP="";
 			spRequestEP = (String)smConnService.readVariable(sessionId, "spRequestEP");
 			log.info("spRequestEP just read: "+spRequestEP);
-	
-				
-			// TESTING:
-			//spRequestEP = "testing";
-			//spRequestEP = "data_query";
-			//log.info("*** TESTING spRequestEP: "+spRequestEP);
 			
 			if (spRequestEP.contains("auth")) { //auth_request
-				// Do nothing
+				// It is an auth request.
 				log.info ("It's an auth request.");
-	
+		
+				// Reading "dsResponse"
+				Object objDsResponse = null;
+				AttributeSet dsResponse = null;	
+				log.info("BEFORE dsResponse: ");
+				objDsResponse = smConnService.readVariable(sessionId, "dsResponse");	
+				dsResponse = (new ObjectMapper()).readValue(objDsResponse.toString(),AttributeSet.class);
+				log.info("dsResponse: " + dsResponse.toString() );
+				
+				// Building responseAssertions 
+				AttributeSetList responseAssertions= new AttributeSetList ();
+				
+		// TO REMOVE:
+		//		AttributeSet idpResponse = new AttributeSet();
+		//		idpResponse = dsResponse;
+		//		responseAssertions.add(idpResponse);
+				
+				responseAssertions.add(dsResponse);
+				ObjectMapper objMapper = new ObjectMapper();
+				smConnService.updateVariable(sessionId,"responseAssertions",objMapper.writeValueAsString(responseAssertions));
+				
+				if (dsResponse.getStatus().getCode() == AttributeSetStatus.CodeEnum.ERROR)	// Returning error to the SPms
+				{	
+					log.error("dsResponse returning error");
+					
+					model.addAttribute("ErrorMessage", "dsResponse returning error");
+					return "rmError";
+				}
+					
+				// Reading "dsMetadata"... what for???
+				EntityMetadata dsMetadata = null;
+				Object objDsMetadata = null;
+				objDsMetadata = smConnService.readVariable(sessionId, "dsMetadata");
+				if (objDsMetadata != null) {
+					dsMetadata = (new ObjectMapper()).readValue(objDsMetadata.toString(),EntityMetadata.class);
+					log.info("dsMetadata: " + dsMetadata.toString());
+				}
+				else
+					log.info("****NULL dsMetadata!!****");
+
+				
 				// Redirecting
 				return "redirectform";				
 			}
@@ -225,7 +222,6 @@ public class ResponseServiceImp implements ResponseService
 				// Open the GUI and sending the response assertions selected by the user
 				// TODO: errorMsg?
 				
-				// TODO: dataStoreObjectList
 				return prepareAndGotoResponseUI( sessionId,  model, spRequest, ds, null); 
 				
 			}
