@@ -222,6 +222,9 @@ public class ResponseServiceImp implements ResponseService
 				// Open the GUI and sending the response assertions selected by the user
 				// TODO: errorMsg?
 				
+				/* TESTING*/
+				//String myDS = ""; 
+				//smConnService.updateDS(sessionId, myDS);
 				return prepareAndGotoResponseUI( sessionId,  model, spRequest, ds, null); 
 				
 			}
@@ -274,7 +277,10 @@ public class ResponseServiceImp implements ResponseService
 			
 			DataSet aux_ds = null;
 			try {
-				aux_ds = (new ObjectMapper()).readValue(myJSONdso.get("data").toString(),DataSet.class);
+				if (myJSONdso.get("data").toString().length() >= 2) { // It is not "[]" //TODO: check with UPorto!
+					aux_ds = (new ObjectMapper()).readValue(myJSONdso.get("data").toString(),DataSet.class);
+					dsList.add(aux_ds);
+				}
 			} catch (JsonParseException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -285,7 +291,7 @@ public class ResponseServiceImp implements ResponseService
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			dsList.add(aux_ds);
+			//dsList.add(aux_ds);
 			
 		});
 		
@@ -313,43 +319,49 @@ public class ResponseServiceImp implements ResponseService
 //		session.setAttribute("attributesSendList", attributesSendList); //TO REMOVE
 		
 		AttributeSetList attributesConsentList = new AttributeSetList();
-		for (DataSet auxDs  : dsList) {
-			//Filtering with the requested attributes
-			List<AttributeType> attrs = new ArrayList<AttributeType>();
-			boolean found = false;
-			for (AttributeType auxAttr : auxDs.getAttributes()) {
-				for (AttributeType reqAttr : attributesRequestList) {
-					if (reqAttr.getFriendlyName().contains(auxAttr.getFriendlyName()) || 
-						reqAttr.getName().contains(auxAttr.getName())) {
-						found = true;
-						break;
-					}	
+		
+		if (dsList.size() > 0) {
+		//TODO: check with UPorto!
+			
+			for (DataSet auxDs  : dsList) {
+				//Filtering with the requested attributes
+				List<AttributeType> attrs = new ArrayList<AttributeType>();
+				boolean found = false;
+				for (AttributeType auxAttr : auxDs.getAttributes()) {
+					for (AttributeType reqAttr : attributesRequestList) {
+						if (reqAttr.getFriendlyName().contains(auxAttr.getFriendlyName()) || 
+							reqAttr.getName().contains(auxAttr.getName())) {
+							found = true;
+							break;
+						}	
+					}
+					if (found) {				
+						attrs.add(auxAttr);	
+						found = false;
+					}				
 				}
-				if (found) {				
-					attrs.add(auxAttr);	
-					found = false;
-				}				
-			}
-			if (attrs.size() != 0) {
-				
-				AttributeSet attributeSet = new AttributeSet();
-				attributeSet.setId(auxDs.getId());
-				attributeSet.setIssuer(auxDs.getIssuerId());
-				attributeSet.setType(TypeEnum.REQUEST);
-				attributeSet.setStatus(null);
-				attributeSet.setRecipient("RECIPIENT__TOASK");
-				attributeSet.setLoa(auxDs.getLoa());
-				attributeSet.setNotAfter(auxDs.getExpiration());
-				attributeSet.setNotBefore(auxDs.getIssued());
-				attributeSet.setProperties(auxDs.getProperties());
-				attributeSet.setInResponseTo("INRESPONSETO__TOASK");
-				// Not necessary all the above settings...
-				
-				attributeSet.setAttributes(attrs);
-				
-				attributesConsentList.add(attributeSet);
-			}			
-		}		
+				if (attrs.size() != 0) {
+					
+					AttributeSet attributeSet = new AttributeSet();
+					attributeSet.setId(auxDs.getId());
+					attributeSet.setIssuer(auxDs.getIssuerId());
+					attributeSet.setType(TypeEnum.REQUEST);
+					attributeSet.setStatus(null);
+					attributeSet.setRecipient("RECIPIENT__TOASK");
+					attributeSet.setLoa(auxDs.getLoa());
+					attributeSet.setNotAfter(auxDs.getExpiration());
+					attributeSet.setNotBefore(auxDs.getIssued());
+					attributeSet.setProperties(auxDs.getProperties());
+					attributeSet.setInResponseTo("INRESPONSETO__TOASK");
+					// Not necessary all the above settings...
+					
+					attributeSet.setAttributes(attrs);
+					
+					attributesConsentList.add(attributeSet);
+				}			
+			}		
+		
+		}
 		
 		log.info("attributesConsentList: " + attributesConsentList);
 		session.setAttribute("attributesConsentList", attributesConsentList);
