@@ -268,30 +268,33 @@ public class ResponseServiceImp implements ResponseService
 		// and attributeSendList--> NOT NECESSARY 
 //		AttributeTypeList attributesSendList = new AttributeTypeList();
 		List<DataSet> dsList = new ArrayList<DataSet>();
-		dataStore.forEach ((dso)-> {
-			log.info("dso.toString(): " + dso.toString());
-			JsonObject myJSONdso = new JsonParser().parse(dso.toString()).getAsJsonObject();
-			log.info("myJSONdso: " + myJSONdso.toString());
+		if (dataStore != null && dataStore.size()> 0) { // Non empty dataStore
 			
-			DataSet aux_ds = null;
-			try {
-				if (myJSONdso.get("data").toString().length() >= 2) { // It is not "[]" //TODO: check with UPorto!
+			dataStore.forEach ((dso)-> {
+				log.info("dso.toString(): " + dso.toString());
+				JsonObject myJSONdso = new JsonParser().parse(dso.toString()).getAsJsonObject();
+				log.info("myJSONdso: " + myJSONdso.toString());
+				
+				DataSet aux_ds = null;
+				try {
 					aux_ds = (new ObjectMapper()).readValue(myJSONdso.get("data").toString(),DataSet.class);
 					dsList.add(aux_ds);
+					
+				} catch (JsonParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (JsonMappingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			} catch (JsonParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (JsonMappingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			//dsList.add(aux_ds);
+				//dsList.add(aux_ds);
+				
+			});
 			
-		});
+		}
 		
 /*	OLD	
 		for (DataSet aux_ds:dataStore.getClearData()) {
