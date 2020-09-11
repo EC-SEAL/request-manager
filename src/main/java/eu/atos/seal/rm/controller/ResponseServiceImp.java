@@ -222,9 +222,6 @@ public class ResponseServiceImp implements ResponseService
 				// Open the GUI and sending the response assertions selected by the user
 				// TODO: errorMsg?
 				
-				/* TESTING*/
-				//String myDS = ""; 
-				//smConnService.updateDS(sessionId, myDS);
 				return prepareAndGotoResponseUI( sessionId,  model, spRequest, ds, null); 
 				
 			}
@@ -272,6 +269,7 @@ public class ResponseServiceImp implements ResponseService
 //		AttributeTypeList attributesSendList = new AttributeTypeList();
 		List<DataSet> dsList = new ArrayList<DataSet>();
 		dataStore.forEach ((dso)-> {
+			log.info("dso.toString(): " + dso.toString());
 			JsonObject myJSONdso = new JsonParser().parse(dso.toString()).getAsJsonObject();
 			log.info("myJSONdso: " + myJSONdso.toString());
 			
