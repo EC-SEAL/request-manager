@@ -221,8 +221,16 @@ public class ResponseServiceImp implements ResponseService
 				
 				// Open the GUI and sending the response assertions selected by the user
 				// TODO: errorMsg?
-				
-				return prepareAndGotoResponseUI( sessionId,  model, spRequest, ds, null); 
+				if (ds.size() > 0)
+					return prepareAndGotoResponseUI( sessionId,  model, spRequest, ds, null); 
+				else {
+					String errorMsg= "Empty dataStore!!";
+					log.info ("Returning error: "+errorMsg);
+					
+					model.addAttribute("ErrorMessage", errorMsg);
+					return "rmError";
+				}
+					
 				
 			}
 			else {
