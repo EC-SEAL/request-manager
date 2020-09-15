@@ -383,7 +383,8 @@ public class ResponseServiceImp implements ResponseService
 
 		
 		
-		return "redirect:../rm/response_client"; 
+		//return "redirect:../rm/response_client"; 
+		return "redirect:../response_client"; 
 		//TODO Move to rest_api.controllers.client.MultiUIController***?
 		// ResponseUIController.java in this package by the moment.
 		// See the related responseForm.html

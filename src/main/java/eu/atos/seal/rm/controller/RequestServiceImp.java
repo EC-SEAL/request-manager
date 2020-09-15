@@ -1161,7 +1161,7 @@ public class RequestServiceImp implements RequestService
 	{
 		
 		/* TESTING*/
-		sessionId = "c6f794a8-2ea4-4a4b-acf7-69f3f8095b54"; // with session data
+		sessionId = "a8efc30d-0232-448c-a6ba-6c508ce5678e"; // with session data
 		smConnService.updateVariable(sessionId, "ClientCallbackAddr", "https://vm.project-seal.eu:8063/rm/response");
 		smConnService.updateVariable(sessionId, "spRequestEP", "data_query");
 		
