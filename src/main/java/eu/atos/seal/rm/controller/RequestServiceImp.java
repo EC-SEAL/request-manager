@@ -900,6 +900,17 @@ public class RequestServiceImp implements RequestService
 		{
 			spRequestSource = "PDS";
 			String pdsRequestSelection = session.getAttribute("pdsRequestSelection").toString();
+			try
+			{
+			smConnService.updateVariable(sessionId,"PDS",pdsRequestSelection);
+			}
+			catch (Exception ex)
+			{
+				 String errorMsg= "Exception calling SM (updateVariable PDS)  \n";
+				 errorMsg += "Exception message:"+ex.getMessage()+"\n";
+				//model.addAttribute("ErrorMessage",errorMsg);
+				log.error(errorMsg);
+			}
 		}
 		
 		
