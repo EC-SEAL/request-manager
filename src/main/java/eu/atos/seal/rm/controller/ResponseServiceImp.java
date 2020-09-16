@@ -100,12 +100,13 @@ public class ResponseServiceImp implements ResponseService
 			// Validate token
 			sessionId = smConnService.validateToken(token);
 			if (sessionId != null) {
-				// Testing
-				//msName = getMsName(model, sessionId, null); // Returning the FIRST ONE! ***
-				//endPoint = getSpResponseEndpoint(model, msName,cmConnService);  // from spMetadata
+				msName = getMsName(model, sessionId, null); // Returning the FIRST ONE! ***
+				endPoint = getSpResponseEndpoint(model, msName,cmConnService);  // from spMetadata
+				
+				/* Testing
 				msName = "SAMLms_0001";
 				endPoint = "https://stork.uji.es/esmoSPms/module.php/esmo/sp/response.php/esmo";				  
-				//Testing*/			
+				Testing*/			
 			}
 			
 			log.info ("UrlToRedirect: " + endPoint);
