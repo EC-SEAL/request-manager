@@ -75,7 +75,7 @@ public class ResponseApiController implements ResponseApi {
     @GetMapping("response_client/return")
     public String acceptConsent (String sessionId,Model model) throws Exception
     {
-    	log.info("ACCEPT: Entering response_client/return ...");
+    	log.info("ACCEPT: Entering response_client/return ...sessionId: " + sessionId);
     	return responseService.returnFromResponseUI (sessionId, model);
     }
     

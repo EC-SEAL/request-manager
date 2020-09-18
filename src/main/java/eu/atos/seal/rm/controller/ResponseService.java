@@ -27,7 +27,7 @@ public interface ResponseService
 	
 	public String rmResponse( String token, Model model) throws JsonParseException, JsonMappingException, IOException;
 	
-	public String returnFromResponseUI (String token, Model model) throws Exception;
+	public String returnFromResponseUI (String sessionId, Model model) throws Exception;
 	public String returnNothing (String token, Model model) throws Exception;
 
 }
