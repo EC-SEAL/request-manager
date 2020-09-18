@@ -336,18 +336,22 @@ public class ResponseServiceImp implements ResponseService
 		//TODO: check with UPorto!
 			
 			for (DataSet auxDs  : dsList) {
-				//Filtering with the requested attributes
+				log.info ("Filtering with the requested attributes ...");
+				
 				List<AttributeType> attrs = new ArrayList<AttributeType>();
 				boolean found = false;
 				for (AttributeType auxAttr : auxDs.getAttributes()) {
+					log.info("auxAttr: " + auxAttr.getFriendlyName());
 					for (AttributeType reqAttr : attributesRequestList) {
+						log.info("reqAttr: " + reqAttr.getFriendlyName());
 						if (reqAttr.getFriendlyName().contains(auxAttr.getFriendlyName()) || 
 							reqAttr.getName().contains(auxAttr.getName())) {
 							found = true;
 							break;
 						}	
 					}
-					if (found) {				
+					if (found) {	
+						log.info("Found: " + auxAttr.getFriendlyName());
 						attrs.add(auxAttr);	
 						found = false;
 					}				
