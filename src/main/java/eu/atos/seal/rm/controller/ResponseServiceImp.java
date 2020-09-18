@@ -281,12 +281,14 @@ public class ResponseServiceImp implements ResponseService
 			
 			dataStore.forEach ((dso)-> {
 				log.info("dso.toString(): " + dso.toString());
-				JsonObject myJSONdso = new JsonParser().parse(dso.toString()).getAsJsonObject();
-				log.info("myJSONdso: " + myJSONdso.toString());
+//				JsonObject myJSONdso = new JsonParser().parse(dso.toString()).getAsJsonObject();
+//				log.info("myJSONdso: " + myJSONdso.toString());
 				
 				DataSet aux_ds = null;
 				try {
-					aux_ds = (new ObjectMapper()).readValue(myJSONdso.get("data").toString(),DataSet.class);
+					//aux_ds = (new ObjectMapper()).readValue(myJSONdso.get("data").toString(),DataSet.class);
+					aux_ds = (new ObjectMapper()).readValue(dso.getData(), DataSet.class);
+					log.info("aux_ds: " + aux_ds.toString());
 					dsList.add(aux_ds);
 					
 				} catch (JsonParseException e) {
