@@ -458,6 +458,8 @@ public class ResponseUIController
         session.setAttribute("consentFinish", "Click to CANCEL the submission of your above data to Service Provider and finish the process.");
         session.setAttribute("consentReturn", "Click to CONSENT to return your above data to Service Provider and finish the process." +
                 " You are accepting the privacy policy conditions, please be sure you understand them."); //TODO
+        
+        session.setAttribute("sessionId", session.getAttribute("sessionId"));
 
         return "redirect:../response_client";
     }
