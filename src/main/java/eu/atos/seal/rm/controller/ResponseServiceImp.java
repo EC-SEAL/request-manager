@@ -341,17 +341,20 @@ public class ResponseServiceImp implements ResponseService
 				List<AttributeType> attrs = new ArrayList<AttributeType>();
 				boolean found = false;
 				for (AttributeType auxAttr : auxDs.getAttributes()) {
-					log.info("auxAttr: " + auxAttr.getFriendlyName());
+					log.info("auxAttr friendly: " + auxAttr.getFriendlyName());
+					log.info("auxAttr: " + auxAttr.getName());
 					for (AttributeType reqAttr : attributesRequestList) {
-						log.info("reqAttr: " + reqAttr.getFriendlyName());
-						if (reqAttr.getFriendlyName().contains(auxAttr.getFriendlyName()) || 
+						log.info("reqAttr friendly: " + reqAttr.getFriendlyName());
+						log.info("reqAttr: " + reqAttr.getName());
+						if ((reqAttr.getFriendlyName() != null) && (reqAttr.getFriendlyName().contains(auxAttr.getFriendlyName())) || 
 							reqAttr.getName().contains(auxAttr.getName())) {
 							found = true;
 							break;
 						}	
 					}
 					if (found) {	
-						log.info("Found: " + auxAttr.getFriendlyName());
+						log.info("Found friendly: " + auxAttr.getFriendlyName());
+						log.info("Found: " + auxAttr.getName());
 						attrs.add(auxAttr);	
 						found = false;
 					}				
