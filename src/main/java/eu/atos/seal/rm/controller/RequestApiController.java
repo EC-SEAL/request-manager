@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -50,6 +51,27 @@ public class RequestApiController implements RequestApi {
         this.objectMapper = objectMapper;
         this.request = request;
     }
+    
+    @GetMapping("request_client/finish")
+    public String rejectConsent(String sessionId,Model model) throws Exception
+    {
+    	log.info("REJECT: Entering response_client/finish ...");
+    	return requestService.returnNothing (sessionId, model);
+    }
+    
+    @GetMapping("request_client/return")
+    public String acceptConsent(String sessionId,Model model) throws Exception
+    {
+    	log.info("ACCEPT: Entering response_client/return ...");
+    	
+    	
+    	
+    	
+    	return requestService.returnFromRequestUI (sessionId, model);
+    }
+    
+    
+    
 
     //public ResponseEntity<Void> requestPost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model) {
     public String requestPost(@ApiParam(value = "The security token for ms to ms calls", required=true) @RequestParam(value="msToken", required=true)  String msToken, Model model) {

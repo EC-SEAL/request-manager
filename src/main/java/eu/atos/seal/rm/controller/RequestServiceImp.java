@@ -11,7 +11,9 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import eu.atos.seal.rm.model.ApiClassEnum;
 import eu.atos.seal.rm.model.AttributeSet;
+import eu.atos.seal.rm.model.AttributeType;
 import eu.atos.seal.rm.model.AttributeTypeList;
 import eu.atos.seal.rm.model.DataStore;
 import eu.atos.seal.rm.model.EntityMetadata;
@@ -31,11 +33,14 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.management.AttributeList;
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,6 +106,8 @@ public class RequestServiceImp implements RequestService
         
         
     }
+    
+    
 	@Override
 	public String rmRequest(String token, Model model) throws JsonParseException, JsonMappingException, IOException, UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, CertificateException, InvalidKeySpecException
 	{
@@ -275,27 +282,29 @@ public class RequestServiceImp implements RequestService
 		/// 
 		if (spRequestEP.contains("auth"))
 		{
-		if (spRequestSource.contains("Discovery"))
+			if (spRequestSource.contains("Discovery"))
 			{
-				return goToSelectApUI(model, spRequest,spMetadata,sourceList);
+				
+				return goToSelectIUI( model, sessionId, spRequest, sourceList);
 			}
 			else  //Should be eIDAS of eduGAIN
 			{
-				return prepareAndGoToIdp(sessionId,spRequest,spMetadata,spRequestSource);
+				return prepareAndGoToIdp(sessionId,spRequest,spMetadata,spRequestSource,null);
 			}
 		}
 		else //data_query or null ¿puede ser null?
 		{
-
-		if (spRequestSource.contains("Discovery"))
+			if (spRequestSource.contains("Discovery"))
 			{
-				return goToSelectApUI(model, spRequest,spMetadata,sourceList);
+				
+				return goToSelectIUI( model, sessionId, spRequest, sourceList);
 			}
 			else
+			{
 				return prepareAndGoToAP(sessionId, spRequest,spMetadata,spRequestSource);
-		
+			}
 		}
-		}
+	}
 //		
 //		
 //		//
@@ -412,7 +421,7 @@ public class RequestServiceImp implements RequestService
 	
 
 
-	private String prepareAndGoToIdp(String sessionId, AttributeSet spRequest, EntityMetadata spMetadata, String spRequestSource) throws UnrecoverableKeyException, KeyStoreException, FileNotFoundException, NoSuchAlgorithmException, CertificateException, InvalidKeySpecException, IOException
+	private String prepareAndGoToIdp(String sessionId, AttributeSet spRequest, EntityMetadata spMetadata, String spRequestSource, List<AttributeType> newAttributeList) throws UnrecoverableKeyException, KeyStoreException, FileNotFoundException, NoSuchAlgorithmException, CertificateException, InvalidKeySpecException, IOException
 	{
 //		System.out.println("getEntityMetadataSet(idp)"+cmConnService.getEntityMetadataSet("IdP").toString());
 //		System.out.println("EntityMetadata(EIDAS)"+cmConnService.getEntityMetadata("AUTHSOURCE","EIDAS").toString());
@@ -562,10 +571,12 @@ public class RequestServiceImp implements RequestService
 			System.out.println("[prepareAndGoToAP] emList:"+emList.toString());
 		}
 		
-		if (spRequestSource.contains("PDS"))
+		if (spRequestSource.equalsIgnoreCase("PDS"))
 		{
 			spRequestSource="PERSISTENCE";
 			apiCall = "load";
+			
+			//Null ,Mobile, Browser, googleDrive, oneDrive
 		}
 		else
 		{
@@ -600,35 +611,47 @@ public class RequestServiceImp implements RequestService
 	
 		return "redirectform";
 	}
+	
+	
+	
+		
+		//	{
+//		// TODO Auto-generated method stub
+//		log.info("en goToSelectApUI");
+//		//Rellenar EntityMetadataList
+//		// y ponerla en la variable sourceList
+//		//EntityMetadataList sourceList = new EntityMetadataList();
+//		session.setAttribute("sourceList",sourceList);
+//		
+//		//Rellenar atributos con la spRequest
+//		// y ponerla en la vble de sesion: attributeRequestList
+//		AttributeTypeList attributeRequestList = new AttributeTypeList();
+//
+//		attributeRequestList.addAll(spRequest.getAttributes());
+//		session.setAttribute("attributesRequestList", attributeRequestList);
+//		System.out.println("This is  name: " + attributeRequestList.get(0).getName()	);
+//		System.out.println("This is friendly name: " + attributeRequestList.get(0).getFriendlyName());
+//
+//		//Rellenar spMetadata
+//		//con la vble spMetadata
+//		session.setAttribute("spMetadata", spMetadata);
+//		
+//		return "redirect:../request_client";  //REVIEW
+//	}
 
-	private String goToSelectApUI(Model model, AttributeSet spRequest, EntityMetadata spMetadata, EntityMetadataList sourceList)
+	private String goToSelectIUI(Model model, String sessionId, AttributeSet spRequest, EntityMetadataList sourceList)
 	{
 		// TODO Auto-generated method stub
-		log.info("en goToSelectApUI");
-		//Rellenar EntityMetadataList
-		// y ponerla en la variable sourceList
-		//EntityMetadataList sourceList = new EntityMetadataList();
-		session.setAttribute("sourceList",sourceList);
+		log.info("en goToSelectUI");
 		
-		//Rellenar atributos con la spRequest
-		// y ponerla en la vble de sesion: attributeRequestList
 		AttributeTypeList attributeRequestList = new AttributeTypeList();
 
 		attributeRequestList.addAll(spRequest.getAttributes());
 		session.setAttribute("attributesRequestList", attributeRequestList);
-		System.out.println("This is  name: " + attributeRequestList.get(0).getName()	);
-		System.out.println("This is friendly name: " + attributeRequestList.get(0).getFriendlyName());
-
-		//Rellenar spMetadata
-		//con la vble spMetadata
-		session.setAttribute("spMetadata", spMetadata);
+		session.setAttribute("sourceList",sourceList);
+		session.setAttribute("urlReturn", "request_client/return");
+		session.setAttribute("sessionId", sessionId);
 		
-		return "redirect:../request_client";  //REVIEW
-	}
-
-	private String goToSelectIdpUI() {
-		// TODO Auto-generated method stub
-		log.info("en goToSelectIdpUI");
 		return "redirect:../request_client";
 	}	
 	
@@ -769,4 +792,606 @@ public class RequestServiceImp implements RequestService
 		
 		return endpoint;
 	}
+		
+	
+	// ¿SE SUPONE QUE SE LLEGA DESDE REJECT PERO DE MOMENTO NO FUNCIONA
+	@Override
+	public String returnNothing(String sessionId, Model model)
+	{
+		//sessionId= "f66d6165-aa4d-4e6a-898e-46faea16d6cf"; //TODO Quitar
+
+		ObjectMapper objMapper = new ObjectMapper();
+		String endPoint = null;
+		try
+		{
+			// Updating the responseAssertions consented by the user: none
+			smConnService.updateVariable(sessionId,"responseAssertions",objMapper.writeValueAsString(null));
+		
+			String msName = getMsName(model, sessionId, null); // Returning the FIRST ONE! ***
+			endPoint = getSpResponseEndpoint(model, msName,cmConnService);
+			log.info ("UrlToRedirect: " + endPoint);
+			if (endPoint == null  || endPoint.contains("error"))
+			{
+				model.addAttribute("ErrorMessage","SP endpoint not found");
+				return "fatalError";
+			}
+				
+			String tokenToSPms = "";
+			tokenToSPms = smConnService.generateToken(sessionId,msName); 
+		
+			model.addAttribute("msToken", tokenToSPms);
+			model.addAttribute("UrlToRedirect", endPoint);
+			
+			return "redirectform";
+		
+		}
+		catch (Exception ex)
+		{
+			String errorMsg= ex.getMessage()+"\n";
+			log.info ("Returning error: "+errorMsg);
+			
+			model.addAttribute("ErrorMessage",errorMsg);
+			if (endPoint != null) 
+	        	return "rmError"; 
+	        else
+	        	return "fatalError"; // Unknown endPoint...
+		}
+	}
+	
+	@Override
+	public String returnFromRequestUI(String sessionId, Model model)
+	{
+		log.info("En returnFromRequestUI");
+		log.info("attrRequestList:"+ session.getAttribute("attrRequestList"));
+		log.info("requestSource:"+session.getAttribute("requestSource"));
+		log.info("pdsRequestSelection"+session.getAttribute("pdsRequestSelection"));
+		 //session.setAttribute("pdsRequestSelection", pdsRequestSelection);
+		log.info("sessionId"+sessionId);
+		log.info("sessionId"+session.getAttribute("sessionId"));
+		
+//		List<String> attrRequestListSelected = (List<String>)session.getAttribute("attrRequestList");
+//		log.info("requestList: "+attrRequestListSelected.toString());
+		sessionId = (String) session.getAttribute("sessionId");
+		
+		
+		
+		AttributeSet spRequest;
+		EntityMetadata spMetadata;
+		try 
+		{
+			spRequest = readSpRequest(sessionId);
+			spMetadata = readSpMetadata(sessionId);
+		} 
+		catch (IOException e)
+		{
+			// TODO Error control
+			e.printStackTrace();
+			return "error";
+		}
+		//List<AttributeType> attReqList = spRequest.getAttributes();
+		String[] attrRequestSelectedArray = (String[])session.getAttribute("attrRequestList");
+		List<String> attrRequestSelectedList =Arrays.asList( attrRequestSelectedArray );
+		List<AttributeType> newAttributeList = new AttributeTypeList();
+		for( AttributeType attribute:spRequest.getAttributes())
+		{
+			System.out.println("Friendly:"+attribute.getFriendlyName()+ " name:"+attribute.getName());
+			if (attrRequestSelectedList.contains(attribute.getFriendlyName()) || attrRequestSelectedList.contains(attribute.getName()))
+			{
+				newAttributeList.add(attribute);
+			}
+		}
+		//idpRequest.setAttributes(newAttributeList);
+		
+		String requestSource = (String) session.getAttribute("requestSource");
+		String spRequestSource ="";//Discovery, PDS, SSI, eIDAS, eduGAIN		
+		if (requestSource.contains("eidas"))
+		{ 
+			spRequestSource = "eIDAS";
+		}
+		else if (requestSource.contains("edugain"))
+		{
+			spRequestSource = "eduGAIN";
+		}
+		else if (requestSource.contains("ssi"))
+		{
+			spRequestSource = "SSI";
+		}
+		else if (requestSource.contains("pds"))
+		{
+			spRequestSource = "PDS";
+			String pdsRequestSelection = session.getAttribute("pdsRequestSelection").toString();
+			try
+			{
+			smConnService.updateVariable(sessionId,"PDS",pdsRequestSelection);
+			}
+			catch (Exception ex)
+			{
+				 String errorMsg= "Exception calling SM (updateVariable PDS)  \n";
+				 errorMsg += "Exception message:"+ex.getMessage()+"\n";
+				//model.addAttribute("ErrorMessage",errorMsg);
+				log.error(errorMsg);
+			}
+		}
+		
+		
+		// Cambiar la variable spRequestSource en el SM de Discovery a su actual valor
+		try
+		{
+			smConnService.updateVariable(sessionId,"spRequestSource",spRequestSource);
+		}
+		catch (Exception ex)
+		{
+			 String errorMsg= "Exception calling SM (updateVariable spRequestSource)  \n";
+			 errorMsg += "Exception message:"+ex.getMessage()+"\n";
+			//model.addAttribute("ErrorMessage",errorMsg);
+			log.error(errorMsg);
+		}
+		
+		if (spRequestSource.equalsIgnoreCase("eIDAS") || spRequestSource.equalsIgnoreCase("edugain"))
+		{
+			try
+			{
+				log.info("llamo a prepareAndGoToIdp");
+				
+				return redirectToIDP(sessionId, model, spRequest, spRequestSource);
+				//return prepareAndGoToIdp( sessionId, spRequest, spMetadata, spRequestSource, newAttributeList);
+				//
+			} 
+			catch (Exception e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+				return "error";
+			}
+		}
+		else
+		{
+			try
+			{
+				log.info("llamo a prepareAndGoToAP");
+				return redirectToAP(sessionId, model, spRequest, spRequestSource);
+//				String endpoint="";
+//				String msName = "";
+//				String apiCall ="";
+//
+//				EntityMetadataList emList = cmConnService.getEntityMetadataSet("DATAQUERYSOURCES");
+//				if (spRequestSource.contains("PDS"))
+//				{
+//					spRequestSource="PERSISTENCE";
+//					apiCall = "load";
+//					
+//					//Null ,Mobile, Browser, googleDrive, oneDrive
+//				}
+//				else
+//				{
+//					apiCall = "issue";
+//				}
+//				
+//				EntityMetadataList dataMetadatas = cmConnService.getEntityMetadataSet(spRequestSource);
+//				//SELECT between the different dataMetadatas
+//				int size = dataMetadatas.size();
+//				int selected = 0; //REVIEW
+//				
+//				EntityMetadata dqMetadata= dataMetadatas.get(selected);
+//				msName = dqMetadata.getMicroservice().get(0);
+//				endpoint = getEndpoint(apiCall, msName);
+//				
+//				String token = smConnService.generateToken(sessionId, msName);
+//				System.out.println("Create token to "+msName+" tokenValue:"+token);
+//				System.out.println("redirect to: "+endpoint);
+//				
+//				this.model.addAttribute("msToken", token);
+//				this.model.addAttribute("UrlToRedirect", endpoint);
+//				
+//			
+//				return "redirectform";
+				
+				//return prepareAndGoToAP(sessionId, spRequest, spMetadata, spRequestSource);//newAttributeList
+			} 
+			catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | CertificateException
+					| InvalidKeySpecException | IOException e) 
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return "error";
+			}
+		}
+				
+//		sessionId= "f66d6165-aa4d-4e6a-898e-46faea16d6cf"; //TODO Quitar
+//
+//		ObjectMapper objMapper = new ObjectMapper();
+//		String endPoint = null;
+//		try
+//		{
+//			// Updating the responseAssertions consented by the user: none
+//			smConnService.updateVariable(sessionId,"responseAssertions",objMapper.writeValueAsString(null));
+//		
+//			String msName = getMsName(model, sessionId, null); // Returning the FIRST ONE! ***
+//			endPoint = getSpResponseEndpoint(model, msName,cmConnService);
+//			log.info ("UrlToRedirect: " + endPoint);
+//			if (endPoint == null  || endPoint.contains("error"))
+//			{
+//				model.addAttribute("ErrorMessage","SP endpoint not found");
+//				return "fatalError";
+//			}
+//				
+//			String tokenToSPms = "";
+//			tokenToSPms = smConnService.generateToken(sessionId,msName); 
+//		
+//			model.addAttribute("msToken", tokenToSPms);
+//			model.addAttribute("UrlToRedirect", endPoint);
+//			log.info("En returnFromRequestUI UrlToRedirect"+endPoint);
+//			return "redirectform";
+//		
+//		}
+//		catch (Exception ex)
+//		{
+//			String errorMsg= ex.getMessage()+"\n";
+//			log.info ("Returning error: "+errorMsg);
+//			
+//			model.addAttribute("ErrorMessage",errorMsg);
+//			if (endPoint != null) 
+//	        	return "rmError"; 
+//	        else
+//	        	return "fatalError"; // Unknown endPoint...
+//		}
+	}
+
+
+	private String redirectToIDP(String sessionId, Model model, AttributeSet spRequest, String spRequestSource)
+			throws UnrecoverableKeyException, KeyStoreException, FileNotFoundException, NoSuchAlgorithmException,
+			CertificateException, InvalidKeySpecException, IOException 
+	{
+		
+		EntityMetadata authMetadata0;
+		String msName;
+		String endpoint;
+		
+		if (spRequestSource.equalsIgnoreCase("eidas")||spRequestSource.equalsIgnoreCase("edugain"))
+		{
+			authMetadata0 = cmConnService.getEntityMetadata("AUTHSOURCE", spRequestSource); // Reading the AUTHSOURCEmetadata.json
+			msName = authMetadata0.getMicroservice().get(0);
+			endpoint= getEndpoint("auth",msName);
+		}
+		else
+		{
+			String apiCall;
+			if (spRequestSource.contains("PDS"))
+			{
+				spRequestSource="PERSISTENCE";
+				apiCall = "load";
+				
+				//Null ,Mobile, Browser, googleDrive, oneDrive
+			}
+			else
+			{
+				apiCall = "issue";
+			}
+			//EntityMetadata dataMetadata = cmConnService.getEntityMetadata("DATAQUERYSOURCES", spRequestSource);
+			EntityMetadataList dataMetadatas = cmConnService.getEntityMetadataSet(spRequestSource);
+		
+			int size = dataMetadatas.size();
+			int selected = 0; //REVIEW
+			
+			EntityMetadata dqMetadata= dataMetadatas.get(selected);
+			msName = dqMetadata.getMicroservice().get(0);
+			endpoint = getEndpoint(apiCall, msName);
+		}
+		
+		////
+		////
+		////
+		/// 
+		/// creamos idpMetadata
+		///
+		EntityMetadata idpMetadata = null;
+		//EntityMetadataList eMTDList = cmConnService.getEntityMetadataSet("EIDAS");
+		if (spRequestSource.equalsIgnoreCase("PDS"))
+		{
+			spRequestSource= "PERSISTENCE";
+		}
+		EntityMetadataList eMTDList = cmConnService.getEntityMetadataSet(spRequestSource.toUpperCase());
+		if ((eMTDList!=null)&&(eMTDList.size()>0))
+		{
+			idpMetadata = eMTDList.get(0);
+		}
+		///
+		// creamos idpRequest
+		///
+		AttributeSet idpRequest = new AttributeSet();
+		idpRequest.setId( UUID.randomUUID().toString());
+		idpRequest.setType(AttributeSet.TypeEnum.REQUEST);
+		idpRequest.setIssuer( spRequest.getIssuer());
+		idpRequest.setProperties( spRequest.getProperties());
+		if (idpMetadata!=null)
+		{
+			idpRequest.setRecipient( idpMetadata.getEntityId());
+		}
+		idpRequest.setLoa( spRequest.getLoa());
+		idpRequest.setAttributes(spRequest.getAttributes());
+		
+		
+		///
+		/// actualizamos idpMetadata en SM
+		///
+		ObjectMapper objMapper = new ObjectMapper();
+		try
+		{
+			System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@ idpMetadata:"+idpMetadata.toString());
+			smConnService.updateVariable(sessionId,"idpMetadata",objMapper.writeValueAsString(idpMetadata));
+		}
+		catch (Exception ex)
+		{
+			String errorMsg= "Exception calling SM (updateVariable idpMetadata)  \n";
+			errorMsg += "Exception message:"+ex.getMessage()+"\n";
+			//model.addAttribute("ErrorMessage",errorMsg);
+			log.error(errorMsg);
+		    return "rmError";
+		}
+		
+
+		///
+		// actualizamos idpRequest en SM
+		///
+		objMapper = new ObjectMapper();
+		try
+		{
+			smConnService.updateVariable(sessionId,"idpRequest",objMapper.writeValueAsString(idpRequest));
+		}
+		catch (Exception ex)
+		{
+			String errorMsg= "Exception calling SM (updateVariable idpRequest)  \n";
+			errorMsg += "Exception message:"+ex.getMessage()+"\n";
+			//model.addAttribute("ErrorMessage",errorMsg);
+			log.error(errorMsg);
+		    return "fatalError";
+		}
+		
+		
+		
+		
+		
+		
+		////
+		////
+		////
+		
+		String tokenToSPms = "";
+		tokenToSPms = smConnService.generateToken(sessionId,msName); 
+
+		model.addAttribute("msToken", tokenToSPms);
+		model.addAttribute("UrlToRedirect", endpoint);
+		log.info("En redirectToIDP spRequestSource: "+spRequestSource);
+		log.info("urlToRedirect 	"+endpoint);
+		return "redirectform";
+	}
+	
+	
+	private String redirectToAP(String sessionId, Model model, AttributeSet spRequest, String spRequestSource)
+			throws UnrecoverableKeyException, KeyStoreException, FileNotFoundException, NoSuchAlgorithmException,
+			CertificateException, InvalidKeySpecException, IOException 
+	{
+		
+		/* TESTING
+		sessionId = "51c6f957-8541-4699-a5c3-5ac0539e75ae"; // with session data
+		smConnService.updateVariable(sessionId, "ClientCallbackAddr", "https://vm.project-seal.eu:9063/rm/response");
+		smConnService.updateVariable(sessionId, "spRequestEP", "data_query");
+		
+		//String mySpRequest = "{\"id\":\"_d645d111cf100dfa46ace16ed3b208f0f2e867db83\",\"type\":\"Request\",\"issuer\":\"https:\\/\\/clave.sir2.rediris.es\\/module.php\\/saml\\/sp\\/saml2-acs.php\\/q2891006e_ea0002678\",\"recipient\":null,\"inResponseTo\":null,\"loa\":\"http:\\/\\/eidas.europa.eu\\/LoA\\/low\",\"notBefore\":\"2019-03-05T15:11:41Z\",\"notAfter\":\"2019-03-05T15:16:41Z\",\"status\":{\"code\":null,\"subcode\":null,\"message\":null},\"attributes\":[{\"name\":\"http:\\/\\/eidas.europa.eu\\/attributes\\/naturalperson\\/PersonIdentifier\",\"friendlyName\":\"PersonIdentifier\",\"encoding\":null,\"language\":null,\"isMandatory\":true,\"values\":null},{\"name\":\"http:\\/\\/eidas.europa.eu\\/attributes\\/naturalperson\\/CurrentGivenName\",\"friendlyName\":\"FirstName\",\"encoding\":null,\"language\":null,\"isMandatory\":true,\"values\":null},{\"name\":\"http:\\/\\/eidas.europa.eu\\/attributes\\/naturalperson\\/CurrentFamilyName\",\"friendlyName\":\"FamilyName\",\"encoding\":null,\"language\":null,\"isMandatory\":true,\"values\":null}],\"properties\":{\"SAML_RelayState\":\"\",\"SAML_RemoteSP_RequestId\":\"_193600a923e1959d375e21fb3d216879\",\"SAML_ForceAuthn\":true,\"SAML_isPassive\":false,\"SAML_NameIDFormat\":\"urn:oasis:names:tc:SAML:2.0:nameid-format:persistent\",\"SAML_AllowCreate\":\"true\",\"SAML_ConsumerURL\":\"http:\\/\\/lab9054.inv.uji.es\\/~paco\\/clave\\/secure.php?aaaa=1&bbbb=2\",\"SAML_Binding\":\"urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST\",\"EIDAS_ProviderName\":\"ojetecalor_uojetecalor\",\"EIDAS_IdFormat\":\"urn:oasis:names:tc:SAML:2.0:nameid-format:persistent\",\"EIDAS_SPType\":\"public\",\"EIDAS_Comparison\":\"minimum\",\"EIDAS_LoA\":\"http:\\/\\/eidas.europa.eu\\/LoA\\/low\",\"EIDAS_country\":null}}";       
+		ObjectMapper objMapper = new ObjectMapper();		
+		smConnService.updateVariable(sessionId, "spRequest", objMapper.writeValueAsString(spRequest));
+		END TESTING*/
+		
+		
+		EntityMetadata authMetadata0;
+		String msName;
+		String endpoint;
+		
+//		if (spRequestSource.equalsIgnoreCase("eidas")||spRequestSource.equalsIgnoreCase("edugain"))
+//		{
+//			authMetadata0 = cmConnService.getEntityMetadata("AUTHSOURCE", spRequestSource); // Reading the AUTHSOURCEmetadata.json
+//			msName = authMetadata0.getMicroservice().get(0);
+//			endpoint= getEndpoint("auth",msName);
+//		}
+//		else
+//		{
+			String apiCall;
+			if (spRequestSource.contains("PDS"))
+			{
+				spRequestSource="PERSISTENCE";
+				apiCall = "load";
+				
+				//Null ,Mobile, Browser, googleDrive, oneDrive
+			}
+			else
+			{
+				apiCall = "issue";
+			}
+			//EntityMetadata dataMetadata = cmConnService.getEntityMetadata("DATAQUERYSOURCES", spRequestSource);
+			EntityMetadataList dataMetadatas = cmConnService.getEntityMetadataSet(spRequestSource);
+		
+			int size = dataMetadatas.size();
+			int selected = 0; //REVIEW
+			
+			EntityMetadata dqMetadata= dataMetadatas.get(selected);
+			msName = dqMetadata.getMicroservice().get(0);
+			endpoint = getEndpoint(apiCall, msName);
+//		}
+		
+		////
+		////
+		////
+		/// 
+		/// creamos idpMetadata
+		///
+//		EntityMetadata idpMetadata = null;
+//		//EntityMetadataList eMTDList = cmConnService.getEntityMetadataSet("EIDAS");
+//		if (spRequestSource.equalsIgnoreCase("PDS"))
+//		{
+//			spRequestSource= "PERSISTENCE";
+//		}
+//		EntityMetadataList eMTDList = cmConnService.getEntityMetadataSet(spRequestSource.toUpperCase());
+//		if ((eMTDList!=null)&&(eMTDList.size()>0))
+//		{
+//			idpMetadata = eMTDList.get(0);
+//		}
+//		///
+//		// creamos idpRequest
+//		///
+//		AttributeSet idpRequest = new AttributeSet();
+//		idpRequest.setId( UUID.randomUUID().toString());
+//		idpRequest.setType(AttributeSet.TypeEnum.REQUEST);
+//		idpRequest.setIssuer( spRequest.getIssuer());
+//		idpRequest.setProperties( spRequest.getProperties());
+//		if (idpMetadata!=null)
+//		{
+//			idpRequest.setRecipient( idpMetadata.getEntityId());
+//		}
+//		idpRequest.setLoa( spRequest.getLoa());
+//		idpRequest.setAttributes(spRequest.getAttributes());
+//		
+//		
+//		///
+//		/// actualizamos idpMetadata en SM
+//		///
+//		ObjectMapper objMapper = new ObjectMapper();
+//		try
+//		{
+//			System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@ idpMetadata:"+idpMetadata.toString());
+//			smConnService.updateVariable(sessionId,"idpMetadata",objMapper.writeValueAsString(idpMetadata));
+//		}
+//		catch (Exception ex)
+//		{
+//			String errorMsg= "Exception calling SM (updateVariable idpMetadata)  \n";
+//			errorMsg += "Exception message:"+ex.getMessage()+"\n";
+//			//model.addAttribute("ErrorMessage",errorMsg);
+//			log.error(errorMsg);
+//		    return "rmError";
+//		}
+//		
+//
+//		///
+//		// actualizamos idpRequest en SM
+//		///
+//		objMapper = new ObjectMapper();
+//		try
+//		{
+//			smConnService.updateVariable(sessionId,"idpRequest",objMapper.writeValueAsString(idpRequest));
+//		}
+//		catch (Exception ex)
+//		{
+//			String errorMsg= "Exception calling SM (updateVariable idpRequest)  \n";
+//			errorMsg += "Exception message:"+ex.getMessage()+"\n";
+//			//model.addAttribute("ErrorMessage",errorMsg);
+//			log.error(errorMsg);
+//		    return "fatalError";
+//		}
+		
+		
+		
+		
+		
+		
+		////
+		////
+		////
+		
+		String tokenToSPms = "";
+		tokenToSPms = smConnService.generateToken(sessionId,msName); 
+		
+		model.addAttribute("msToken", tokenToSPms);
+		model.addAttribute("UrlToRedirect", endpoint);
+		log.info("En redirectToIDP spRequestSource: "+spRequestSource);
+		log.info("urlToRedirect 	"+endpoint);
+		//return "redirectform";
+		return "redirectform2";
+	}
+	
+	
+	
+	
+	///De Response
+	// TO BE REFACTORED:
+		private EntityMetadata readSpMetadata(Model model, String sessionId)
+				throws IOException, JsonParseException, JsonMappingException {
+			EntityMetadata spMetadata = null;
+			Object objSpMetadata = null;
+			try
+			{
+				objSpMetadata = smConnService.readVariable(sessionId, "spMetadata");
+			}
+			catch (Exception ex)
+			{
+				String errorMsg= "Exception calling SM (getSessionData spMetadata)  \n";
+				errorMsg += "Exception message:"+ex.getMessage()+"\n";
+				model.addAttribute("ErrorMessage",errorMsg);
+				log.info ("Returning error: "+errorMsg);
+		        
+		        //return "rmError";
+			}
+			spMetadata = (new ObjectMapper()).readValue(objSpMetadata.toString(),EntityMetadata.class);
+			log.info("spMetadata: " + spMetadata.toString());
+			
+			return spMetadata;
+		}
+		
+		// TO BE REFACTORED:
+		public String getMsName(Model model, String sessionId,EntityMetadata spMetadata) throws IOException, JsonParseException, JsonMappingException
+		//public String getMsName(Model model, String sessionId) throws IOException, JsonParseException, JsonMappingException
+		{
+			
+			final String msName;
+			
+			
+			//EntityMetadata spMetadata;
+			if (spMetadata == null)
+				spMetadata = readSpMetadata(model, sessionId);
+				
+			if (spMetadata.getMicroservice() == null || spMetadata.getMicroservice().size() == 0)
+			{
+				// ERROR
+				String errorMsg= "Error getting microservice from spMetadata \n";
+				log.error(errorMsg);
+				
+				model.addAttribute("ErrorMessage",errorMsg);
+		        return "fatalError"; 
+			}
+			msName = spMetadata.getMicroservice().get(0);  // Choosing the first one!! TO ASK
+			log.info ("spMetadata msName: "+msName);
+			
+			return msName;
+		}
+		
+		// TO BE REFACTORED:
+		public String getSpResponseEndpoint(Model model, String msName,  ConfMngrConnService cmService)
+		{
+			String endPoint = null;
+			
+			MsMetadataList spList= cmService.getMicroservicesByApiClass("SP");
+			
+			Optional<MsMetadata> msopt = spList.stream().filter(a->a.getMsId().equalsIgnoreCase(msName)).findAny();
+			//MsMetadata ms= null;
+			List<PublishedApiType> listPub;
+			if (msopt.isPresent())
+						listPub= msopt.get().getPublishedAPI();
+			else
+			{
+				log.info ("Error ms not found: " + msName);
+				
+				return "error";//TODO
+			}
+			
+			// sp/response *** TO UPDATE
+			Optional<PublishedApiType> pubOpt = listPub.stream().filter(a->(a.getApiClass()==ApiClassEnum.SP && a.getApiCall().contains("handleResponse"))).findAny();
+			if (pubOpt.isPresent())
+			{
+				endPoint = pubOpt.get().getApiEndpoint();
+				//log.info ("Endpoint: " + endPoint);
+			}
+			else
+			{
+				log.info ("Error: endpoint for *handleResponse* not found.");
+				return "error";//TODO
+			}
+			return endPoint;
+		}
 }

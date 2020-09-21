@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>RequestManager redirecting</title>
+</head>
+<!-- <body onload="document.redirect.submit()">  -->
+<!-- <form action="${UrlToRedirect}" id="redirect" name="redirect" method="POST"> -->
+<!-- <input id="authResponse" type="hidden" value="${msToken}" name="msToken"/> -->
+<!-- </form> -->
+<body>
+
+ <h1>SEAL</h1>
+<!--  <div class="header"> -->
+ 
+ 	<form name="myRedirectForm" action="" th:action="${UrlToRedirect}" method="GET">
+ 		<input name="msToken" type="hidden" value="" th:value="${msToken}" />
+ 		<noscript>
+            <input type="submit" value="Click here to continue" />
+        </noscript>
+        <script type="text/javascript">
+
+            (function () {
+                document.myRedirectForm.submit();
+            })();
+
+        </script>
+ 	</form>
+ 	
+</body>
+</html>

@@ -101,8 +101,14 @@ public class ResponseServiceImp implements ResponseService
 			sessionId = smConnService.validateToken(token);
 			if (sessionId != null) {
 				msName = getMsName(model, sessionId, null); // Returning the FIRST ONE! ***
-				endPoint = getSpResponseEndpoint(model, msName,cmConnService);
+				endPoint = getSpResponseEndpoint(model, msName,cmConnService);  // from spMetadata
+				
+				/* Testing
+				msName = "SAMLms_0001";
+				endPoint = "https://stork.uji.es/esmoSPms/module.php/esmo/sp/response.php/esmo";				  
+				Testing*/			
 			}
+			model.addAttribute("sessionId", sessionId);
 			
 			log.info ("UrlToRedirect: " + endPoint);
 			if (endPoint == null  || endPoint.contains("error"))
@@ -118,65 +124,58 @@ public class ResponseServiceImp implements ResponseService
 		
 			// msToken just generated
 			model.addAttribute("msToken", tokenToSPms);
-		
-			// Reading "dsResponse"
-			Object objDsResponse = null;
-			AttributeSet dsResponse = null;	
-			log.info("BEFORE dsResponse: ");
-			objDsResponse = smConnService.readVariable(sessionId, "dsResponse");	
-			dsResponse = (new ObjectMapper()).readValue(objDsResponse.toString(),AttributeSet.class);
-			log.info("dsResponse: " + dsResponse.toString() );
-			
-			// Building responseAssertions 
-			AttributeSetList responseAssertions= new AttributeSetList ();
-			
-	// TO REMOVE:
-	//		AttributeSet idpResponse = new AttributeSet();
-	//		idpResponse = dsResponse;
-	//		responseAssertions.add(idpResponse);
-			
-			responseAssertions.add(dsResponse);
-			ObjectMapper objMapper = new ObjectMapper();
-			smConnService.updateVariable(sessionId,"responseAssertions",objMapper.writeValueAsString(responseAssertions));
-			
-			if (dsResponse.getStatus().getCode() == AttributeSetStatus.CodeEnum.ERROR)	// Returning error to the SPms
-			{	
-				log.error("dsResponse returning error");
-				
-				model.addAttribute("ErrorMessage", "dsResponse returning error");
-				return "rmError";
-			}
 
-			
-			// Reading "dsMetadata"... what for???
-			EntityMetadata dsMetadata = null;
-			Object objDsMetadata = null;
-			objDsMetadata = smConnService.readVariable(sessionId, "dsMetadata");
-			if (objDsMetadata != null) {
-				dsMetadata = (new ObjectMapper()).readValue(objDsMetadata.toString(),EntityMetadata.class);
-				log.info("dsMetadata: " + dsMetadata.toString());
-			}
-			else
-				log.info("****NULL dsMetadata!!****");
-		
-					
 			//
 			//  Looking for the kind of endpoint to redirect: spRequestEP
 			// 
 			String spRequestEP="";
 			spRequestEP = (String)smConnService.readVariable(sessionId, "spRequestEP");
 			log.info("spRequestEP just read: "+spRequestEP);
-	
-				
-			// TESTING:
-			//spRequestEP = "testing";
-			//spRequestEP = "data_query";
-			//log.info("*** TESTING spRequestEP: "+spRequestEP);
 			
 			if (spRequestEP.contains("auth")) { //auth_request
-				// Do nothing
+				// It is an auth request.
 				log.info ("It's an auth request.");
-	
+		
+				// Reading "dsResponse"
+				Object objDsResponse = null;
+				AttributeSet dsResponse = null;	
+				log.info("BEFORE dsResponse: ");
+				objDsResponse = smConnService.readVariable(sessionId, "dsResponse");	
+				dsResponse = (new ObjectMapper()).readValue(objDsResponse.toString(),AttributeSet.class);
+				log.info("dsResponse: " + dsResponse.toString() );
+				
+				// Building responseAssertions 
+				AttributeSetList responseAssertions= new AttributeSetList ();
+				
+		// TO REMOVE:
+		//		AttributeSet idpResponse = new AttributeSet();
+		//		idpResponse = dsResponse;
+		//		responseAssertions.add(idpResponse);
+				
+				responseAssertions.add(dsResponse);
+				ObjectMapper objMapper = new ObjectMapper();
+				smConnService.updateVariable(sessionId,"responseAssertions",objMapper.writeValueAsString(responseAssertions));
+				
+				if (dsResponse.getStatus().getCode() == AttributeSetStatus.CodeEnum.ERROR)	// Returning error to the SPms
+				{	
+					log.error("dsResponse returning error");
+					
+					model.addAttribute("ErrorMessage", "dsResponse returning error");
+					return "rmError";
+				}
+					
+				// Reading "dsMetadata"... what for???
+				EntityMetadata dsMetadata = null;
+				Object objDsMetadata = null;
+				objDsMetadata = smConnService.readVariable(sessionId, "dsMetadata");
+				if (objDsMetadata != null) {
+					dsMetadata = (new ObjectMapper()).readValue(objDsMetadata.toString(),EntityMetadata.class);
+					log.info("dsMetadata: " + dsMetadata.toString());
+				}
+				else
+					log.info("****NULL dsMetadata!!****");
+
+				
 				// Redirecting
 				return "redirectform";				
 			}
@@ -224,9 +223,16 @@ public class ResponseServiceImp implements ResponseService
 				
 				// Open the GUI and sending the response assertions selected by the user
 				// TODO: errorMsg?
-				
-				// TODO: dataStoreObjectList
-				return prepareAndGotoResponseUI( sessionId,  model, spRequest, ds, null); 
+				if (ds.size() > 0)
+					return prepareAndGotoResponseUI( sessionId,  model, spRequest, ds, null); 
+				else {
+					String errorMsg= "Empty dataStore!!";
+					log.info ("Returning error: "+errorMsg);
+					
+					model.addAttribute("ErrorMessage", errorMsg);
+					return "rmError";
+				}
+					
 				
 			}
 			else {
@@ -266,32 +272,41 @@ public class ResponseServiceImp implements ResponseService
 		    String errorMessage) 
 
 	{
-		log.info("prepareAndGotoResponseUI ...");
+		log.info("prepareAndGotoResponseUI ...sessionId: "+ sessionId);
 		
 		// Filling dsList 
 		// and attributeSendList--> NOT NECESSARY 
 //		AttributeTypeList attributesSendList = new AttributeTypeList();
 		List<DataSet> dsList = new ArrayList<DataSet>();
-		dataStore.forEach ((dso)-> {
-			JsonObject myJSONdso = new JsonParser().parse(dso.toString()).getAsJsonObject();
-			log.info("myJSONdso: " + myJSONdso.toString());
+		if (dataStore != null && dataStore.size()> 0) { // Non empty dataStore
 			
-			DataSet aux_ds = null;
-			try {
-				aux_ds = (new ObjectMapper()).readValue(myJSONdso.get("data").toString(),DataSet.class);
-			} catch (JsonParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (JsonMappingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			dsList.add(aux_ds);
+			dataStore.forEach ((dso)-> {
+				log.info("dso.toString(): " + dso.toString());
+//				JsonObject myJSONdso = new JsonParser().parse(dso.toString()).getAsJsonObject();
+//				log.info("myJSONdso: " + myJSONdso.toString());
+				
+				DataSet aux_ds = null;
+				try {
+					//aux_ds = (new ObjectMapper()).readValue(myJSONdso.get("data").toString(),DataSet.class);
+					aux_ds = (new ObjectMapper()).readValue(dso.getData(), DataSet.class);
+					log.info("aux_ds: " + aux_ds.toString());
+					dsList.add(aux_ds);
+					
+				} catch (JsonParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (JsonMappingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				//dsList.add(aux_ds);
+				
+			});
 			
-		});
+		}
 		
 /*	OLD	
 		for (DataSet aux_ds:dataStore.getClearData()) {
@@ -317,43 +332,56 @@ public class ResponseServiceImp implements ResponseService
 //		session.setAttribute("attributesSendList", attributesSendList); //TO REMOVE
 		
 		AttributeSetList attributesConsentList = new AttributeSetList();
-		for (DataSet auxDs  : dsList) {
-			//Filtering with the requested attributes
-			List<AttributeType> attrs = new ArrayList<AttributeType>();
-			boolean found = false;
-			for (AttributeType auxAttr : auxDs.getAttributes()) {
-				for (AttributeType reqAttr : attributesRequestList) {
-					if (reqAttr.getFriendlyName().contains(auxAttr.getFriendlyName()) || 
-						reqAttr.getName().contains(auxAttr.getName())) {
-						found = true;
-						break;
-					}	
+		
+		if (dsList.size() > 0) {
+		//TODO: check with UPorto!
+			
+			for (DataSet auxDs  : dsList) {
+				log.info ("Filtering with the requested attributes ...");
+				
+				List<AttributeType> attrs = new ArrayList<AttributeType>();
+				boolean found = false;
+				for (AttributeType auxAttr : auxDs.getAttributes()) {
+					log.info("auxAttr friendly: " + auxAttr.getFriendlyName());
+					log.info("auxAttr: " + auxAttr.getName());
+					for (AttributeType reqAttr : attributesRequestList) {
+						log.info("reqAttr friendly: " + reqAttr.getFriendlyName());
+						log.info("reqAttr: " + reqAttr.getName());
+						if ((reqAttr.getFriendlyName() != null) && (reqAttr.getFriendlyName().contains(auxAttr.getFriendlyName())) || 
+							reqAttr.getName().contains(auxAttr.getName())) {
+							found = true;
+							break;
+						}	
+					}
+					if (found) {	
+						log.info("Found friendly: " + auxAttr.getFriendlyName());
+						log.info("Found: " + auxAttr.getName());
+						attrs.add(auxAttr);	
+						found = false;
+					}				
 				}
-				if (found) {				
-					attrs.add(auxAttr);	
-					found = false;
-				}				
-			}
-			if (attrs.size() != 0) {
-				
-				AttributeSet attributeSet = new AttributeSet();
-				attributeSet.setId(auxDs.getId());
-				attributeSet.setIssuer(auxDs.getIssuerId());
-				attributeSet.setType(TypeEnum.REQUEST);
-				attributeSet.setStatus(null);
-				attributeSet.setRecipient("RECIPIENT__TOASK");
-				attributeSet.setLoa(auxDs.getLoa());
-				attributeSet.setNotAfter(auxDs.getExpiration());
-				attributeSet.setNotBefore(auxDs.getIssued());
-				attributeSet.setProperties(auxDs.getProperties());
-				attributeSet.setInResponseTo("INRESPONSETO__TOASK");
-				// Not necessary all the above settings...
-				
-				attributeSet.setAttributes(attrs);
-				
-				attributesConsentList.add(attributeSet);
-			}			
-		}		
+				if (attrs.size() != 0) {
+					
+					AttributeSet attributeSet = new AttributeSet();
+					attributeSet.setId(auxDs.getId());
+					attributeSet.setIssuer(auxDs.getIssuerId());
+					attributeSet.setType(TypeEnum.REQUEST);
+					attributeSet.setStatus(null);
+					attributeSet.setRecipient("RECIPIENT__TOASK");
+					attributeSet.setLoa(auxDs.getLoa());
+					attributeSet.setNotAfter(auxDs.getExpiration());
+					attributeSet.setNotBefore(auxDs.getIssued());
+					attributeSet.setProperties(auxDs.getProperties());
+					attributeSet.setInResponseTo("INRESPONSETO__TOASK");
+					// Not necessary all the above settings...
+					
+					attributeSet.setAttributes(attrs);
+					
+					attributesConsentList.add(attributeSet);
+				}			
+			}		
+		
+		}
 		
 		log.info("attributesConsentList: " + attributesConsentList);
 		session.setAttribute("attributesConsentList", attributesConsentList);
@@ -374,7 +402,8 @@ public class ResponseServiceImp implements ResponseService
 
 		
 		
-		return "redirect:../rm/response_client"; 
+		//return "redirect:../rm/response_client"; 
+		return "redirect:../response_client"; 
 		//TODO Move to rest_api.controllers.client.MultiUIController***?
 		// ResponseUIController.java in this package by the moment.
 		// See the related responseForm.html

@@ -16,4 +16,8 @@ public interface RequestService
 {
 
 	public String rmRequest(String token, Model model) throws JsonParseException, JsonMappingException, IOException, UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, CertificateException, InvalidKeySpecException;
+
+	public String returnNothing(String sessionId, Model model);
+
+	public String returnFromRequestUI(String sessionId, Model model);
 }
