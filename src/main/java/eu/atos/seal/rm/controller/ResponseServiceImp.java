@@ -108,6 +108,7 @@ public class ResponseServiceImp implements ResponseService
 				endPoint = "https://stork.uji.es/esmoSPms/module.php/esmo/sp/response.php/esmo";				  
 				Testing*/			
 			}
+			model.addAttribute("sessionId", sessionId);
 			
 			log.info ("UrlToRedirect: " + endPoint);
 			if (endPoint == null  || endPoint.contains("error"))
@@ -271,7 +272,7 @@ public class ResponseServiceImp implements ResponseService
 		    String errorMessage) 
 
 	{
-		log.info("prepareAndGotoResponseUI ...");
+		log.info("prepareAndGotoResponseUI ...sessionId: "+ sessionId);
 		
 		// Filling dsList 
 		// and attributeSendList--> NOT NECESSARY 
