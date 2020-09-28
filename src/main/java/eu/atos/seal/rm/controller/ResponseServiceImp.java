@@ -265,6 +265,10 @@ public class ResponseServiceImp implements ResponseService
 	
 	@Value("${rm.multiui.consentFinish}") //Defined in application.properties file
     String consentFinish;
+	@Value("${rm.multiui.consentFinish0}") //Defined in application.properties file
+    String consentFinish0;
+	@Value("${rm.multiui.consentFinish}") //Defined in application.properties file
+    String consentReturn;
 
 	private String prepareAndGotoResponseUI( String sessionId, Model model, 
 			AttributeSet spRequest,
@@ -393,6 +397,10 @@ public class ResponseServiceImp implements ResponseService
 			session.setAttribute("privacyPolicy",privacyPolicy);
 		if (consentFinish != null)
 			session.setAttribute("consentFinish",consentFinish);
+		if (consentFinish != null)
+			session.setAttribute("consentFinish0",consentFinish0);
+		if (consentFinish != null)
+			session.setAttribute("consentReturn",consentReturn);
 		
 		
 		model.addAttribute("dsList", dsList);
