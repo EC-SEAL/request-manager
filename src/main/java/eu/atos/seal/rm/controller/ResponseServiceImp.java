@@ -267,7 +267,7 @@ public class ResponseServiceImp implements ResponseService
     String consentFinish;
 	@Value("${rm.multiui.consentFinish0}") //Defined in application.properties file
     String consentFinish0;
-	@Value("${rm.multiui.consentFinish}") //Defined in application.properties file
+	@Value("${rm.multiui.consentReturn}") //Defined in application.properties file
     String consentReturn;
 
 	private String prepareAndGotoResponseUI( String sessionId, Model model, 
@@ -397,9 +397,9 @@ public class ResponseServiceImp implements ResponseService
 			session.setAttribute("privacyPolicy",privacyPolicy);
 		if (consentFinish != null)
 			session.setAttribute("consentFinish",consentFinish);
-		if (consentFinish != null)
+		if (consentFinish0 != null)
 			session.setAttribute("consentFinish0",consentFinish0);
-		if (consentFinish != null)
+		if (consentReturn != null)
 			session.setAttribute("consentReturn",consentReturn);
 		
 		

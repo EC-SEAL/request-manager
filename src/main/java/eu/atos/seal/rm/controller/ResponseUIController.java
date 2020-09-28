@@ -200,7 +200,7 @@ public class ResponseUIController
         String errorMessage = (String) session.getAttribute("errorMessage");
         String SPName = (String) session.getAttribute("SPName");
         String privacyPolicy = (String) session.getAttribute("privacyPolicy");
-        String consentFinish = (String) session.getAttribute("consentFinish");
+        String consentFinish0 = (String) session.getAttribute("consentFinish0");
         //String consentReturn = (String) session.getAttribute("consentReturn");
 
         if (dsList ==  null || 
@@ -299,11 +299,7 @@ public class ResponseUIController
 
         model.addAttribute("SPName", (SPName != null) ? SPName : "Service Provider");
         model.addAttribute("privacyPolicy", privacyPolicy);
-        model.addAttribute("consentFinish", consentFinish);
-
-        //model.addAttribute("consentQuery", consentQuery);
-        
-        
+        model.addAttribute("consentFinish0", consentFinish0);
 
         //return "responseForm_test";
         return "responseForm0";
