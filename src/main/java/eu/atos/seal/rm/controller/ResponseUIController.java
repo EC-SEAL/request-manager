@@ -72,8 +72,8 @@ public class ResponseUIController
         String errorMessage = (String) session.getAttribute("errorMessage");
         String SPName = (String) session.getAttribute("SPName");
         String privacyPolicy = (String) session.getAttribute("privacyPolicy");
-        //String consentQuery = (String) session.getAttribute("consentQuery");
         String consentFinish = (String) session.getAttribute("consentFinish");
+        //String consentFinish0 = (String) session.getAttribute("consentFinish0");
         String consentReturn = (String) session.getAttribute("consentReturn");
 
         if (dsList ==  null || 
@@ -171,13 +171,138 @@ public class ResponseUIController
         model.addAttribute("SPName", (SPName != null) ? SPName : "Service Provider");
         model.addAttribute("privacyPolicy", privacyPolicy);
         model.addAttribute("consentFinish", consentFinish);
+        //model.addAttribute("consentFinish0", consentFinish0);
+        model.addAttribute("consentReturn", consentReturn);
 
-        //model.addAttribute("consentQuery", consentQuery);
-        
-        
 
         //return "responseForm_test";
         return "responseForm";
+        
+    }
+    
+    @GetMapping("response_client0")
+    public String getHtmlForm0(HttpSession session, Model model) throws Exception
+    {
+    	log.info ("GET response_client0: getHtmlForm0....");
+    	
+        
+    	//** DataStore has a list of DataSets
+    	//** DataSet has a list of AttributeTypes
+    	//** NOT FOUND ANY: The SPrequest has a list of requested AttributeTypes
+    	
+    	List<DataSet> dsList = (List<DataSet>) session.getAttribute("dsList"); // list of dataSets
+        AttributeSetList attributesConsentList = (AttributeSetList) session
+                .getAttribute("attributesConsentList");
+        
+        String urlReturn = (String) session.getAttribute("urlReturn");
+        String urlFinishProcess = (String) session.getAttribute("urlFinishProcess");
+        String infoMessage = (String) session.getAttribute("infoMessage");
+        String errorMessage = (String) session.getAttribute("errorMessage");
+        String SPName = (String) session.getAttribute("SPName");
+        String privacyPolicy = (String) session.getAttribute("privacyPolicy");
+        String consentFinish0 = (String) session.getAttribute("consentFinish0");
+        //String consentReturn = (String) session.getAttribute("consentReturn");
+
+        if (dsList ==  null || 
+//        	attributesRequestList == null || attributesSendList == null || 
+        	urlReturn == null || urlFinishProcess == null)
+        {
+            throw new Exception("Data not initialize");
+        }
+
+        List<DSClient> dsClientList = new ArrayList<DSClient>(); //APClient
+
+        for (int i = 0; i < dsList.size(); i++)
+        {
+            DSClient dsClient = DSClient.getDSClientFrom(dsList.get(i), i);
+            dsClientList.add(dsClient);
+        }
+
+        model.addAttribute("dsList", dsClientList);
+
+//        List<AttributeClient> attributeClientList = new ArrayList<AttributeClient>();
+//
+//        for (int i = 0; i < attributesRequestList.size(); i++)
+//        {
+//            AttributeClient attributeClient = AttributeClient
+//                    .getAttributeClientFrom(attributesRequestList.get(i), i);
+//            attributeClientList.add(attributeClient);
+//        }
+//
+//        model.addAttribute("attributesRequestList", attributeClientList);// Necessary in order to filter the results to be shown
+//        
+//        List<AttributeClient> attributeClientSendList = new ArrayList<AttributeClient>();
+//
+//        if (attributesSendList != null)
+//        {
+//            for (int i = 0; i < attributesSendList.size(); i++)
+//            {
+//                AttributeClient attributeClient = AttributeClient
+//                        .getAttributeClientFrom(attributesSendList.get(i), i);
+//                attributeClientSendList.add(attributeClient);
+//            }
+//        }
+//
+//        model.addAttribute("attributesSendList", attributeClientSendList);  
+
+       
+/* NOT FOUND
+        List<AttributeSetClient> consentList = new ArrayList<AttributeSetClient>();
+
+        if (attributesConsentList != null)
+        {
+            for (AttributeSet attributeSet : attributesConsentList)
+            {
+                AttributeSetClient attributeSetClient = new AttributeSetClient();
+                attributeSetClient.setId(attributeSet.getIssuer());
+
+                List<AttributeClient> aux = new ArrayList<AttributeClient>();
+                if (attributeSet.getAttributes() != null)
+                {
+                    for (int i = 0; i < attributeSet.getAttributes().size(); i++)
+                    {
+                        AttributeClient attributeClient = AttributeClient
+                                .getAttributeClientFrom(attributeSet.getAttributes().get(i), i);
+                        aux.add(attributeClient);
+                    }
+
+                    attributeSetClient.setAttributeClientList(aux);
+                }
+                consentList.add(attributeSetClient);
+            }
+        }
+        
+        log.info("consentList: " + consentList.toString());
+ 
+        model.addAttribute("attributesConsentList", consentList);
+ */       
+        
+        for (int i = 0; i < dsList.size(); i++)
+        {
+            DSClient dsClient = DSClient.getDSClientFrom(dsList.get(i), i);
+            dsClientList.add(dsClient);
+
+        }
+
+
+        model.addAttribute("urlFinishProcess", urlFinishProcess);
+//        model.addAttribute("urlReturn", urlReturn);
+
+        if (infoMessage != null)
+        {
+            model.addAttribute("infoMessage", infoMessage);
+        }
+        if (errorMessage != null)
+        {
+            model.addAttribute("errorMessage", errorMessage);
+        }
+
+        model.addAttribute("SPName", (SPName != null) ? SPName : "Service Provider");
+        model.addAttribute("privacyPolicy", privacyPolicy);
+        model.addAttribute("consentFinish0", consentFinish0);
+
+        //return "responseForm_test";
+        return "responseForm0";
         
     }
 

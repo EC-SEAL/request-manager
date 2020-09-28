@@ -56,4 +56,6 @@ rm.cm:
 rm.multiui:
   privacyPolicy: ${URL_PRIVACY_POLICY}
   consentFinish: ${TEXT_CONSENT_FINISH}
+  consentFinish0: ${TEXT_CONSENT_FINISH0}
+  consentReturn: ${TEXT_CONSENT_RETURN}
    

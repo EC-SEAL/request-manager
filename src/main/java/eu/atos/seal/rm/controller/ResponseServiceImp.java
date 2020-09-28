@@ -265,6 +265,10 @@ public class ResponseServiceImp implements ResponseService
 	
 	@Value("${rm.multiui.consentFinish}") //Defined in application.properties file
     String consentFinish;
+	@Value("${rm.multiui.consentFinish0}") //Defined in application.properties file
+    String consentFinish0;
+	@Value("${rm.multiui.consentReturn}") //Defined in application.properties file
+    String consentReturn;
 
 	private String prepareAndGotoResponseUI( String sessionId, Model model, 
 			AttributeSet spRequest,
@@ -393,17 +397,23 @@ public class ResponseServiceImp implements ResponseService
 			session.setAttribute("privacyPolicy",privacyPolicy);
 		if (consentFinish != null)
 			session.setAttribute("consentFinish",consentFinish);
+		if (consentFinish0 != null)
+			session.setAttribute("consentFinish0",consentFinish0);
+		if (consentReturn != null)
+			session.setAttribute("consentReturn",consentReturn);
 		
 		
 		model.addAttribute("dsList", dsList);
 //		model.addAttribute("attributesRequestList", attributesRequestList);
 //		model.addAttribute("attributesSendList", attributesSendList);
 		model.addAttribute("attributesConsentList", attributesConsentList);
-
 		
+		if (attributesConsentList.size() > 0)
+			//return "redirect:../rm/response_client"; 
+			return "redirect:../response_client"; 
+		else
+			return "redirect:../response_client0";	// There's been no requested attribute found.
 		
-		//return "redirect:../rm/response_client"; 
-		return "redirect:../response_client"; 
 		//TODO Move to rest_api.controllers.client.MultiUIController***?
 		// ResponseUIController.java in this package by the moment.
 		// See the related responseForm.html
