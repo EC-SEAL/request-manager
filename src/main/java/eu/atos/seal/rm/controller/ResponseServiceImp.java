@@ -399,11 +399,13 @@ public class ResponseServiceImp implements ResponseService
 //		model.addAttribute("attributesRequestList", attributesRequestList);
 //		model.addAttribute("attributesSendList", attributesSendList);
 		model.addAttribute("attributesConsentList", attributesConsentList);
-
 		
+		if (attributesConsentList.size() > 0)
+			//return "redirect:../rm/response_client"; 
+			return "redirect:../response_client"; 
+		else
+			return "redirect:../response_client0";	// There's been no requested attribute found.
 		
-		//return "redirect:../rm/response_client"; 
-		return "redirect:../response_client"; 
 		//TODO Move to rest_api.controllers.client.MultiUIController***?
 		// ResponseUIController.java in this package by the moment.
 		// See the related responseForm.html
