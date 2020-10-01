@@ -262,9 +262,10 @@ public class RequestServiceImp implements RequestService
 		{
 			spRequestEP="auth_request";
 		}
-		if (spRequestSource==null)
+		if (spRequestSource==null || spRequestSource.length() == 0) // 20201001 Paco on skype
 		{
-			spRequestSource="eIDAS";
+			//spRequestSource="eIDAS";
+			spRequestSource="Discovery";
 		}
 		String collectionId ="";
 		if (spRequestEP.contains("auth"))
