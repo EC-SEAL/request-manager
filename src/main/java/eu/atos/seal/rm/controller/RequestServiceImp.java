@@ -750,7 +750,8 @@ public class RequestServiceImp implements RequestService
 		return spRequestSource;
 	}
 	
-	private String readSpRequestEP(String sessionId) {
+	private String readSpRequestEP(String sessionId) 
+	{
 		String spRequestEP="";
 		try
 		{
@@ -919,6 +920,7 @@ public class RequestServiceImp implements RequestService
 		try
 		{
 			smConnService.updateVariable(sessionId,"spRequestSource",spRequestSource);
+			smConnService.updateVariable(sessionId,"isDiscovery","TRUE");
 		}
 		catch (Exception ex)
 		{
