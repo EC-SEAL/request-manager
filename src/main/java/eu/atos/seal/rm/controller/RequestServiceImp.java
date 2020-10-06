@@ -255,6 +255,9 @@ public class RequestServiceImp implements RequestService
 				 
 			 }
 		}
+		
+		//Por defecto le doy un valor a la variable isDiscovery
+		smConnService.updateVariable(sessionId,"isDiscovery","FALSE");
 	
 		
 		//[DELETE

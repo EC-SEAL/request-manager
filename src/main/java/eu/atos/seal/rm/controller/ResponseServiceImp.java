@@ -132,7 +132,20 @@ public class ResponseServiceImp implements ResponseService
 			spRequestEP = (String)smConnService.readVariable(sessionId, "spRequestEP");
 			log.info("spRequestEP just read: "+spRequestEP);
 			
-			if (spRequestEP.contains("auth")) { //auth_request
+			String sIsDiscovery=(String)smConnService.readVariable(sessionId, "isDiscovery");
+			log.info("sIsDiscovery just read: "+sIsDiscovery);
+			
+			if (sIsDiscovery == null)
+			{
+				String errorMsg= "isDiscovery null ";
+    			log.info ("Returning error: "+errorMsg);
+			
+    			model.addAttribute("ErrorMessage", errorMsg);
+    			return "rmError";	
+			}
+			
+			//if (spRequestEP.contains("auth")) { //auth_request
+			if (  !sIsDiscovery.equalsIgnoreCase("TRUE") ) {
 				// It is an auth request.
 				log.info ("It's an auth request.");
 		
@@ -179,7 +192,8 @@ public class ResponseServiceImp implements ResponseService
 				// Redirecting
 				return "redirectform";				
 			}
-			else if (spRequestEP.contains("data")) {// data_query
+			//else if (spRequestEP.contains("data")) {// data_query
+			else { // sIsDiscovery=TRUE
 				// Show and confirm sending response assertions
 				
 				// Reading the dataSets from the dataStore
@@ -235,13 +249,13 @@ public class ResponseServiceImp implements ResponseService
 					
 				
 			}
-			else {
-				String errorMsg= "spRequestEP: " + spRequestEP;
-				log.info ("Returning error: "+errorMsg);
-				
-				model.addAttribute("ErrorMessage", errorMsg);
-				return "rmError";
-			}
+//			else {
+//				String errorMsg= "spRequestEP: " + spRequestEP;
+//				log.info ("Returning error: "+errorMsg);
+//				
+//				model.addAttribute("ErrorMessage", errorMsg);
+//				return "rmError";
+//			}
 		
 		
 		}
