@@ -65,7 +65,7 @@
 				<div class="card main-split">
 
 					<strong>
-						<p class="main-title">NO Personal Data Retrieved</p>
+						<p class="main-title">NO Personal Data Retrieved matching asked Data</p>
 					</strong>
 
 					<div id="attributes-consent">
@@ -105,7 +105,7 @@
 					</div>
 
 					<form id="rejecting-form" class="consent-form"
-						th:action="${urlFinishProcess}" method="get">
+						th:action="${urlFinishProcess0}" method="get">
 						<p th:if="${consentFinish0}" class="consent-text" th:text="${consentFinish0}"></p>
             			<p th:unless="${consentFinish0}" class="consent-text finish-consent-text">
                 			NOT FOUND any attribute requested.</p>

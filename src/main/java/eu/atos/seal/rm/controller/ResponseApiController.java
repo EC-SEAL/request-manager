@@ -17,6 +17,8 @@ package eu.atos.seal.rm.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import eu.atos.seal.rm.model.AttributeSet;
+import eu.atos.seal.rm.model.EntityMetadataList;
 import io.swagger.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +58,9 @@ public class ResponseApiController implements ResponseApi {
     
     @Autowired
     private ResponseService responseService;
+    
+    @Autowired
+    private RequestService requestService;
 
     private final HttpServletRequest request;
 
@@ -77,6 +82,16 @@ public class ResponseApiController implements ResponseApi {
     {
     	log.info("ACCEPT: Entering response_client/return ...sessionId: " + session.getAttribute("sessionId"));
     	return responseService.returnFromResponseUI ((String)session.getAttribute("sessionId"), model);
+    }
+    
+    @GetMapping("response_client/back")
+    public String backToRequest (HttpSession session, Model model) throws Exception
+    {
+    	String sessionId = (String) session.getAttribute("sessionId");
+    	log.info("ACCEPT: Entering response_client/back ...sessionId: " + sessionId);
+     	
+    	return responseService.goToSelectIUI_2 (model, sessionId);
+    	
     }
     
 

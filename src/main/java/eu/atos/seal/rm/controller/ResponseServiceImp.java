@@ -45,6 +45,7 @@ import eu.atos.seal.rm.model.AttributeSetList;
 import eu.atos.seal.rm.model.AttributeSetStatus;
 import eu.atos.seal.rm.model.AttributeType;
 import eu.atos.seal.rm.model.EntityMetadata;
+import eu.atos.seal.rm.model.EntityMetadataList;
 import eu.atos.seal.rm.model.MsMetadata;
 import eu.atos.seal.rm.model.MsMetadataList;
 import eu.atos.seal.rm.model.PublishedApiType;
@@ -200,22 +201,6 @@ public class ResponseServiceImp implements ResponseService
 				DataStoreObjectList ds = null;
 				Object objDatastore = smConnService.readDS(sessionId, "dataSet");
 				
-				/* TESTING:
-				log.info("*** Testing: invented DataStoreObjectList");
-				
-				//TODO
-				DataStoreObjectList datastore = new DataStoreObjectList();
-				DataStoreObject dso = new DataStoreObject("DS_" + UUID.randomUUID().toString(), "dataSet", "the dataSet object");
-				dso.setId("DS_" + UUID.randomUUID().toString());
-				dso.setEncryptedData(null);
-				dso.setEncryptionAlgorithm("this is the encryption algorithm");
-				dso.setSignature("this is the signature");
-				dso.setSignatureAlgorithm("this is the signature algorithm");	
-				dso.setClearData(null);
-				
-				datastore.add (dso);
-				// END TESTING*/
-				
 				if (objDatastore != null) {
 					ds = (new ObjectMapper()).readValue(objDatastore.toString(),DataStoreObjectList.class);
 					log.info("dataSets stored: " + ds.toString());
@@ -344,6 +329,7 @@ public class ResponseServiceImp implements ResponseService
 		 
 		session.setAttribute("urlReturn", "response_client/return"); 		// Consenting: ACCEPT
         session.setAttribute("urlFinishProcess", "response_client/finish"); // No consenting: REJECT
+        session.setAttribute("urlFinishProcess0", "response_client/back"); 	// No matching data: BACK
         
 		session.setAttribute("dsList", dsList); // TO REMOVE???
 //		session.setAttribute("attributesRequestList", attributesRequestList); //TO REMOVE
@@ -493,6 +479,47 @@ public class ResponseServiceImp implements ResponseService
 	        else
 	        	return "fatalError"; // Unknown endPoint...
 		}
+	}
+	
+	@Override
+	public String goToSelectIUI_2(Model model, String sessionId)
+	{
+		log.info("Entering goToSelectUI_2");
+		
+		AttributeSet spRequest = null;
+    	EntityMetadataList sourceList = null;
+    	
+    	Object objSpRequest = null;
+		try
+		{
+			objSpRequest = smConnService.readVariable(sessionId, "spRequest");
+		
+			if (objSpRequest!=null)
+			{
+				spRequest = (new ObjectMapper()).readValue(objSpRequest.toString(),AttributeSet.class);
+				log.info("RequestAttributes: Reading spRequest");
+			}
+		}
+		catch (Exception ex)
+		{
+			String errorMsg= "Exception calling SM (getSessionData spRequest)  \n";
+			errorMsg += "Exception message:"+ex.getMessage()+"\n";
+			//model.addAttribute("ErrorMessage",errorMsg);
+			log.error(errorMsg);
+	        //return "rmError";
+	        return null;
+		}
+    	
+		
+		AttributeTypeList attributeRequestList = new AttributeTypeList();
+
+		attributeRequestList.addAll(spRequest.getAttributes());
+		session.setAttribute("attributesRequestList", attributeRequestList);
+		session.setAttribute("sourceList",sourceList);
+		session.setAttribute("urlReturn", "request_client/return");
+		session.setAttribute("sessionId", sessionId);
+		
+		return "redirect:../request_client";
 	}
 	
 	
