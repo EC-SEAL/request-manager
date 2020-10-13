@@ -195,7 +195,8 @@ public class ResponseUIController
                 .getAttribute("attributesConsentList");
         
         String urlReturn = (String) session.getAttribute("urlReturn");
-        String urlFinishProcess = (String) session.getAttribute("urlFinishProcess");
+        //String urlFinishProcess = (String) session.getAttribute("urlFinishProcess");
+        String urlFinishProcess0 = (String) session.getAttribute("urlFinishProcess0");
         String infoMessage = (String) session.getAttribute("infoMessage");
         String errorMessage = (String) session.getAttribute("errorMessage");
         String SPName = (String) session.getAttribute("SPName");
@@ -205,7 +206,7 @@ public class ResponseUIController
 
         if (dsList ==  null || 
 //        	attributesRequestList == null || attributesSendList == null || 
-        	urlReturn == null || urlFinishProcess == null)
+        	urlReturn == null || urlFinishProcess0 == null)
         {
             throw new Exception("Data not initialize");
         }
@@ -285,7 +286,7 @@ public class ResponseUIController
         }
 
 
-        model.addAttribute("urlFinishProcess", urlFinishProcess);
+        model.addAttribute("urlFinishProcess0", urlFinishProcess0);
 //        model.addAttribute("urlReturn", urlReturn);
 
         if (infoMessage != null)
