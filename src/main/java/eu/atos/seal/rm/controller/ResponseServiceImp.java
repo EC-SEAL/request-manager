@@ -450,8 +450,9 @@ public class ResponseServiceImp implements ResponseService
 			// Updating the responseAssertions consented by the user.
 			smConnService.updateVariable(sessionId,"responseAssertions",objMapper.writeValueAsString(responseAssertions));
 			
-			Object objSpRequestEP = smConnService.readVariable(sessionId, "spRequestEP");
-			String spRequestEP = "";
+			Object objSpRequestEP = null;
+			String spRequestEP = null;
+			objSpRequestEP = smConnService.readVariable(sessionId, "spRequestEP");
 			if (objSpRequestEP != null) {
 				spRequestEP = (new ObjectMapper()).readValue(objSpRequestEP.toString(),String.class);
 			
