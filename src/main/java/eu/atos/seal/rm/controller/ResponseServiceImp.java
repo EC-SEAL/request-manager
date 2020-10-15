@@ -449,6 +449,16 @@ public class ResponseServiceImp implements ResponseService
 		{
 			// Updating the responseAssertions consented by the user.
 			smConnService.updateVariable(sessionId,"responseAssertions",objMapper.writeValueAsString(responseAssertions));
+			
+			Object objSpRequestEP = smConnService.readVariable(sessionId, "spRequestEP");
+			String spRequestEP = "";
+			if (objSpRequestEP != null) {
+				spRequestEP = (new ObjectMapper()).readValue(objSpRequestEP.toString(),String.class);
+			
+				if (spRequestEP.contains("data")) // PDS
+					// Clearing the authenticatedSubject 
+					smConnService.updateVariable(sessionId,"authenticatedSubject",objMapper.writeValueAsString(null));
+			}
 		
 			String msName = getMsName(model, sessionId, null); // Returning the FIRST ONE! ***
 			endPoint = getSpResponseEndpoint(model, msName,cmConnService);
