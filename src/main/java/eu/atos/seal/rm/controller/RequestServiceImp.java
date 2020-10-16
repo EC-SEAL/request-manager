@@ -255,6 +255,9 @@ public class RequestServiceImp implements RequestService
 				 
 			 }
 		}
+		
+		//Por defecto le doy un valor a la variable isDiscovery
+		smConnService.updateVariable(sessionId,"isDiscovery","FALSE");
 	
 		
 		//[DELETE
@@ -262,9 +265,10 @@ public class RequestServiceImp implements RequestService
 		{
 			spRequestEP="auth_request";
 		}
-		if (spRequestSource==null)
+		if (spRequestSource==null || spRequestSource.length() == 0) // 20201001 Paco on skype
 		{
-			spRequestSource="eIDAS";
+			//spRequestSource="eIDAS";
+			spRequestSource="Discovery";
 		}
 		String collectionId ="";
 		if (spRequestEP.contains("auth"))
@@ -749,7 +753,8 @@ public class RequestServiceImp implements RequestService
 		return spRequestSource;
 	}
 	
-	private String readSpRequestEP(String sessionId) {
+	private String readSpRequestEP(String sessionId) 
+	{
 		String spRequestEP="";
 		try
 		{
@@ -918,6 +923,7 @@ public class RequestServiceImp implements RequestService
 		try
 		{
 			smConnService.updateVariable(sessionId,"spRequestSource",spRequestSource);
+			smConnService.updateVariable(sessionId,"isDiscovery","TRUE");
 		}
 		catch (Exception ex)
 		{

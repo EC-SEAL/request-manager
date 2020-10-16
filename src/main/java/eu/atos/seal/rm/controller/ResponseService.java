@@ -20,6 +20,10 @@ import java.io.IOException;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+
+import eu.atos.seal.rm.model.AttributeSet;
+import eu.atos.seal.rm.model.EntityMetadataList;
+
 import org.springframework.ui.Model;
 
 public interface ResponseService
@@ -29,5 +33,6 @@ public interface ResponseService
 	
 	public String returnFromResponseUI (String sessionId, Model model) throws Exception;
 	public String returnNothing (String token, Model model) throws Exception;
-
+	
+	public String goToSelectIUI_2(Model model, String sessionId);
 }

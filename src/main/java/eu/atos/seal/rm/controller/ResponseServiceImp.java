@@ -45,6 +45,7 @@ import eu.atos.seal.rm.model.AttributeSetList;
 import eu.atos.seal.rm.model.AttributeSetStatus;
 import eu.atos.seal.rm.model.AttributeType;
 import eu.atos.seal.rm.model.EntityMetadata;
+import eu.atos.seal.rm.model.EntityMetadataList;
 import eu.atos.seal.rm.model.MsMetadata;
 import eu.atos.seal.rm.model.MsMetadataList;
 import eu.atos.seal.rm.model.PublishedApiType;
@@ -132,7 +133,20 @@ public class ResponseServiceImp implements ResponseService
 			spRequestEP = (String)smConnService.readVariable(sessionId, "spRequestEP");
 			log.info("spRequestEP just read: "+spRequestEP);
 			
-			if (spRequestEP.contains("auth")) { //auth_request
+			String sIsDiscovery=(String)smConnService.readVariable(sessionId, "isDiscovery");
+			log.info("sIsDiscovery just read: "+sIsDiscovery);
+			
+			if (sIsDiscovery == null)
+			{
+				String errorMsg= "isDiscovery null ";
+    			log.info ("Returning error: "+errorMsg);
+			
+    			model.addAttribute("ErrorMessage", errorMsg);
+    			return "rmError";	
+			}
+			
+			//if (spRequestEP.contains("auth")) { //auth_request
+			if (  !sIsDiscovery.equalsIgnoreCase("TRUE") ) {
 				// It is an auth request.
 				log.info ("It's an auth request.");
 		
@@ -179,28 +193,13 @@ public class ResponseServiceImp implements ResponseService
 				// Redirecting
 				return "redirectform";				
 			}
-			else if (spRequestEP.contains("data")) {// data_query
+			//else if (spRequestEP.contains("data")) {// data_query
+			else { // sIsDiscovery=TRUE
 				// Show and confirm sending response assertions
 				
 				// Reading the dataSets from the dataStore
 				DataStoreObjectList ds = null;
 				Object objDatastore = smConnService.readDS(sessionId, "dataSet");
-				
-				/* TESTING:
-				log.info("*** Testing: invented DataStoreObjectList");
-				
-				//TODO
-				DataStoreObjectList datastore = new DataStoreObjectList();
-				DataStoreObject dso = new DataStoreObject("DS_" + UUID.randomUUID().toString(), "dataSet", "the dataSet object");
-				dso.setId("DS_" + UUID.randomUUID().toString());
-				dso.setEncryptedData(null);
-				dso.setEncryptionAlgorithm("this is the encryption algorithm");
-				dso.setSignature("this is the signature");
-				dso.setSignatureAlgorithm("this is the signature algorithm");	
-				dso.setClearData(null);
-				
-				datastore.add (dso);
-				// END TESTING*/
 				
 				if (objDatastore != null) {
 					ds = (new ObjectMapper()).readValue(objDatastore.toString(),DataStoreObjectList.class);
@@ -235,13 +234,13 @@ public class ResponseServiceImp implements ResponseService
 					
 				
 			}
-			else {
-				String errorMsg= "spRequestEP: " + spRequestEP;
-				log.info ("Returning error: "+errorMsg);
-				
-				model.addAttribute("ErrorMessage", errorMsg);
-				return "rmError";
-			}
+//			else {
+//				String errorMsg= "spRequestEP: " + spRequestEP;
+//				log.info ("Returning error: "+errorMsg);
+//				
+//				model.addAttribute("ErrorMessage", errorMsg);
+//				return "rmError";
+//			}
 		
 		
 		}
@@ -330,6 +329,7 @@ public class ResponseServiceImp implements ResponseService
 		 
 		session.setAttribute("urlReturn", "response_client/return"); 		// Consenting: ACCEPT
         session.setAttribute("urlFinishProcess", "response_client/finish"); // No consenting: REJECT
+        session.setAttribute("urlFinishProcess0", "response_client/back"); 	// No matching data: BACK
         
 		session.setAttribute("dsList", dsList); // TO REMOVE???
 //		session.setAttribute("attributesRequestList", attributesRequestList); //TO REMOVE
@@ -449,6 +449,13 @@ public class ResponseServiceImp implements ResponseService
 		{
 			// Updating the responseAssertions consented by the user.
 			smConnService.updateVariable(sessionId,"responseAssertions",objMapper.writeValueAsString(responseAssertions));
+			
+			String spRequestEP = null;
+			spRequestEP = (String)smConnService.readVariable(sessionId, "spRequestEP");
+					
+			if ((spRequestEP != null) && (spRequestEP.contains("data")))  // PDS
+					// Clearing the authenticatedSubject 
+					smConnService.updateVariable(sessionId,"authenticatedSubject",objMapper.writeValueAsString(null));
 		
 			String msName = getMsName(model, sessionId, null); // Returning the FIRST ONE! ***
 			endPoint = getSpResponseEndpoint(model, msName,cmConnService);
@@ -479,6 +486,47 @@ public class ResponseServiceImp implements ResponseService
 	        else
 	        	return "fatalError"; // Unknown endPoint...
 		}
+	}
+	
+	@Override
+	public String goToSelectIUI_2(Model model, String sessionId)
+	{
+		log.info("Entering goToSelectUI_2");
+		
+		AttributeSet spRequest = null;
+    	EntityMetadataList sourceList = null;
+    	
+    	Object objSpRequest = null;
+		try
+		{
+			objSpRequest = smConnService.readVariable(sessionId, "spRequest");
+		
+			if (objSpRequest!=null)
+			{
+				spRequest = (new ObjectMapper()).readValue(objSpRequest.toString(),AttributeSet.class);
+				log.info("RequestAttributes: Reading spRequest");
+			}
+		}
+		catch (Exception ex)
+		{
+			String errorMsg= "Exception calling SM (getSessionData spRequest)  \n";
+			errorMsg += "Exception message:"+ex.getMessage()+"\n";
+			//model.addAttribute("ErrorMessage",errorMsg);
+			log.error(errorMsg);
+	        //return "rmError";
+	        return null;
+		}
+    	
+		
+		AttributeTypeList attributeRequestList = new AttributeTypeList();
+
+		attributeRequestList.addAll(spRequest.getAttributes());
+		session.setAttribute("attributesRequestList", attributeRequestList);
+		session.setAttribute("sourceList",sourceList);
+		session.setAttribute("urlReturn", "request_client/return");
+		session.setAttribute("sessionId", sessionId);
+		
+		return "redirect:../request_client";
 	}
 	
 	

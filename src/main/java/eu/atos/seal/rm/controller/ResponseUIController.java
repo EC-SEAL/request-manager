@@ -195,7 +195,8 @@ public class ResponseUIController
                 .getAttribute("attributesConsentList");
         
         String urlReturn = (String) session.getAttribute("urlReturn");
-        String urlFinishProcess = (String) session.getAttribute("urlFinishProcess");
+        //String urlFinishProcess = (String) session.getAttribute("urlFinishProcess");
+        String urlFinishProcess0 = (String) session.getAttribute("urlFinishProcess0");
         String infoMessage = (String) session.getAttribute("infoMessage");
         String errorMessage = (String) session.getAttribute("errorMessage");
         String SPName = (String) session.getAttribute("SPName");
@@ -205,7 +206,7 @@ public class ResponseUIController
 
         if (dsList ==  null || 
 //        	attributesRequestList == null || attributesSendList == null || 
-        	urlReturn == null || urlFinishProcess == null)
+        	urlReturn == null || urlFinishProcess0 == null)
         {
             throw new Exception("Data not initialize");
         }
@@ -285,7 +286,7 @@ public class ResponseUIController
         }
 
 
-        model.addAttribute("urlFinishProcess", urlFinishProcess);
+        model.addAttribute("urlFinishProcess0", urlFinishProcess0);
 //        model.addAttribute("urlReturn", urlReturn);
 
         if (infoMessage != null)
@@ -310,86 +311,6 @@ public class ResponseUIController
     @GetMapping("response_client/init")
     public String initSessionParams(HttpSession session)
     {
-
-// OBSOLETE this example for a dataStore
-//    	{
-//    		  "id": "6c0f70a8-f32b-4535-b5f6-0d596c52813a",
-//    		  "encryptedData": "encryptedData",
-//    		  "signature": "signature",
-//    		  "signatureAlgorithm": "signatureAlgorithm",
-//    		  "encryptionAlgorithm": "encryptionAlgorithm",
-//    		  "clearData": [
-//    		    {
-//    		      "id": "6c0f70a8-f32b-4535-b5f6-0d596c52813a",
-//    		      "type": "type",
-//    		      "categories": [
-//    		        "category1"
-//    		      ],
-//    		      "issuerId": "issuerId",
-//    		      "subjectId": "subjectId",
-//    		      "loa": "loa",
-//    		      "issued": "2020-01-06T19:40:16Z",
-//    		      "expiration": "2020-12-06T19:45:16Z",
-//    		      "attributes": [
-//    		        {
-//    		          "name": "http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName",
-//    		          "friendlyName": "CurrentGivenName",
-//    		          "encoding": "plain",
-//    		          "language": "ES_es",
-//    		          "mandatory": true,
-//    		          "values": [
-//    		            "JOHN", "Jr"
-//    		          ]
-//    		        },
-//		    		{
-//			          "name": "http://eidas.europa.eu/attributes/naturalperson/FamilyName",
-//			          "friendlyName": "FamilyName",
-//			          "encoding": "plain",
-//			          "language": "ES_es",
-//			          "mandatory": true,
-//			          "values": [
-//			            "SMITH"
-//			          ]
-//			        }
-//    		      ],
-//    		      "properties": {
-//    		        "additionalProp1": "prop1",
-//    		        "additionalProp2": "prop2",
-//    		        "additionalProp3": "prop3"
-//    		      }
-//    		    },
-//	    {
-//	      "id": "ANOTHER_6c0f70a8-f32b-4535-b5f6-0d596c52813a",
-//	      "type": "ANOTHER_type",
-//	      "categories": [
-//	        "ANOTHER_category1"
-//	      ],
-//	      "issuerId": "ANOTHER_issuerId",
-//	      "subjectId": "ANOTHER_subjectId",
-//	      "loa": "ANOTHER_loa",
-//	      "issued": "2020-01-06T19:40:16Z",
-//	      "expiration": "2020-12-06T19:45:16Z",
-//	      "attributes": [
-//	        {
-//	          "name": "http://eidas.europa.eu/attributes/naturalperson/CurrentGivenName",
-//	          "friendlyName": "CurrentGivenName",
-//	          "encoding": "plain",
-//	          "language": "ES_es",
-//	          "mandatory": true,
-//	          "values": [
-//	            "JOHN", "Jr"
-//	          ]
-//	        }
-//	      ],
-//	      "properties": {
-//	        "ANOTHER_additionalProp1": "ANOTHER_prop1",
-//	        "ANOTHER_additionalProp2": "ANOTHER_prop2",
-//	        "ANOTHER_additionalProp3": "ANOTHER_prop3"
-//	      }
-//	    }    	
-//    		  ]
-//    		}
-    	
         
     	List<DataSet> dataSetList = new ArrayList<DataSet>();
     	DataSet dataSet1 = new DataSet();
