@@ -255,7 +255,7 @@ public class NetworkServiceImpl implements NetworkService
         String host = hostUrl.replace("http://", "").replace("https://", "");
         try {
             HttpHeaders requestHeaders = new HttpHeaders();
-            requestHeaders.add("authorization", sigServ.generateSignature(host, "POST", "/sm/updateSessionData", postBody, "application/json;charset=UTF-8", requestId));
+            requestHeaders.add("authorization", sigServ.generateSignature(host, "POST", /*"/sm/updateSessionData"*/ uri, postBody, "application/json;charset=UTF-8", requestId));
             requestHeaders.add("host", hostUrl);
             requestHeaders.add("original-date", nowDate);
             requestHeaders.add("digest", "SHA-256=" + new String(org.tomitribe.auth.signatures.Base64.encodeBase64(MessageDigest.getInstance("SHA-256").digest(updateString.getBytes()))));
@@ -428,7 +428,7 @@ public class NetworkServiceImpl implements NetworkService
         String host = hostUrl.replace("http://", "").replace("https://", "");
         try {
             HttpHeaders requestHeaders = new HttpHeaders();
-            requestHeaders.add("authorization", sigServ.generateSignature(host, "POST", "/sm/updateSessionData", postBody, "application/json;charset=UTF-8", requestId));
+            requestHeaders.add("authorization", sigServ.generateSignature(host, "POST", /*"/sm/updateSessionData"*/ uri, postBody, "application/json;charset=UTF-8", requestId));
             requestHeaders.add("host", hostUrl);
             requestHeaders.add("original-date", nowDate);
             requestHeaders.add("digest", "SHA-256=" + new String(org.tomitribe.auth.signatures.Base64.encodeBase64(MessageDigest.getInstance("SHA-256").digest(updateString.getBytes()))));

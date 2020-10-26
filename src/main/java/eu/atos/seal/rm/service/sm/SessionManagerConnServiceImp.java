@@ -25,6 +25,7 @@ import eu.atos.seal.rm.service.cm.ConfMngrConnService;
 import eu.atos.seal.rm.service.network.NetworkServiceImpl;
 import eu.atos.seal.rm.service.param.KeyStoreService;
 import eu.atos.seal.rm.service.param.ParameterService;
+import eu.atos.seal.rm.model.RequestParameters;
 
 
 @Service
@@ -32,24 +33,15 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 {
 	
 	private static final Logger log = LoggerFactory.getLogger(SessionManagerConnServiceImp.class);
-	//final String hostURL = "http://5.79.83.118:8090";
-	//final String hostURL = "http://SessionManager:8080";
-	
-	//@Value("${gateway.sm.host}")
 	private final String hostURL;
 	
-	//private HttpSignatureServiceImpl httpSigService = null;
 	private NetworkServiceImpl network = null;
 	
-	
-	private SessionMngrResponse lastSMResponse = null;
+	private SessionMngrResponse lastSMResponse = null;  // What for??
 	private KeyStoreService keyStoreService = null;
 	private ConfMngrConnService confMngrService = null;
 	
 	private String sender ="";
-	
-//	@Autowired
-//	ParameterService paramServ;
 	
 	@Autowired
 	public SessionManagerConnServiceImp(ConfMngrConnService confMngrConnService,KeyStoreService keyStoreServ,ParameterService paramServ)
@@ -68,10 +60,7 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
         {
         	sender = "RMms001";
         	log.error("HARDCODED sender! "+ sender);
-		}
-		
-		//sender = "RMms001";
-		
+		}	
 	}
 	
 	@Override
@@ -80,12 +69,8 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 										CertificateException, InvalidKeySpecException, IOException 
 	{
 		String service = "/sm/startSession";
-		log.info("En startSession host:"+hostURL+" service:"+service );
+		log.info("StartSession host: "+hostURL+" service: "+service );
 		
-//		if (httpSigService== null)
-//		{
-//			createHttpSigService();
-//		}
 		if (network == null)
 		{
 			//network = new NetworkServiceImpl(httpSigService);
@@ -97,16 +82,13 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 		
 		if (smResponse != null)
 		{
-		System.out.println("SMresponse(startSession):" +smResponse.toString());
-		System.out.println("sessionID:"+smResponse.getSessionData().getSessionId());
+//			System.out.println("SMresponse(startSession):" +smResponse.toString());
+//			System.out.println("sessionID:"+smResponse.getSessionData().getSessionId());
+			setLastSMResponse(smResponse);
+			return smResponse.getSessionData().getSessionId();	
+		}
+		else return "";
 		
-		}
-		else
-		{
-			return "";
-		}
-		setLastSMResponse(smResponse);
-		return smResponse.getSessionData().getSessionId();
 	}
 	
 	@Override
@@ -124,22 +106,16 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 			CertificateException, InvalidKeySpecException, IOException
 	{
 		String service = "/sm/generateToken";
-		log.info("En generateToken host:"+hostURL+" service:"+service );
+		log.info("GenerateToken host:"+hostURL+" service:"+service );
 		
-		
-//		if (httpSigService== null)
-//		{
-//			createHttpSigService();
-//		}
 		if (network == null)
 		{
-			//network = new NetworkServiceImpl(httpSigService);
 			network = new NetworkServiceImpl(this.keyStoreService);
 		}
 		List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
         urlParameters.add(new NameValuePair("sessionId",sessionId));
-        urlParameters.add(new NameValuePair("sender", sender));   //[TODO] sender en properties
-        urlParameters.add(new NameValuePair("receiver", receiver)); //[TODO] en un parametro�? Consultar
+        urlParameters.add(new NameValuePair("sender", sender));   
+        urlParameters.add(new NameValuePair("receiver", receiver));
         urlParameters.add(new NameValuePair("data", "extraData"));
         log.info("En generateToken sender:"+sender+" receiver:"+receiver );
         
@@ -149,11 +125,11 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
         //System.out.println("SMresponse(generateToken):" +smResponse.toString());
         if ( smResponse.getCode()== ResponseCode.NEW)
         {
-	        System.out.println( "addDAta:"+ smResponse.getAdditionalData());
+	        log.info( "addDAta:"+ smResponse.getAdditionalData());
 	        additionalData = smResponse.getAdditionalData();
 	    }
         setLastSMResponse(smResponse);
-        return additionalData; //Devuelve un token
+        return additionalData; // returns a token
 	}
 	
 	
@@ -163,15 +139,10 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 													 CertificateException, InvalidKeySpecException, IOException 
 	{
 		String service = "/sm/validateToken";
-		log.info("En validateToken host:"+hostURL+" service:"+service );
+		log.info("ValidateToken host:"+hostURL+" service:"+service );
 		
-//		if (httpSigService== null)
-//		{
-//			createHttpSigService();
-//		}
 		if (network == null)
 		{
-			//network = new NetworkServiceImpl(httpSigService);
 			network = new NetworkServiceImpl(this.keyStoreService);
 		}
 		
@@ -182,19 +153,18 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 	    
 	    SessionMngrResponse smResponse = null;
 	   
-	    System.out.println("Enviando validateToken :"+token);
-	    //response = network.sendGet(hostURL, service, urlParameters);
+	    System.out.println("Sending validateToken :"+token);
 	    smResponse = network.sendGetSMResponse(hostURL, service, urlParameters,1);
 	    
 	    if ( smResponse.getCode()== ResponseCode.OK)
 	    {
 	    	sessionID = smResponse.getSessionData().getSessionId();
-	    	System.out.println("SessionID:"+sessionID);
+//	    	System.out.println("SessionID:"+sessionID);
+//	    	System.out.println("validateToken smResponse:"+smResponse);
+			setLastSMResponse(smResponse);
+			return sessionID; 
 	    }
-		// else   // Si hay error p.ej. JWT is blacklisted �q hacemos?
-		System.out.println("validateToken smResponse:"+smResponse);
-		setLastSMResponse(smResponse);
-		return sessionID; //devuelve un sessionId
+	    else return null;		
 	}
 	
 	
@@ -203,13 +173,10 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 	public HashMap<String, Object> readVariables(String sessionId) throws UnrecoverableKeyException, KeyStoreException, FileNotFoundException, NoSuchAlgorithmException, CertificateException, InvalidKeySpecException, IOException
 	{
 		String service = "/sm/getSessionData";
-		log.info("En readVariables host:"+hostURL+" service:"+service );
+		log.info("ReadVariables host:"+hostURL+" service:"+service );
 		
 		HashMap<String, Object> sessionVbles= new HashMap<String, Object>();
-//		if (httpSigService== null)
-//		{
-//			createHttpSigService();
-//		}
+
 		if (network == null)
 		{
 			network = new NetworkServiceImpl(this.keyStoreService);
@@ -233,9 +200,11 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 	    if (smResponse.getCode()== ResponseCode.OK)
 	    {
 	    	sessionVbles = (HashMap<String, Object>) smResponse.getSessionData().getSessionVariables();
+	    	setLastSMResponse(smResponse);
+		    return sessionVbles;
 	    }
-	    setLastSMResponse(smResponse);
-	    return sessionVbles;
+	    else return null;
+	    
 	}
 	
 	
@@ -244,14 +213,10 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 	public Object readVariable(String sessionId, String variableName) throws UnrecoverableKeyException, KeyStoreException, FileNotFoundException, NoSuchAlgorithmException, CertificateException, InvalidKeySpecException, IOException
 	{
 		String service = "/sm/getSessionData";
-		log.info("En readVariable host:"+hostURL+" service:"+service );
+		log.info("ReadVariable host:"+hostURL+" service:"+service );
 		
 		
 		HashMap<String, Object> sessionVbles = new HashMap<String, Object>();
-//		if (httpSigService== null)
-//		{
-//			createHttpSigService();
-//		}
 		if (network == null)
 		{
 			network = new NetworkServiceImpl(this.keyStoreService);
@@ -259,11 +224,11 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 		List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
 	    urlParameters.add(new NameValuePair("sessionId",sessionId));
 	    urlParameters.add(new NameValuePair("variableName",variableName));
-	    log.info("En readVariable sessionId:"+sessionId+" variableName:"+variableName );
+	    log.info("At readVariable sessionId:"+sessionId+" variableName:"+variableName );
 	    
 	    SessionMngrResponse smResponse = null;
 	    try {
-	    	System.out.println("Enviando getSessionData");
+	    	//System.out.println("Sending getSessionData");
 	    	//response = network.sendGet(hostURL, service, urlParameters);
 	    	smResponse = network.sendGetSMResponse(hostURL, service, urlParameters, 1);
 		} catch (NoSuchAlgorithmException e) {
@@ -273,22 +238,23 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	    System.out.println("Response getSessionData:<"+smResponse.toString()+">");
+	    log.info("Response getSessionData:<"+smResponse.toString()+">");
 	    if (smResponse.getCode()== ResponseCode.OK)
 	    {
 	    	sessionVbles = (HashMap<String, Object>) smResponse.getSessionData().getSessionVariables();
 	    	
-	    	System.out.println( "sessionVbles:"+sessionVbles.get("spRequest"));
+	    	log.info( "sessionVbles:"+sessionVbles.get("spRequest"));
 //	    	//AttributeSet spRequest = (AttributeSet) sessionVbles.get("spRequest");
 //	    	ObjectMapper objectMapper = new ObjectMapper();
 //	    	
 //	    	AttributeSet spRequest = objectMapper.readValue(sessionVbles.get("spRequest").toString(), AttributeSet.class);
 //	    	System.out.println("spRequest.issuer"+spRequest.getIssuer());
+	    	
+	    	setLastSMResponse(smResponse);
+		    
+		    return sessionVbles.get(variableName);
 	    }
-	    
-	    setLastSMResponse(smResponse);
-	    //[TODO] �que devolvemos?
-	    return sessionVbles.get(variableName);
+	    else return null;
 	}
 	
 
@@ -299,6 +265,7 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 	{
 		//String service = "/sm/new/get";
 		String service = "/sm/new/search";
+		String contentType="application/json";
 		
 		Object sessionVble = new Object();
 		
@@ -306,14 +273,19 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 		{
 				network = new NetworkServiceImpl(keyStoreService);
 		}
-		List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
-	    urlParameters.add(new NameValuePair("sessionId",sessionId));
-	    urlParameters.add(new NameValuePair("type",type));
+//		List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
+//	    urlParameters.add(new NameValuePair("sessionId",sessionId));
+//	    urlParameters.add(new NameValuePair("type",type));
+	    
+	    RequestParameters requestParameters = new RequestParameters();
+        requestParameters.setSessionId(sessionId);
+        requestParameters.setType(type);
 	    
 	    SessionMngrResponse smResponse = null;
 	    try {
 	    	log.info("Sending new/search ...");
-	    	smResponse = network.sendGetSMResponse(hostURL, service, urlParameters, 1);
+	    	//smResponse = network.sendGetSMResponse(hostURL, service, urlParameters, 1);
+	    	smResponse = network.sendPostBodySMResponse(hostURL, /*"/sm/new/get"*/ service, requestParameters, contentType, 1);
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -328,10 +300,9 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 	    	sessionVble = smResponse.getAdditionalData();
 	    	
 	    	log.info("DS (only "+ type + " : "+ sessionVble.toString());
+	    	return sessionVble;
 	    }
-	    
-	    
-	    return sessionVble;
+	    else return null;
 	}
 	
 	@Override
@@ -339,12 +310,8 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 			throws UnrecoverableKeyException, KeyStoreException, FileNotFoundException, NoSuchAlgorithmException,
 			CertificateException, InvalidKeySpecException, IOException {
 		String service = "/sm/updateSessionData";
-		log.info("En updateVariable("+varName+") host:"+hostURL+" service:"+service );
+		log.info("UpdateVariable("+varName+") host:"+hostURL+" service:"+service );
 		
-//		if (httpSigService== null)
-//		{
-//			createHttpSigService();
-//		}
 		if (network == null)
 		{
 			network = new NetworkServiceImpl(this.keyStoreService);
@@ -360,15 +327,14 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
         updateDR.setVariableName(varName);
         updateDR.dataObject(varValue);
 //        String postBody = mapper.writeValueAsString(updateDR);
+        
         String contentType="application/json";
-		
-       
         SessionMngrResponse smResponse = null;
         
         smResponse = network.sendPostBodySMResponse(hostURL, service, updateDR, contentType, 1);
         
         setLastSMResponse(smResponse);
-        System.out.println("Response updateSessionData"+smResponse);
+        log.info("Response updateSessionData"+smResponse);
 		
 	}
 
@@ -378,10 +344,6 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 		String service = "/sm/endSession";
 		log.info("En deleteSession host:"+hostURL+" service:"+service );
 		
-//		if (httpSigService== null)
-//		{
-//			createHttpSigService();
-//		}
 		if (network == null)
 		{
 			network = new NetworkServiceImpl(this.keyStoreService);
@@ -402,65 +364,14 @@ public class SessionManagerConnServiceImp implements SessionManagerConnService
 //			e.printStackTrace();
 //		}
 	    setLastSMResponse(smResponse);
-	    System.out.println("Response endSession :<"+smResponse.toString()+">");
+	    log.info("Response endSession :<"+smResponse.toString()+">");
 		
 	}
 
-//	@Override
-//	public String getSession(String varName, String varValue)
-//	{
-//		// TODO Auto-generated method stub
-//		return null;
-//		
-//	}
 
-	
-	///
-	/// PRIVATE
-	///
-	
-	//[TODO] Leer de variables de entorno
-//	private void createHttpSigService() throws KeyStoreException, FileNotFoundException, IOException,
-//											   NoSuchAlgorithmException, CertificateException, 
-//											   UnrecoverableKeyException, InvalidKeySpecException 
-//	{
-//		//[TODO] Cambiar para cada microservicio, el su
-//		String fingerPrint = "7a9ba747ab5ac50e640a07d90611ce612b7bde775457f2e57b804517a87c813b";
-//		ClassLoader classLoader = getClass().getClassLoader();
-//		//String path = classLoader.getResource("testKeys/keystore.jks").getPath();
-//		ClassPathResource resource = new ClassPathResource("testKeys/keystore.jks");
-//		
-//		
-//		log.info("En createHttpSigService resource:"+resource.getPath());
-//		InputStream certIS = resource.getInputStream();
-//		//File jwtCertFile = ResourceUtils.getFile("classpath:testKeys/keystore.jks");
-//		
-//		
-//		KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-//		//File jwtCertFile = new File(path);
-//		//InputStream certIS = new FileInputStream(jwtCertFile);
-//		keystore.load(certIS, "keystorepass".toCharArray());
-//		
-//		Key signingKey = keystore.getKey("1", "selfsignedpass".toCharArray());
-//		
-//		httpSigService = new HttpSignatureServiceImpl(fingerPrint, signingKey);
-//	}
-
-//	@Override
-//	public SessionMngrResponse getLastSMResponse() {
-//		return lastSMResponse;
-//	}
-//
 	private void setLastSMResponse(SessionMngrResponse lastSMResponse) {
 		this.lastSMResponse = lastSMResponse;
 	}
 
-//	@Override
-//	public String generateToken(String sessionId, String receiver)
-//			throws UnrecoverableKeyException, KeyStoreException, FileNotFoundException, NoSuchAlgorithmException,
-//			CertificateException, InvalidKeySpecException, IOException {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
 	
 }
