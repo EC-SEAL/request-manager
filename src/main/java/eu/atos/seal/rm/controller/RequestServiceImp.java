@@ -885,7 +885,26 @@ public class RequestServiceImp implements RequestService
 				newAttributeList.add(attribute);
 			}
 		}
-		//idpRequest.setAttributes(newAttributeList);
+		AttributeSet newSpRequest = new AttributeSet();
+		newSpRequest.setId( UUID.randomUUID().toString());
+		newSpRequest.setType(AttributeSet.TypeEnum.REQUEST);
+		newSpRequest.setIssuer( spRequest.getIssuer());
+		newSpRequest.setProperties( spRequest.getProperties());
+		
+		newSpRequest.setLoa( spRequest.getLoa());
+		//newSpRequest.setAttributes(spRequest.getAttributes());
+		newSpRequest.setAttributes(newAttributeList);
+		ObjectMapper objMapper = new ObjectMapper();
+		try
+		{
+			smConnService.updateVariable(sessionId,"spRequestModified",objMapper.writeValueAsString(newSpRequest));
+		}
+		catch (Exception ex)
+		{
+			String errorMsg= "Exception calling SM (updateVariable spRequestModified)  \n";
+			errorMsg += "Exception message:"+ex.getMessage()+"\n";
+			log.error(errorMsg);
+		}
 		
 		String requestSource = (String) session.getAttribute("requestSource");
 		String spRequestSource ="";//Discovery, PDS, SSI, eIDAS, eduGAIN		
