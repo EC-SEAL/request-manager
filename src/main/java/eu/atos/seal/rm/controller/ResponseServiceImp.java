@@ -46,6 +46,7 @@ import eu.atos.seal.rm.model.AttributeSetStatus;
 import eu.atos.seal.rm.model.AttributeType;
 import eu.atos.seal.rm.model.EntityMetadata;
 import eu.atos.seal.rm.model.EntityMetadataList;
+import eu.atos.seal.rm.model.LinkRequest;
 import eu.atos.seal.rm.model.MsMetadata;
 import eu.atos.seal.rm.model.MsMetadataList;
 import eu.atos.seal.rm.model.PublishedApiType;
@@ -197,13 +198,23 @@ public class ResponseServiceImp implements ResponseService
 			else { // sIsDiscovery=TRUE
 				// Show and confirm sending response assertions
 				
-				// Reading the dataSets from the dataStore
 				DataStoreObjectList ds = null;
-				Object objDatastore = smConnService.readDS(sessionId, "dataSet");
+				DataStoreObjectList lr = null;
 				
-				if (objDatastore != null) {
-					ds = (new ObjectMapper()).readValue(objDatastore.toString(),DataStoreObjectList.class);
+				// Reading the dataSets from the dataStore
+				Object objDatastoreDS = smConnService.readDS(sessionId, "dataSet");
+				
+				// Reading all the contents (dataSets and linkRequests) from the dataStore				
+				Object objDatastoreLR = smConnService.readDS(sessionId, "linkRequest");
+				
+				if (objDatastoreDS != null) {
+					ds = (new ObjectMapper()).readValue(objDatastoreDS.toString(),DataStoreObjectList.class);
 					log.info("dataSets stored: " + ds.toString());
+					
+					if (objDatastoreLR != null) {
+						lr = (new ObjectMapper()).readValue(objDatastoreLR.toString(),DataStoreObjectList.class);
+						log.info("linkRequests stored: " + lr.toString());
+					}
 				}
 				else {
 					String errorMsg= "dataStore: not exist";
@@ -223,7 +234,7 @@ public class ResponseServiceImp implements ResponseService
 				// Open the GUI and sending the response assertions selected by the user
 				// TODO: errorMsg?
 				if (ds.size() > 0)
-					return prepareAndGotoResponseUI( sessionId,  model, spRequest, ds, null); 
+					return prepareAndGotoResponseUI( sessionId,  model, spRequest, ds, lr, null); 
 				else {
 					String errorMsg= "Empty dataStore!!";
 					log.info ("Returning error: "+errorMsg);
@@ -271,7 +282,8 @@ public class ResponseServiceImp implements ResponseService
 
 	private String prepareAndGotoResponseUI( String sessionId, Model model, 
 			AttributeSet spRequest,
-		    DataStoreObjectList dataStore,
+		    DataStoreObjectList dataStoreDS,
+		    DataStoreObjectList dataStoreLR,
 		    String errorMessage) 
 
 	{
@@ -281,9 +293,10 @@ public class ResponseServiceImp implements ResponseService
 		// and attributeSendList--> NOT NECESSARY 
 //		AttributeTypeList attributesSendList = new AttributeTypeList();
 		List<DataSet> dsList = new ArrayList<DataSet>();
-		if (dataStore != null && dataStore.size()> 0) { // Non empty dataStore
+		List<LinkRequest> lrList = new ArrayList<LinkRequest>();
+		if (dataStoreDS != null && dataStoreDS.size()> 0) { // Non empty dataStoreDS
 			
-			dataStore.forEach ((dso)-> {
+			dataStoreDS.forEach ((dso)-> {
 				log.info("dso.toString(): " + dso.toString());
 //				JsonObject myJSONdso = new JsonParser().parse(dso.toString()).getAsJsonObject();
 //				log.info("myJSONdso: " + myJSONdso.toString());
@@ -305,9 +318,35 @@ public class ResponseServiceImp implements ResponseService
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				//dsList.add(aux_ds);
 				
 			});
+			
+			if (dataStoreLR != null && dataStoreLR.size()>0) { // Non empty dataStoreLR
+				
+				dataStoreLR.forEach ((dso)-> {
+					log.info("LR dso.toString(): " + dso.toString());
+//					JsonObject myJSONdso = new JsonParser().parse(dso.toString()).getAsJsonObject();
+//					log.info("myJSONdso: " + myJSONdso.toString());
+					
+					LinkRequest aux_lr = null;
+					try {
+						aux_lr = (new ObjectMapper()).readValue(dso.getData(), LinkRequest.class);
+						log.info("aux_lr: " + aux_lr.toString());
+						lrList.add(aux_lr);
+						
+					} catch (JsonParseException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (JsonMappingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+				});
+			}
 			
 		}
 		
@@ -332,13 +371,13 @@ public class ResponseServiceImp implements ResponseService
         session.setAttribute("urlFinishProcess0", "response_client/back"); 	// No matching data: BACK
         
 		session.setAttribute("dsList", dsList); // TO REMOVE???
+		session.setAttribute("lrList", lrList); // TO REMOVE???
 //		session.setAttribute("attributesRequestList", attributesRequestList); //TO REMOVE
 //		session.setAttribute("attributesSendList", attributesSendList); //TO REMOVE
 		
 		AttributeSetList attributesConsentList = new AttributeSetList();
 		
 		if (dsList.size() > 0) {
-		//TODO: check with UPorto!
 			
 			for (DataSet auxDs  : dsList) {
 				log.info ("Filtering with the requested attributes ...");
@@ -383,7 +422,75 @@ public class ResponseServiceImp implements ResponseService
 					
 					attributesConsentList.add(attributeSet);
 				}			
-			}		
+			}	
+			
+			if (lrList.size() > 0) {
+				
+				for (LinkRequest auxLr  : lrList) {
+					log.info ("LR****Filtering with the requested attributes ...");
+					
+					List<AttributeType> attrs = new ArrayList<AttributeType>();
+					boolean found = false;
+					for (AttributeType auxAttr : auxLr.getDatasetA().getAttributes()) {
+						log.info("LR****DATASET_A: auxAttr friendly: " + auxAttr.getFriendlyName());
+						log.info("LR****DATASET_A: auxAttr: " + auxAttr.getName());
+						for (AttributeType reqAttr : attributesRequestList) {
+							log.info("reqAttr friendly: " + reqAttr.getFriendlyName());
+							log.info("reqAttr: " + reqAttr.getName());
+							if ((reqAttr.getFriendlyName() != null) && (reqAttr.getFriendlyName().contains(auxAttr.getFriendlyName())) || 
+								reqAttr.getName().contains(auxAttr.getName())) {
+								found = true;
+								break;
+							}	
+						}
+						if (found) {	
+							log.info("LR****DATASET_A: Found friendly: " + auxAttr.getFriendlyName());
+							log.info("LR****DATASET_A: Found: " + auxAttr.getName());
+							attrs.add(auxAttr);	
+							found = false;
+						}				
+					}
+					for (AttributeType auxAttr : auxLr.getDatasetB().getAttributes()) {
+						log.info("LR****DATASET_B: auxAttr friendly: " + auxAttr.getFriendlyName());
+						log.info("LR****DATASET_B: auxAttr: " + auxAttr.getName());
+						for (AttributeType reqAttr : attributesRequestList) {
+							log.info("reqAttr friendly: " + reqAttr.getFriendlyName());
+							log.info("reqAttr: " + reqAttr.getName());
+							if ((reqAttr.getFriendlyName() != null) && (reqAttr.getFriendlyName().contains(auxAttr.getFriendlyName())) || 
+								reqAttr.getName().contains(auxAttr.getName())) {
+								found = true;
+								break;
+							}	
+						}
+						if (found) {	
+							log.info("LR****DATASET_B: Found friendly: " + auxAttr.getFriendlyName());
+							log.info("LR****DATASET_B: Found: " + auxAttr.getName());
+							attrs.add(auxAttr);	
+							found = false;
+						}				
+					}
+					if (attrs.size() != 0) {
+						
+						AttributeSet attributeSet = new AttributeSet();
+						attributeSet.setId(auxLr.getId());
+						//attributeSet.setIssuer(auxLR.getIssuerId());
+						attributeSet.setType(TypeEnum.REQUEST);
+						attributeSet.setStatus(null);
+						attributeSet.setRecipient("RECIPIENT__TOASK");
+						attributeSet.setLoa(auxLr.getLloa());
+						attributeSet.setNotAfter(auxLr.getExpiration());
+						attributeSet.setNotBefore(auxLr.getIssued());
+						//attributeSet.setProperties(auxLr.getProperties());
+						attributeSet.setInResponseTo("INRESPONSETO__TOASK");
+						// Not necessary all the above settings...
+						
+						attributeSet.setAttributes(attrs);
+						
+						attributesConsentList.add(attributeSet);
+					}			
+			
+				}
+			}
 		
 		}
 		
@@ -404,6 +511,7 @@ public class ResponseServiceImp implements ResponseService
 		
 		
 		model.addAttribute("dsList", dsList);
+		model.addAttribute("lrList", lrList);
 //		model.addAttribute("attributesRequestList", attributesRequestList);
 //		model.addAttribute("attributesSendList", attributesSendList);
 		model.addAttribute("attributesConsentList", attributesConsentList);

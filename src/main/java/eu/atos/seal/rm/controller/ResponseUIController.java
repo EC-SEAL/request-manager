@@ -37,6 +37,8 @@ import eu.atos.seal.rm.model.DSClient;
 import eu.atos.seal.rm.model.DataSet;
 import eu.atos.seal.rm.model.DataSetList;
 import eu.atos.seal.rm.model.DataSetListClient;
+import eu.atos.seal.rm.model.LRClient;
+import eu.atos.seal.rm.model.LinkRequest;
 import eu.atos.seal.rm.model.AttributeClient;
 import eu.atos.seal.rm.model.AttributeSet;
 import eu.atos.seal.rm.model.AttributeSetClient;
@@ -59,6 +61,7 @@ public class ResponseUIController
     	//** The SPrequest has a list of requested AttributeTypes
     	
     	List<DataSet> dsList = (List<DataSet>) session.getAttribute("dsList"); // list of dataSets
+    	List<LinkRequest> lrList = (List<LinkRequest>) session.getAttribute("lrList"); // list of linkRequests
 //        AttributeTypeList attributesRequestList = (AttributeTypeList) session
 //                .getAttribute("attributesRequestList");
 //        AttributeTypeList attributesSendList = (AttributeTypeList) session
@@ -92,6 +95,16 @@ public class ResponseUIController
         }
 
         model.addAttribute("dsList", dsClientList);
+        
+        List<LRClient> lrClientList = new ArrayList<LRClient>(); //APClient
+
+        for (int i = 0; i < lrList.size(); i++)
+        {
+            LRClient lrClient = LRClient.getLRClientFrom(lrList.get(i), i);
+            lrClientList.add(lrClient);
+        }
+
+        model.addAttribute("lrList", lrClientList);
 
 //        List<AttributeClient> attributeClientList = new ArrayList<AttributeClient>();
 //
@@ -144,13 +157,14 @@ public class ResponseUIController
             }
         }
         
-        
-        for (int i = 0; i < dsList.size(); i++)
-        {
-            DSClient dsClient = DSClient.getDSClientFrom(dsList.get(i), i);
-            dsClientList.add(dsClient);
-
-        }
+ 
+// Duplicated code?!
+//        for (int i = 0; i < dsList.size(); i++)
+//        {
+//            DSClient dsClient = DSClient.getDSClientFrom(dsList.get(i), i);
+//            dsClientList.add(dsClient);
+//
+//        }
         log.info("consentList: " + consentList.toString());
  
         model.addAttribute("attributesConsentList", consentList);
