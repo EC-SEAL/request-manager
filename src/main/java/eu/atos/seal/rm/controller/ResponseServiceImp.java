@@ -224,17 +224,18 @@ public class ResponseServiceImp implements ResponseService
 					return "rmError";				
 				}
 				
-				// Reading the spRequest
-				AttributeSet spRequest = null;
+				// Reading the spRequestModified
+				AttributeSet spRequestModified = null;
 				Object objSpRequest = null;
-				objSpRequest = smConnService.readVariable(sessionId, "spRequest");
-				spRequest = (new ObjectMapper()).readValue(objSpRequest.toString(),AttributeSet.class);
+				objSpRequest = smConnService.readVariable(sessionId, "spRequestModified");
+				
+				spRequestModified = (new ObjectMapper()).readValue(objSpRequest.toString(),AttributeSet.class);
 				
 				
 				// Open the GUI and sending the response assertions selected by the user
 				// TODO: errorMsg?
 				if (ds.size() > 0)
-					return prepareAndGotoResponseUI( sessionId,  model, spRequest, ds, lr, null); 
+					return prepareAndGotoResponseUI( sessionId,  model, spRequestModified, ds, lr, null); 
 				else {
 					String errorMsg= "Empty dataStore!!";
 					log.info ("Returning error: "+errorMsg);
@@ -473,7 +474,7 @@ public class ResponseServiceImp implements ResponseService
 						
 						AttributeSet attributeSet = new AttributeSet();
 						attributeSet.setId(auxLr.getId());
-						//attributeSet.setIssuer(auxLR.getIssuerId());
+						attributeSet.setIssuer(auxLr.getIssuer());
 						attributeSet.setType(TypeEnum.REQUEST);
 						attributeSet.setStatus(null);
 						attributeSet.setRecipient("RECIPIENT__TOASK");
