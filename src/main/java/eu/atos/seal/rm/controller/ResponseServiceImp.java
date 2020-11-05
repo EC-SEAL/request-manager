@@ -602,18 +602,18 @@ public class ResponseServiceImp implements ResponseService
 	{
 		log.info("Entering goToSelectUI_2");
 		
-		AttributeSet spRequest = null;
+		AttributeSet spRequestModified = null;
     	EntityMetadataList sourceList = null;
     	
     	Object objSpRequest = null;
 		try
 		{
-			objSpRequest = smConnService.readVariable(sessionId, "spRequest");
+			objSpRequest = smConnService.readVariable(sessionId, "spRequestModified");
 		
 			if (objSpRequest!=null)
 			{
-				spRequest = (new ObjectMapper()).readValue(objSpRequest.toString(),AttributeSet.class);
-				log.info("RequestAttributes: Reading spRequest");
+				spRequestModified = (new ObjectMapper()).readValue(objSpRequest.toString(),AttributeSet.class);
+				log.info("RequestAttributes: Reading spRequestModified");
 			}
 		}
 		catch (Exception ex)
@@ -629,7 +629,7 @@ public class ResponseServiceImp implements ResponseService
 		
 		AttributeTypeList attributeRequestList = new AttributeTypeList();
 
-		attributeRequestList.addAll(spRequest.getAttributes());
+		attributeRequestList.addAll(spRequestModified.getAttributes());
 		session.setAttribute("attributesRequestList", attributeRequestList);
 		session.setAttribute("sourceList",sourceList);
 		session.setAttribute("urlReturn", "request_client/return");
