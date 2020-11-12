@@ -408,7 +408,8 @@ public class ResponseServiceImp implements ResponseService
 					
 					AttributeSet attributeSet = new AttributeSet();
 					attributeSet.setId(auxDs.getId());
-					attributeSet.setIssuer(auxDs.getIssuerId());
+					//attributeSet.setIssuer(auxDs.getIssuerId());
+					attributeSet.setIssuer(getIssuerIdLnk(auxDs, auxDs.getIssuerId()));
 					attributeSet.setType(TypeEnum.REQUEST);
 					attributeSet.setStatus(null);
 					attributeSet.setRecipient("RECIPIENT__TOASK");
@@ -682,6 +683,24 @@ public class ResponseServiceImp implements ResponseService
 	}
 		
 	
+	private String getIssuerIdLnk(DataSet auxDs, String issuerId) {
+		  String theIssuerId = null;
+		  
+		  List<AttributeType> auxList = new ArrayList<AttributeType>();
+		  auxList = auxDs.getAttributes();
+		  
+		  for (AttributeType attr: auxList) {
+			  if ((attr.getFriendlyName() != null) && 
+				 (attr.getFriendlyName().contains (issuerId))){
+				  
+				  theIssuerId = attr.getValues().get(0);
+				  break;
+			  }
+		  }
+		  
+		  return (theIssuerId != null ? theIssuerId : issuerId);
+		
+	}
 	
 	
 	// TO BE REFACTORED:
