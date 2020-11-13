@@ -916,10 +916,10 @@ public class RequestServiceImp implements RequestService
 		{
 			spRequestSource = "eduGAIN";
 		}
-		else if (requestSource.contains("ssi"))
-		{
-			spRequestSource = "SSI";
-		}
+//		else if (requestSource.contains("ssi"))
+//		{
+//			spRequestSource = "SSI";
+//		}
 		else if (requestSource.contains("pds"))
 		{
 			spRequestSource = "PDS";

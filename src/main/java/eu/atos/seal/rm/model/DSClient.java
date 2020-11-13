@@ -77,7 +77,8 @@ public class DSClient
     {
         DSClient dsClient = new DSClient();
         dsClient.setIndex(index);
-        dsClient.setDisplayName(dataset.getIssuerId());
+        dsClient.setDisplayName(dataset.getIssuerId() + " (Loa: " +
+        						dataset.getLoa() + ")");
         dsClient.setLogo(dataset.getSubjectId());
         
         List<AttributeClient> auxAttrs = new ArrayList<AttributeClient>();

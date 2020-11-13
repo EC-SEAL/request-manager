@@ -69,6 +69,8 @@ public class ResponseUIController
         AttributeSetList attributesConsentList = (AttributeSetList) session
                 .getAttribute("attributesConsentList");
         
+        String requestSource = (String) session.getAttribute("requestSource");
+        
         String urlReturn = (String) session.getAttribute("urlReturn");
         String urlFinishProcess = (String) session.getAttribute("urlFinishProcess");
         String infoMessage = (String) session.getAttribute("infoMessage");
@@ -172,6 +174,7 @@ public class ResponseUIController
 
         model.addAttribute("urlFinishProcess", urlFinishProcess);
         model.addAttribute("urlReturn", urlReturn);
+        model.addAttribute("requestSource", requestSource);
 
         if (infoMessage != null)
         {
@@ -207,6 +210,8 @@ public class ResponseUIController
     	List<DataSet> dsList = (List<DataSet>) session.getAttribute("dsList"); // list of dataSets
         AttributeSetList attributesConsentList = (AttributeSetList) session
                 .getAttribute("attributesConsentList");
+        
+        String requestSource = (String) session.getAttribute("requestSource");
         
         String urlReturn = (String) session.getAttribute("urlReturn");
         //String urlFinishProcess = (String) session.getAttribute("urlFinishProcess");
@@ -301,7 +306,7 @@ public class ResponseUIController
 
 
         model.addAttribute("urlFinishProcess0", urlFinishProcess0);
-//        model.addAttribute("urlReturn", urlReturn);
+        model.addAttribute("requestSource", requestSource);
 
         if (infoMessage != null)
         {

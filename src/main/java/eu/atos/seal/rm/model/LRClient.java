@@ -77,7 +77,10 @@ public class LRClient
     {
         LRClient lrClient = new LRClient();
         lrClient.setIndex(index);
-        lrClient.setDisplayName(linkRequest.getIssuer());
+        //lrClient.setDisplayName(linkRequest.getIssuer());
+        lrClient.setDisplayName(linkRequest.getDatasetA().getIssuerId() + " + " + 
+        						linkRequest.getDatasetB().getIssuerId() + " (Lloa: " + 
+        						linkRequest.getLloa() + ")");
         //lrClient.setLogo(linkRequest.getSubjectId());
         
         List<AttributeClient> auxAttrs = new ArrayList<AttributeClient>();

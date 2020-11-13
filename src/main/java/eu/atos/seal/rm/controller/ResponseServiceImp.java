@@ -79,7 +79,7 @@ public class ResponseServiceImp implements ResponseService
 		//UC 8.01, UC 8.03
 		
 		// spRequestEP: Null, auth_request, data_query
-		// NOT used *** spRequestSource: Discovery, PDS, SSI, eIDAS, eduGAIN
+		// spRequestSource: PDS, eIDAS, eduGAIN
 		
 		
 		// ***
@@ -234,8 +234,27 @@ public class ResponseServiceImp implements ResponseService
 				
 				// Open the GUI and sending the response assertions selected by the user
 				// TODO: errorMsg?
-				if (ds.size() > 0)
-					return prepareAndGotoResponseUI( sessionId,  model, spRequestModified, ds, lr, null); 
+				if (ds.size() > 0) {
+					String spRequestSource = "";
+					spRequestSource = (String)smConnService.readVariable(sessionId, "spRequestSource");
+					log.info("spRequestSource just read: "+ spRequestSource);
+					
+					String requestSource = "";
+					switch (spRequestSource.toLowerCase()) {
+						case "eidas":
+							requestSource = "eIDAS authentication";
+							break;
+						case "edugain":
+							requestSource = "eduGAIN authentication";
+							break;
+						case "pds":
+							requestSource = "personal data store";
+							break;
+						default:
+							log.info ("BE AWARE: unknown spRequestSource ***" + spRequestSource);
+					}
+					return prepareAndGotoResponseUI( sessionId,  model, requestSource, spRequestModified, ds, lr, null); 
+				}
 				else {
 					String errorMsg= "Empty dataStore!!";
 					log.info ("Returning error: "+errorMsg);
@@ -282,6 +301,7 @@ public class ResponseServiceImp implements ResponseService
     String consentReturn;
 
 	private String prepareAndGotoResponseUI( String sessionId, Model model, 
+			String requestSource,
 			AttributeSet spRequest,
 		    DataStoreObjectList dataStoreDS,
 		    DataStoreObjectList dataStoreLR,
@@ -367,6 +387,7 @@ public class ResponseServiceImp implements ResponseService
 			attributesRequestList.add(attrRequested);
 		}
 		 
+		session.setAttribute("requestSource", requestSource);
 		session.setAttribute("urlReturn", "response_client/return"); 		// Consenting: ACCEPT
         session.setAttribute("urlFinishProcess", "response_client/finish"); // No consenting: REJECT
         session.setAttribute("urlFinishProcess0", "response_client/back"); 	// No matching data: BACK
@@ -517,6 +538,7 @@ public class ResponseServiceImp implements ResponseService
 //		model.addAttribute("attributesRequestList", attributesRequestList);
 //		model.addAttribute("attributesSendList", attributesSendList);
 		model.addAttribute("attributesConsentList", attributesConsentList);
+		model.addAttribute("requestSource", requestSource);
 		
 		if (attributesConsentList.size() > 0)
 			//return "redirect:../rm/response_client"; 
