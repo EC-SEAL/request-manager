@@ -428,9 +428,10 @@ public class ResponseServiceImp implements ResponseService
 				if (attrs.size() != 0) {
 					
 					AttributeSet attributeSet = new AttributeSet();
-					attributeSet.setId(auxDs.getId() + " (Loa: " + auxDs.getLoa() + ")");  // To be shown in the response form
-					//attributeSet.setIssuer(auxDs.getIssuerId());
-					attributeSet.setIssuer(getIssuerIdLnk(auxDs, auxDs.getIssuerId()));
+					attributeSet.setId(auxDs.getId()); 
+					attributeSet.setIssuer(	getIssuerIdLnk(auxDs, auxDs.getIssuerId()) + " (Loa: " + 
+											(auxDs.getLoa() != null ? auxDs.getLoa() : "-") + ")");  // To be shown in the response form
+					//attributeSet.setIssuer(getIssuerIdLnk(auxDs, auxDs.getIssuerId()));
 					attributeSet.setType(TypeEnum.REQUEST);
 					attributeSet.setStatus(null);
 					attributeSet.setRecipient("RECIPIENT__TOASK");
@@ -495,11 +496,11 @@ public class ResponseServiceImp implements ResponseService
 					if (attrs.size() != 0) {
 						
 						AttributeSet attributeSet = new AttributeSet();
-						//attributeSet.setId(auxLr.getId());
-						attributeSet.setId(auxLr.getDatasetA().getIssuerId() + " + " + 	// To be shown in the response form
+						attributeSet.setId(auxLr.getId());
+						attributeSet.setIssuer(auxLr.getDatasetA().getIssuerId() + " + " + 	// To be shown in the response form
 								auxLr.getDatasetB().getIssuerId() + " (Lloa: " + 
-								auxLr.getLloa() + ")");
-						attributeSet.setIssuer(auxLr.getIssuer());
+								(auxLr.getLloa() != null ? auxLr.getLloa() : "-") + ")");
+						//attributeSet.setIssuer(auxLr.getIssuer());
 						attributeSet.setType(TypeEnum.REQUEST);
 						attributeSet.setStatus(null);
 						attributeSet.setRecipient("RECIPIENT__TOASK");
