@@ -428,7 +428,7 @@ public class ResponseServiceImp implements ResponseService
 				if (attrs.size() != 0) {
 					
 					AttributeSet attributeSet = new AttributeSet();
-					attributeSet.setId(auxDs.getId());
+					attributeSet.setId(auxDs.getId() + " (Loa: " + auxDs.getLoa() + ")");  // To be shown in the response form
 					//attributeSet.setIssuer(auxDs.getIssuerId());
 					attributeSet.setIssuer(getIssuerIdLnk(auxDs, auxDs.getIssuerId()));
 					attributeSet.setType(TypeEnum.REQUEST);
@@ -495,7 +495,10 @@ public class ResponseServiceImp implements ResponseService
 					if (attrs.size() != 0) {
 						
 						AttributeSet attributeSet = new AttributeSet();
-						attributeSet.setId(auxLr.getId());
+						//attributeSet.setId(auxLr.getId());
+						attributeSet.setId(auxLr.getDatasetA().getIssuerId() + " + " + 	// To be shown in the response form
+								auxLr.getDatasetB().getIssuerId() + " (Lloa: " + 
+								auxLr.getLloa() + ")");
 						attributeSet.setIssuer(auxLr.getIssuer());
 						attributeSet.setType(TypeEnum.REQUEST);
 						attributeSet.setStatus(null);
