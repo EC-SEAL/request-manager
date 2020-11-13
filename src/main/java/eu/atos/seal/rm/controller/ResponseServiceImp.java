@@ -430,7 +430,7 @@ public class ResponseServiceImp implements ResponseService
 					AttributeSet attributeSet = new AttributeSet();
 					attributeSet.setId(auxDs.getId()); 
 					attributeSet.setIssuer(	getIssuerIdLnk(auxDs, auxDs.getIssuerId()) + " (Loa: " + 
-											(auxDs.getLoa() != null ? auxDs.getLoa() : "-") + ")");  // To be shown in the response form
+											(auxDs.getLoa() != null ? auxDs.getLoa() : "unknown") + ")");  // To be shown in the response form
 					//attributeSet.setIssuer(getIssuerIdLnk(auxDs, auxDs.getIssuerId()));
 					attributeSet.setType(TypeEnum.REQUEST);
 					attributeSet.setStatus(null);
@@ -497,9 +497,9 @@ public class ResponseServiceImp implements ResponseService
 						
 						AttributeSet attributeSet = new AttributeSet();
 						attributeSet.setId(auxLr.getId());
-						attributeSet.setIssuer(auxLr.getDatasetA().getIssuerId() + " + " + 	// To be shown in the response form
-								auxLr.getDatasetB().getIssuerId() + " (Lloa: " + 
-								(auxLr.getLloa() != null ? auxLr.getLloa() : "-") + ")");
+						attributeSet.setIssuer(getIssuerIdLnk(auxLr.getDatasetA(), auxLr.getDatasetA().getIssuerId()) + " + " + 	// To be shown in the response form
+								getIssuerIdLnk(auxLr.getDatasetB(), auxLr.getDatasetB().getIssuerId()) + " (Lloa: " + 
+								(auxLr.getLloa() != null ? auxLr.getLloa() : "unknown") + ")");
 						//attributeSet.setIssuer(auxLr.getIssuer());
 						attributeSet.setType(TypeEnum.REQUEST);
 						attributeSet.setStatus(null);
