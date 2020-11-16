@@ -544,12 +544,13 @@ public class RequestServiceImp implements RequestService
 		}
 
 		String token = smConnService.generateToken(sessionId, msName);
-		System.out.println("Create token to "+msName+" tokenValue:"+token);
-		System.out.println("redirect to: "+endpoint);
+		System.out.println("prepareAndGoToIDP:Create token to "+msName+" tokenValue:"+token);
+		//System.out.println("redirect to: "+endpoint);
 		
 		this.model.addAttribute("msToken", token);
 		this.model.addAttribute("UrlToRedirect", endpoint);
-		
+		log.info("En prepareAndGoToIDP spRequestSource: "+spRequestSource);
+		log.info("urlToRedirect 	"+endpoint);
 	
 		return "redirectform";
 		//return "redirect:/redirect.html";
@@ -1185,7 +1186,7 @@ public class RequestServiceImp implements RequestService
 		
 		String tokenToSPms = "";
 		tokenToSPms = smConnService.generateToken(sessionId,msName); 
-
+		System.out.println("redirectToIDP: token to "+msName+" tokenValue:"+tokenToSPms);
 		model.addAttribute("msToken", tokenToSPms);
 		model.addAttribute("UrlToRedirect", endpoint);
 		log.info("En redirectToIDP spRequestSource: "+spRequestSource);
@@ -1328,7 +1329,7 @@ public class RequestServiceImp implements RequestService
 		
 		model.addAttribute("msToken", tokenToSPms);
 		model.addAttribute("UrlToRedirect", endpoint);
-		log.info("En redirectToIDP spRequestSource: "+spRequestSource);
+		log.info("En redirectToAP spRequestSource: "+spRequestSource);
 		log.info("urlToRedirect 	"+endpoint);
 		//return "redirectform";
 		return "redirectform2";
