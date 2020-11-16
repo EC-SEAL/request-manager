@@ -487,7 +487,7 @@ public class RequestServiceImp implements RequestService
 		/// creamos idpMetadata
 		///
 		EntityMetadata idpMetadata = null;
-		EntityMetadataList eMTDList = cmConnService.getEntityMetadataSet("EIDAS");
+		EntityMetadataList eMTDList = cmConnService.getEntityMetadataSet(spRequestSource.toUpperCase()); 
 		if ((eMTDList!=null)&&(eMTDList.size()>0))
 		{
 			idpMetadata = eMTDList.get(0);
@@ -958,7 +958,9 @@ public class RequestServiceImp implements RequestService
 			{
 				log.info("llamo a prepareAndGoToIdp");
 				
-				return redirectToIDP(sessionId, model, spRequest, spRequestSource);
+				//return redirectToIDP(sessionId, model, spRequest, spRequestSource);
+				return redirectToIDP(sessionId, model, newSpRequest, spRequestSource);
+				
 				//return prepareAndGoToIdp( sessionId, spRequest, spMetadata, spRequestSource, newAttributeList);
 				//
 			} 
@@ -973,7 +975,8 @@ public class RequestServiceImp implements RequestService
 			try
 			{
 				log.info("llamo a prepareAndGoToAP");
-				return redirectToAP(sessionId, model, spRequest, spRequestSource);
+				//return redirectToAP(sessionId, model, spRequest, spRequestSource);
+				return redirectToAP(sessionId, model, newSpRequest, spRequestSource);
 //				String endpoint="";
 //				String msName = "";
 //				String apiCall ="";
@@ -1132,7 +1135,7 @@ public class RequestServiceImp implements RequestService
 			idpRequest.setRecipient( idpMetadata.getEntityId());
 		}
 		idpRequest.setLoa( spRequest.getLoa());
-		idpRequest.setAttributes(spRequest.getAttributes());
+		idpRequest.setAttributes(spRequest.getAttributes());  //TODO: spRequest
 		
 		
 		///
