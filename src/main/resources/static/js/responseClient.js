@@ -35,7 +35,7 @@ function updateConsentAttributesList()
 
         if (consentId != null)
         {
-            consentList = consentList + "#" + consentId + ':' + indexes.join();
+            consentList = consentList + "#" + consentId + '::' + indexes.join();
         }
     });
 

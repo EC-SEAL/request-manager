@@ -590,7 +590,7 @@ public class ResponseUIController
             String[] attributeSets = attrConsent.split("#");
             for (String attributeSet : attributeSets)
             {
-                String[] aux = attributeSet.split(":");
+                String[] aux = attributeSet.split("::");
                 String id = aux[0];
                 String[] indexes = aux[1].split(",");
                 AttributeSet consentNew = null;
