@@ -577,6 +577,11 @@ public class ResponseServiceImp implements ResponseService
 		log.info ("attributesConsentList: " + session.getAttribute("attributesConsentList").toString());
 		responseAssertions = (AttributeSetList)session.getAttribute("attributesConsentList");
 		
+		for (AttributeSet attr :responseAssertions ) {
+			String oldIss = attr.getIssuer();
+			attr.setIssuer(oldIss.substring(0, oldIss.indexOf(" (")));
+		}
+		
 		log.info ("responseAssertions just consented: " + responseAssertions.toString());
 		
 		ObjectMapper objMapper = new ObjectMapper();
