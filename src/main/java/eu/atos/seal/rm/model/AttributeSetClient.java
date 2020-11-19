@@ -20,6 +20,12 @@ import java.util.List;
 public class AttributeSetClient
 {
     private String id;
+    
+    private String source;
+    private String issuer;
+    private String type;
+    private String isLoa;   // label LoA or LLoA
+    private String loa;		// the value
 
     private List<AttributeClient> attributeClientList;
 
@@ -31,6 +37,56 @@ public class AttributeSetClient
     public void setId(String id)
     {
         this.id = id;
+    }
+    
+    public String getSource()
+    {
+        return source;
+    }
+
+    public void setSource(String source)
+    {
+        this.source = source;
+    }
+    
+    public String getIssuer()
+    {
+        return issuer;
+    }
+
+    public void setIssuer(String issuer)
+    {
+        this.issuer = issuer;
+    }
+    
+    public String getType()
+    {
+        return type;
+    }
+
+    public void setType(String type)
+    {
+        this.type = type;
+    }
+    
+    public String getIsLoa()
+    {
+        return isLoa;
+    }
+
+    public void setIsLoa(String isLoa)
+    {
+        this.isLoa = isLoa;
+    }
+    
+    public String getLoa()
+    {
+        return loa;
+    }
+
+    public void setLoa(String loa)
+    {
+        this.loa = loa;
     }
 
     public List<AttributeClient> getAttributeClientList()

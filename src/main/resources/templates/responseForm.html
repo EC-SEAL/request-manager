@@ -65,7 +65,7 @@
 				<div class="card main-split">
 
 					<strong>
-						<p class="main-title">Personal Data Retrieved from 
+						<p class="main-title">Retrieved from 
 						<label th:text="${requestSource}"></label> </p>
 					</strong>
 
@@ -78,6 +78,13 @@
 								<div class="card-header">
 
 									<p th:text="${attrConsent.id}"></p>
+									
+									<p> Source: <label th:text="${attrConsent.source}"></label> </p>
+									<p> Issuer: <label th:text="${attrConsent.issuer}"></label> </p>
+									<p> Type: <label th:text="${attrConsent.type}"></label> </p>
+									<p> <label th:text="${attrConsent.isLoa}"></label> : <label th:text="${attrConsent.loa}"></label> </p>
+									
+									
 									<div class="buttons">
 										<input type="hidden" class="update-img update-consent-attr" />
 									</div>

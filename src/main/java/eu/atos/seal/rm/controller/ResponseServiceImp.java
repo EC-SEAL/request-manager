@@ -20,11 +20,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.servlet.http.HttpSession;
 
-import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,8 +33,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import eu.atos.seal.rm.model.ApiClassEnum;
 import eu.atos.seal.rm.model.AttributeSet;
@@ -248,7 +244,7 @@ public class ResponseServiceImp implements ResponseService
 							requestSource = "eduGAIN authentication";
 							break;
 						case "pds":
-							requestSource = "personal data store";
+							requestSource = "Personal Data Store";
 							break;
 						default:
 							log.info ("BE AWARE: unknown spRequestSource ***" + spRequestSource);
@@ -319,13 +315,11 @@ public class ResponseServiceImp implements ResponseService
 			
 			dataStoreDS.forEach ((dso)-> {
 				log.info("dso.toString(): " + dso.toString());
-//				JsonObject myJSONdso = new JsonParser().parse(dso.toString()).getAsJsonObject();
-//				log.info("myJSONdso: " + myJSONdso.toString());
 				
 				DataSet aux_ds = null;
 				try {
-					//aux_ds = (new ObjectMapper()).readValue(myJSONdso.get("data").toString(),DataSet.class);
 					aux_ds = (new ObjectMapper()).readValue(dso.getData(), DataSet.class);
+					aux_ds.setId(dso.getId());   // Be aware of this!
 					log.info("aux_ds: " + aux_ds.toString());
 					dsList.add(aux_ds);
 					
@@ -346,12 +340,11 @@ public class ResponseServiceImp implements ResponseService
 				
 				dataStoreLR.forEach ((dso)-> {
 					log.info("LR dso.toString(): " + dso.toString());
-//					JsonObject myJSONdso = new JsonParser().parse(dso.toString()).getAsJsonObject();
-//					log.info("myJSONdso: " + myJSONdso.toString());
 					
 					LinkRequest aux_lr = null;
 					try {
 						aux_lr = (new ObjectMapper()).readValue(dso.getData(), LinkRequest.class);
+						aux_lr.setId(dso.getId());   // Be aware of this!
 						log.info("aux_lr: " + aux_lr.toString());
 						lrList.add(aux_lr);
 						
@@ -371,15 +364,6 @@ public class ResponseServiceImp implements ResponseService
 			
 		}
 		
-/*	OLD	
-		for (DataSet aux_ds:dataStore.getClearData()) {
-			dsList.add(aux_ds);
-//			
-//			for (AttributeType aux_attr:aux_ds.getAttributes()) {
-//				attributesSendList.add(aux_attr);
-//			}
-		}
-*/		
 		// Filling attributesRequestList: for filtering. See bellow. 
 		AttributeTypeList attributesRequestList = new AttributeTypeList();
 		for ( AttributeType attrRequested : spRequest.getAttributes())
@@ -394,8 +378,6 @@ public class ResponseServiceImp implements ResponseService
         
 		session.setAttribute("dsList", dsList); // TO REMOVE???
 		session.setAttribute("lrList", lrList); // TO REMOVE???
-//		session.setAttribute("attributesRequestList", attributesRequestList); //TO REMOVE
-//		session.setAttribute("attributesSendList", attributesSendList); //TO REMOVE
 		
 		AttributeSetList attributesConsentList = new AttributeSetList();
 		
@@ -407,11 +389,11 @@ public class ResponseServiceImp implements ResponseService
 				List<AttributeType> attrs = new ArrayList<AttributeType>();
 				boolean found = false;
 				for (AttributeType auxAttr : auxDs.getAttributes()) {
-					log.info("auxAttr friendly: " + auxAttr.getFriendlyName());
-					log.info("auxAttr: " + auxAttr.getName());
+					//log.info("auxAttr friendly: " + auxAttr.getFriendlyName());
+					//log.info("auxAttr: " + auxAttr.getName());
 					for (AttributeType reqAttr : attributesRequestList) {
-						log.info("reqAttr friendly: " + reqAttr.getFriendlyName());
-						log.info("reqAttr: " + reqAttr.getName());
+						//log.info("reqAttr friendly: " + reqAttr.getFriendlyName());
+						//log.info("reqAttr: " + reqAttr.getName());
 						if ((reqAttr.getFriendlyName() != null) && (reqAttr.getFriendlyName().contains(auxAttr.getFriendlyName())) || 
 							reqAttr.getName().contains(auxAttr.getName())) {
 							found = true;
@@ -419,8 +401,8 @@ public class ResponseServiceImp implements ResponseService
 						}	
 					}
 					if (found) {	
-						log.info("Found friendly: " + auxAttr.getFriendlyName());
-						log.info("Found: " + auxAttr.getName());
+						//log.info("Found friendly: " + auxAttr.getFriendlyName());
+						//log.info("Found: " + auxAttr.getName());
 						attrs.add(auxAttr);	
 						found = false;
 					}				
@@ -428,19 +410,26 @@ public class ResponseServiceImp implements ResponseService
 				if (attrs.size() != 0) {
 					
 					AttributeSet attributeSet = new AttributeSet();
-					attributeSet.setId(auxDs.getId()); 
-					attributeSet.setIssuer(	getIssuerIdLnk(auxDs, auxDs.getIssuerId()) + " (" + auxDs.getType() + " LoA: " + 
-											(auxDs.getLoa() != null ? auxDs.getLoa() : "unknown") + ")");  // To be shown in the response form
-					//attributeSet.setIssuer(getIssuerIdLnk(auxDs, auxDs.getIssuerId()));
-					attributeSet.setType(TypeEnum.REQUEST);
-					attributeSet.setStatus(null);
-					attributeSet.setRecipient("RECIPIENT__TOASK");
+					attributeSet.setId(auxDs.getId());   // The "external" id
+//					attributeSet.setIssuer(	getIssuerIdLnk(auxDs, auxDs.getIssuerId()) + " (" + auxDs.getType() + " LoA: " + 
+//											(auxDs.getLoa() != null ? auxDs.getLoa() : "unknown") + ")");  // To be shown in the response form
+					
+					if (!auxDs.getType().contains("derived")) { //not derived id
+						attributeSet.setIssuer(	getIssuerIdLnk(auxDs, auxDs.getIssuerId()) + 
+								" (Type: dataSet" + 
+								" (Source: " + auxDs.getType() +
+								" (LoA");
+						
+					}
+					else {
+						attributeSet.setIssuer(	getIssuerIdLnk(auxDs, auxDs.getIssuerId()) + 
+								" (Type: derivedId" + 
+								" (Source: SEAL derivation" +
+								" (LoA");
+					}
+					
+					
 					attributeSet.setLoa(auxDs.getLoa());
-					attributeSet.setNotAfter(auxDs.getExpiration());
-					attributeSet.setNotBefore(auxDs.getIssued());
-					attributeSet.setProperties(auxDs.getProperties());
-					attributeSet.setInResponseTo("INRESPONSETO__TOASK");
-					// Not necessary all the above settings...
 					
 					attributeSet.setAttributes(attrs);
 					
@@ -456,11 +445,11 @@ public class ResponseServiceImp implements ResponseService
 					List<AttributeType> attrs = new ArrayList<AttributeType>();
 					boolean found = false;
 					for (AttributeType auxAttr : auxLr.getDatasetA().getAttributes()) {
-						log.info("LR****DATASET_A: auxAttr friendly: " + auxAttr.getFriendlyName());
-						log.info("LR****DATASET_A: auxAttr: " + auxAttr.getName());
+						//log.info("LR****DATASET_A: auxAttr friendly: " + auxAttr.getFriendlyName());
+						//log.info("LR****DATASET_A: auxAttr: " + auxAttr.getName());
 						for (AttributeType reqAttr : attributesRequestList) {
-							log.info("reqAttr friendly: " + reqAttr.getFriendlyName());
-							log.info("reqAttr: " + reqAttr.getName());
+							//log.info("reqAttr friendly: " + reqAttr.getFriendlyName());
+							//log.info("reqAttr: " + reqAttr.getName());
 							if ((reqAttr.getFriendlyName() != null) && (reqAttr.getFriendlyName().contains(auxAttr.getFriendlyName())) || 
 								reqAttr.getName().contains(auxAttr.getName())) {
 								found = true;
@@ -468,18 +457,18 @@ public class ResponseServiceImp implements ResponseService
 							}	
 						}
 						if (found) {	
-							log.info("LR****DATASET_A: Found friendly: " + auxAttr.getFriendlyName());
-							log.info("LR****DATASET_A: Found: " + auxAttr.getName());
+							//log.info("LR****DATASET_A: Found friendly: " + auxAttr.getFriendlyName());
+							//log.info("LR****DATASET_A: Found: " + auxAttr.getName());
 							attrs.add(auxAttr);	
 							found = false;
 						}				
 					}
 					for (AttributeType auxAttr : auxLr.getDatasetB().getAttributes()) {
-						log.info("LR****DATASET_B: auxAttr friendly: " + auxAttr.getFriendlyName());
-						log.info("LR****DATASET_B: auxAttr: " + auxAttr.getName());
+						//log.info("LR****DATASET_B: auxAttr friendly: " + auxAttr.getFriendlyName());
+						//log.info("LR****DATASET_B: auxAttr: " + auxAttr.getName());
 						for (AttributeType reqAttr : attributesRequestList) {
-							log.info("reqAttr friendly: " + reqAttr.getFriendlyName());
-							log.info("reqAttr: " + reqAttr.getName());
+							//log.info("reqAttr friendly: " + reqAttr.getFriendlyName());
+							//log.info("reqAttr: " + reqAttr.getName());
 							if ((reqAttr.getFriendlyName() != null) && (reqAttr.getFriendlyName().contains(auxAttr.getFriendlyName())) || 
 								reqAttr.getName().contains(auxAttr.getName())) {
 								found = true;
@@ -487,8 +476,8 @@ public class ResponseServiceImp implements ResponseService
 							}	
 						}
 						if (found) {	
-							log.info("LR****DATASET_B: Found friendly: " + auxAttr.getFriendlyName());
-							log.info("LR****DATASET_B: Found: " + auxAttr.getName());
+							//log.info("LR****DATASET_B: Found friendly: " + auxAttr.getFriendlyName());
+							//log.info("LR****DATASET_B: Found: " + auxAttr.getName());
 							attrs.add(auxAttr);	
 							found = false;
 						}				
@@ -497,19 +486,35 @@ public class ResponseServiceImp implements ResponseService
 						
 						AttributeSet attributeSet = new AttributeSet();
 						attributeSet.setId(auxLr.getId());
-						attributeSet.setIssuer(getIssuerIdLnk(auxLr.getDatasetA(), auxLr.getDatasetA().getIssuerId()) + " + " + 	// To be shown in the response form
-								getIssuerIdLnk(auxLr.getDatasetB(), auxLr.getDatasetB().getIssuerId()) + " (SEAL LLoA: " + 
-								(auxLr.getLloa() != null ? auxLr.getLloa() : "unknown") + ")");
-						//attributeSet.setIssuer(auxLr.getIssuer());
-						attributeSet.setType(TypeEnum.REQUEST);
-						attributeSet.setStatus(null);
-						attributeSet.setRecipient("RECIPIENT__TOASK");
+//						attributeSet.setIssuer(getIssuerIdLnk(auxLr.getDatasetA(), auxLr.getDatasetA().getIssuerId()) + " + " + 	// To be shown in the response form
+//								getIssuerIdLnk(auxLr.getDatasetB(), auxLr.getDatasetB().getIssuerId()) + " (SEAL LLoA: " + 
+//								(auxLr.getLloa() != null ? auxLr.getLloa() : "unknown") + ")");
+						
+						if ((!auxLr.getDatasetA().getType().contains ("derived")) &&
+							(!auxLr.getDatasetB().getType().contains ("derived"))	) { // There is no derived id
+							
+							attributeSet.setIssuer(	"SEAL linking" + 
+									" (Type: linkRequest" +
+									" (Source: " + auxLr.getDatasetA().getType() + ", " + auxLr.getDatasetB().getType() +
+									" (LLoA");
+						}
+						else {
+							String realSource = "";
+							if (!auxLr.getDatasetA().getType().contains ("derived"))
+								realSource = auxLr.getDatasetA().getType();
+							else
+								realSource = auxLr.getDatasetB().getType();
+							
+							attributeSet.setIssuer(	"SEAL linking" + 
+									" (Type: linkRequest" +
+									" (Source: " + realSource +
+									" (LLoA");
+						}
+						
+						
+						
+						
 						attributeSet.setLoa(auxLr.getLloa());
-						attributeSet.setNotAfter(auxLr.getExpiration());
-						attributeSet.setNotBefore(auxLr.getIssued());
-						//attributeSet.setProperties(auxLr.getProperties());
-						attributeSet.setInResponseTo("INRESPONSETO__TOASK");
-						// Not necessary all the above settings...
 						
 						attributeSet.setAttributes(attrs);
 						
@@ -579,7 +584,14 @@ public class ResponseServiceImp implements ResponseService
 		
 		for (AttributeSet attr :responseAssertions ) {
 			String oldIss = attr.getIssuer();
-			attr.setIssuer(oldIss.substring(0, oldIss.indexOf(" (")));
+			
+			if (!oldIss.contains ("SEAL linking")) { // It's not a linked id
+				attr.setIssuer(oldIss.substring(0, oldIss.indexOf(" (")));
+			}
+			else {
+				attr.setIssuer(oldIss.substring(oldIss.indexOf(" (Source: ") + " (Source: ".length(), oldIss.indexOf(" (LLoA")));				
+			}
+				
 		}
 		
 		log.info ("responseAssertions just consented: " + responseAssertions.toString());

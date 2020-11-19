@@ -39,6 +39,7 @@ import eu.atos.seal.rm.model.DataSetList;
 import eu.atos.seal.rm.model.DataSetListClient;
 import eu.atos.seal.rm.model.LRClient;
 import eu.atos.seal.rm.model.LinkRequest;
+import eu.atos.seal.rm.model.AttributeSet.TypeEnum;
 import eu.atos.seal.rm.model.AttributeClient;
 import eu.atos.seal.rm.model.AttributeSet;
 import eu.atos.seal.rm.model.AttributeSetClient;
@@ -141,7 +142,16 @@ public class ResponseUIController
             for (AttributeSet attributeSet : attributesConsentList)
             {
                 AttributeSetClient attributeSetClient = new AttributeSetClient();
-                attributeSetClient.setId(attributeSet.getIssuer());
+                //attributeSetClient.setId(attributeSet.getIssuer());
+                attributeSetClient.setId(attributeSet.getId());
+                
+                String misc = attributeSet.getIssuer();
+                
+                attributeSetClient.setIssuer (misc.substring(0, misc.indexOf(" (Type: ")));
+                attributeSetClient.setType(misc.substring(misc.indexOf(" (Type: ") + " (Type: ".length() , misc.indexOf(" (Source")));
+                attributeSetClient.setSource(misc.substring(misc.indexOf(" (Source: ") + " (Source: ".length(), misc.indexOf(" (L")));
+                attributeSetClient.setIsLoa(misc.substring(misc.indexOf(" (L")) + " (".length());
+                attributeSetClient.setLoa(attributeSet.getLoa() != null ? attributeSet.getLoa() : "unknown");
 
                 List<AttributeClient> aux = new ArrayList<AttributeClient>();
                 if (attributeSet.getAttributes() != null)
