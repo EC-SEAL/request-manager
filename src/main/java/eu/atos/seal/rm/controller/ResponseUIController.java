@@ -150,7 +150,7 @@ public class ResponseUIController
                 attributeSetClient.setIssuer (misc.substring(0, misc.indexOf(" (Type: ")));
                 attributeSetClient.setType(misc.substring(misc.indexOf(" (Type: ") + " (Type: ".length() , misc.indexOf(" (Source")));
                 attributeSetClient.setSource(misc.substring(misc.indexOf(" (Source: ") + " (Source: ".length(), misc.indexOf(" (L")));
-                attributeSetClient.setIsLoa(misc.substring(misc.indexOf(" (L")) + " (".length());
+                attributeSetClient.setIsLoa(misc.substring(misc.indexOf(" (L") + " (".length()));
                 attributeSetClient.setLoa(attributeSet.getLoa() != null ? attributeSet.getLoa() : "unknown");
 
                 List<AttributeClient> aux = new ArrayList<AttributeClient>();
@@ -170,13 +170,6 @@ public class ResponseUIController
         }
         
  
-// Duplicated code?!
-//        for (int i = 0; i < dsList.size(); i++)
-//        {
-//            DSClient dsClient = DSClient.getDSClientFrom(dsList.get(i), i);
-//            dsClientList.add(dsClient);
-//
-//        }
         log.info("consentList: " + consentList.toString());
  
         model.addAttribute("attributesConsentList", consentList);
@@ -607,8 +600,8 @@ public class ResponseUIController
 
                 for (AttributeSet consent : attributesConsentList)
                 {
-                    //if (consent.getId().equals(id))
-                    if (consent.getIssuer().equals(id))
+                    if (consent.getId().equals(id))
+                    //if (consent.getIssuer().equals(id))
                     {
                         consentNew = consent;
                         List<AttributeType> attrs = new ArrayList<AttributeType>();
