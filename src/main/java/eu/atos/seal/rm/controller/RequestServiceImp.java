@@ -1,6 +1,7 @@
 package eu.atos.seal.rm.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
@@ -644,6 +645,8 @@ public class RequestServiceImp implements RequestService
 //		return "redirect:../request_client";  //REVIEW
 //	}
 
+	@Value("${rm.multiui.privacyPolicy}") //Defined in application.properties file
+    String privacyPolicy;
 	private String goToSelectIUI(Model model, String sessionId, AttributeSet spRequest, EntityMetadataList sourceList)
 	{
 		// TODO Auto-generated method stub
@@ -656,6 +659,8 @@ public class RequestServiceImp implements RequestService
 		session.setAttribute("sourceList",sourceList);
 		session.setAttribute("urlReturn", "request_client/return");
 		session.setAttribute("sessionId", sessionId);
+		if (privacyPolicy != null)
+			session.setAttribute("privacyPolicy",privacyPolicy);
 		
 		return "redirect:../request_client";
 	}	

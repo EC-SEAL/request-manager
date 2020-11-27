@@ -23,6 +23,9 @@ div.main-content {
 .card.main-split {
     padding: 3em;
 }
+.card {
+	padding: 0em;
+}
 
 .list-group-item:first-child {
 	border-color: #545b66;
