@@ -463,6 +463,8 @@ public class ResponseServiceImp implements ResponseService
 							found = false;
 						}				
 					}
+					
+					found = false;
 					for (AttributeType auxAttr : auxLr.getDatasetB().getAttributes()) {
 						//log.info("LR****DATASET_B: auxAttr friendly: " + auxAttr.getFriendlyName());
 						//log.info("LR****DATASET_B: auxAttr: " + auxAttr.getName());

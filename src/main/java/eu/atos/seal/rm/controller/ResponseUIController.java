@@ -152,7 +152,7 @@ public class ResponseUIController
                 attributeSetClient.setSource(misc.substring(misc.indexOf(" (Source: ") + " (Source: ".length(), misc.indexOf(" (L")));
                 attributeSetClient.setIsLoa(misc.substring(misc.indexOf(" (L") + " (".length()));
                 //attributeSetClient.setLoa(attributeSet.getLoa() != null ? attributeSet.getLoa() : "unknown");
-                attributeSetClient.setLoa(attributeSet.getLoa() != null ? attributeSet.getLoa() : "-");
+                attributeSetClient.setLoa(attributeSet.getLoa() != null ? attributeSet.getLoa() : "none");
 
                 List<AttributeClient> aux = new ArrayList<AttributeClient>();
                 if (attributeSet.getAttributes() != null)
