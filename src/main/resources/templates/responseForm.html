@@ -79,11 +79,13 @@
 
 <!-- 									<p th:text="${attrConsent.id}"></p> -->
 									
-									 <i>Source: </i> <label th:text="${attrConsent.source}"></label> <br/>
-									 <i>Issuer: </i> <label th:text="${attrConsent.issuer}"></label> <br/>
-									 <i>Type: </i> <label th:text="${attrConsent.type}"></label> <br/>
-									 <i><label th:text="${attrConsent.isLoa}"></label> : </i> <label th:text="${attrConsent.loa}"></label> 
-									
+<!-- 									 <i>Source: </i> <label th:text="${attrConsent.source}"></label> <br/> -->
+<!-- 									 <i>Issuer: </i> <label th:text="${attrConsent.issuer}"></label> <br/> -->
+<!-- 									 <i>Type: </i> <label th:text="${attrConsent.type}"></label> <br/> -->
+<!-- 									 <i><label th:text="${attrConsent.isLoa}"></label> : </i> <label th:text="${attrConsent.loa}"></label>  -->
+									 
+									 <i>Source: </i> <label th:text="${attrConsent.source}"></label> by <label th:text="${attrConsent.issuer}"></label> (<i><label th:text="${attrConsent.isLoa}"></label>: </i> <label th:text="${attrConsent.loa}"></label>)<br/>
+
 									
 									<div class="buttons">
 										<input type="hidden" class="update-img update-consent-attr" />
