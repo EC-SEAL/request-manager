@@ -150,9 +150,21 @@ public class ResponseUIController
                 attributeSetClient.setIssuer (misc.substring(0, misc.indexOf(" (Type: ")));
                 attributeSetClient.setType(misc.substring(misc.indexOf(" (Type: ") + " (Type: ".length() , misc.indexOf(" (Source")));
                 attributeSetClient.setSource(misc.substring(misc.indexOf(" (Source: ") + " (Source: ".length(), misc.indexOf(" (L")));
+                
                 attributeSetClient.setIsLoa(misc.substring(misc.indexOf(" (L") + " (".length()));
                 //attributeSetClient.setLoa(attributeSet.getLoa() != null ? attributeSet.getLoa() : "unknown");
                 attributeSetClient.setLoa(attributeSet.getLoa() != null ? attributeSet.getLoa() : "none");
+                
+                String loaStr = null;
+                if (attributeSet.getLoa() != null) {
+                	loaStr = attributeSetClient.getIsLoa() + ": " + attributeSetClient.getLoa();
+                }
+                else 
+                	if (misc.contains("LLoA")) // 0 by default
+                		loaStr = "LLoA: 0";
+                	else loaStr = "";
+                
+                attributeSetClient.setThereIsLoa(loaStr);
 
                 List<AttributeClient> aux = new ArrayList<AttributeClient>();
                 if (attributeSet.getAttributes() != null)

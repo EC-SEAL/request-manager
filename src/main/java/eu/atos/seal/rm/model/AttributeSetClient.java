@@ -26,6 +26,7 @@ public class AttributeSetClient
     private String type;
     private String isLoa;   // label LoA or LLoA
     private String loa;		// the value
+    private String thereIsLoa;  // "isLoa: loa" or ""
 
     private List<AttributeClient> attributeClientList;
 
@@ -87,6 +88,16 @@ public class AttributeSetClient
     public void setLoa(String loa)
     {
         this.loa = loa;
+    }
+    
+    public String getThereIsLoa()
+    {
+        return thereIsLoa;
+    }
+
+    public void setThereIsLoa(String thereIsLoa)
+    {
+        this.thereIsLoa = thereIsLoa;
     }
 
     public List<AttributeClient> getAttributeClientList()
