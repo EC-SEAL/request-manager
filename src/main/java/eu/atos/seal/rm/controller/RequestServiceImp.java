@@ -584,6 +584,11 @@ public class RequestServiceImp implements RequestService
 			
 			//Null ,Mobile, Browser, googleDrive, oneDrive
 		}
+		else if (spRequestSource.equalsIgnoreCase("eIDAS")||spRequestSource.equalsIgnoreCase("eduGAIN"))
+		{
+			apiCall="query";
+			//apiCall ="authenticate";
+		}
 		else
 		{
 			apiCall = "issue";
