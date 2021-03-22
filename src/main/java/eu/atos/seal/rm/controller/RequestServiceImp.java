@@ -927,10 +927,10 @@ public class RequestServiceImp implements RequestService
 		{
 			spRequestSource = "eduGAIN";
 		}
-//		else if (requestSource.contains("ssi"))
-//		{
-//			spRequestSource = "SSI";
-//		}
+		else if (requestSource.contains("ssi"))
+		{
+			spRequestSource = "SSI";
+		}
 		else if (requestSource.contains("pds"))
 		{
 			spRequestSource = "PDS";
@@ -947,6 +947,7 @@ public class RequestServiceImp implements RequestService
 				log.error(errorMsg);
 			}
 		}
+
 		
 		
 		// Cambiar la variable spRequestSource en el SM de Discovery a su actual valor
