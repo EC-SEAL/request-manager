@@ -1223,7 +1223,7 @@ public class RequestServiceImp implements RequestService
 		
 		
 		EntityMetadata authMetadata0;
-		String msName;
+		String msName="";
 		String endpoint;
 		
 //		if (spRequestSource.equalsIgnoreCase("eidas")||spRequestSource.equalsIgnoreCase("edugain"))
@@ -1252,9 +1252,12 @@ public class RequestServiceImp implements RequestService
 			int size = dataMetadatas.size();
 			int selected = 0; //REVIEW
 			
-			EntityMetadata dqMetadata= dataMetadatas.get(selected);
-			msName = dqMetadata.getMicroservice().get(0);
-			if (spRequestSource.contains("SSI"))
+			if (spRequestSource.contains("PDS"))
+			{
+				EntityMetadata dqMetadata= dataMetadatas.get(selected);
+				msName = dqMetadata.getMicroservice().get(0);
+			}
+			else if (spRequestSource.contains("SSI"))
 			{
 				msName = "SSI-IdP";
 			}
@@ -1348,7 +1351,14 @@ public class RequestServiceImp implements RequestService
 		log.info("En redirectToAP spRequestSource: "+spRequestSource);
 		log.info("urlToRedirect 	"+endpoint);
 		//return "redirectform";
-		return "redirectform2";
+		if (spRequestSource.contains("PDS"))
+		{
+			return "redirectform2";	
+		}
+		else
+		{
+			return "redirectform";
+		}
 	}
 	
 	
