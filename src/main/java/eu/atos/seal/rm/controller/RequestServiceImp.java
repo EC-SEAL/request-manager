@@ -1244,7 +1244,7 @@ public class RequestServiceImp implements RequestService
 			}
 			else
 			{
-				apiCall = "issue";
+				apiCall = "query";
 			}
 			//EntityMetadata dataMetadata = cmConnService.getEntityMetadata("DATAQUERYSOURCES", spRequestSource);
 			EntityMetadataList dataMetadatas = cmConnService.getEntityMetadataSet(spRequestSource);
@@ -1254,6 +1254,11 @@ public class RequestServiceImp implements RequestService
 			
 			EntityMetadata dqMetadata= dataMetadatas.get(selected);
 			msName = dqMetadata.getMicroservice().get(0);
+			if (spRequestSource.contains("SSI"))
+			{
+				msName = "SSI-IdP";
+			}
+			
 			endpoint = getEndpoint(apiCall, msName);
 //		}
 		
