@@ -995,45 +995,8 @@ public class RequestServiceImp implements RequestService
 				else
 				{
 					log.info("llamo a redirectToSSI");
-					redirectToSSI(sessionId, model, newSpRequest, spRequestSource);
+					return redirectToSSI(sessionId, model, newSpRequest, spRequestSource);
 				}
-//				String endpoint="";
-//				String msName = "";
-//				String apiCall ="";
-//
-//				EntityMetadataList emList = cmConnService.getEntityMetadataSet("DATAQUERYSOURCES");
-//				if (spRequestSource.contains("PDS"))
-//				{
-//					spRequestSource="PERSISTENCE";
-//					apiCall = "load";
-//					
-//					//Null ,Mobile, Browser, googleDrive, oneDrive
-//				}
-//				else
-//				{
-//					apiCall = "issue";
-//				}
-//				
-//				EntityMetadataList dataMetadatas = cmConnService.getEntityMetadataSet(spRequestSource);
-//				//SELECT between the different dataMetadatas
-//				int size = dataMetadatas.size();
-//				int selected = 0; //REVIEW
-//				
-//				EntityMetadata dqMetadata= dataMetadatas.get(selected);
-//				msName = dqMetadata.getMicroservice().get(0);
-//				endpoint = getEndpoint(apiCall, msName);
-//				
-//				String token = smConnService.generateToken(sessionId, msName);
-//				System.out.println("Create token to "+msName+" tokenValue:"+token);
-//				System.out.println("redirect to: "+endpoint);
-//				
-//				this.model.addAttribute("msToken", token);
-//				this.model.addAttribute("UrlToRedirect", endpoint);
-//				
-//			
-//				return "redirectform";
-				
-				//return prepareAndGoToAP(sessionId, spRequest, spMetadata, spRequestSource);//newAttributeList
 			} 
 			catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException | CertificateException
 					| InvalidKeySpecException | IOException e) 
