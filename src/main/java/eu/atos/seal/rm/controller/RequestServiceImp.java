@@ -986,9 +986,17 @@ public class RequestServiceImp implements RequestService
 		{
 			try
 			{
-				log.info("llamo a prepareAndGoToAP");
 				//return redirectToAP(sessionId, model, spRequest, spRequestSource);
-				return redirectToAP(sessionId, model, newSpRequest, spRequestSource);
+				if (spRequestSource.equalsIgnoreCase("PDS"))
+				{
+					log.info("llamo a redirectToAP(PDS)");
+					return redirectToAP(sessionId, model, newSpRequest, spRequestSource);
+				}
+				else
+				{
+					log.info("llamo a redirectToSSI");
+					redirectToSSI(sessionId, model, newSpRequest, spRequestSource);
+				}
 //				String endpoint="";
 //				String msName = "";
 //				String apiCall ="";
@@ -1206,6 +1214,8 @@ public class RequestServiceImp implements RequestService
 	}
 	
 	
+	
+	
 	private String redirectToAP(String sessionId, Model model, AttributeSet spRequest, String spRequestSource)
 			throws UnrecoverableKeyException, KeyStoreException, FileNotFoundException, NoSuchAlgorithmException,
 			CertificateException, InvalidKeySpecException, IOException 
@@ -1361,7 +1371,85 @@ public class RequestServiceImp implements RequestService
 		}
 	}
 	
+	private String redirectToSSI(String sessionId, Model model, AttributeSet spRequest, String spRequestSource)
+			throws UnrecoverableKeyException, KeyStoreException, FileNotFoundException, NoSuchAlgorithmException,
+			CertificateException, InvalidKeySpecException, IOException 
+	{
+		String msName="";
+		String endpoint;
+		String apiCall;
+		
 	
+		EntityMetadataList dataMetadatas = cmConnService.getEntityMetadataSet(spRequestSource);
+		int size = dataMetadatas.size();
+		int selected = 0; //REVIEW
+		
+		EntityMetadata apMetadata = dataMetadatas.get(0);
+	
+		///
+		// creamos apRequest
+		///
+		AttributeSet apRequest = new AttributeSet();
+		apRequest.setId( UUID.randomUUID().toString());
+		apRequest.setType(AttributeSet.TypeEnum.REQUEST);
+		apRequest.setIssuer( spRequest.getIssuer());
+		apRequest.setProperties( spRequest.getProperties());
+		if (apMetadata!=null)
+		{
+			apRequest.setRecipient( apMetadata.getEntityId());
+		}
+		apRequest.setLoa( spRequest.getLoa());
+		apRequest.setAttributes(spRequest.getAttributes());
+	
+	
+		///
+		/// actualizamos apMetadata en SM
+		///
+		ObjectMapper objMapper = new ObjectMapper();
+		try
+		{
+			smConnService.updateVariable(sessionId,"apMetadata",objMapper.writeValueAsString(apMetadata));
+		}
+		catch (Exception ex)
+		{
+			String errorMsg= "Exception calling SM (updateVariable apMetadata)  \n";
+			errorMsg += "Exception message:"+ex.getMessage()+"\n";
+			//model.addAttribute("ErrorMessage",errorMsg);
+			log.error(errorMsg);
+	        return "rmError";
+		}
+	
+
+		///
+		// actualizamos apRequest en SM
+		///
+		objMapper = new ObjectMapper();
+		try
+		{
+			smConnService.updateVariable(sessionId,"apRequest",objMapper.writeValueAsString(apRequest));
+		}
+		catch (Exception ex)
+		{
+			String errorMsg= "Exception calling SM (updateVariable apRequest)  \n";
+			errorMsg += "Exception message:"+ex.getMessage()+"\n";
+			//model.addAttribute("ErrorMessage",errorMsg);
+			log.error(errorMsg);
+	        return "rmError";
+		}
+	
+		apiCall = "query";
+		msName = "SSI-IdP";
+		endpoint = getEndpoint(apiCall, msName);
+		
+		String tokenToSPms = "";
+		tokenToSPms = smConnService.generateToken(sessionId,msName); 
+		
+		model.addAttribute("msToken", tokenToSPms);
+		model.addAttribute("UrlToRedirect", endpoint);
+		log.info("En redirectToSSI spRequestSource: "+spRequestSource);
+		log.info("urlToRedirect 	"+endpoint);
+		return "redirectform";
+	}
 	
 	
 	///De Response
