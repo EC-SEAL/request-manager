@@ -1233,8 +1233,10 @@ public class RequestServiceImp implements RequestService
 			
 			if (spRequestSource.contains("PDS"))
 			{
-				EntityMetadata dqMetadata= dataMetadatas.get(selected);
-				msName = dqMetadata.getMicroservice().get(0);
+//				EntityMetadata dqMetadata= dataMetadatas.get(selected);
+//				msName = dqMetadata.getMicroservice().get(0);
+				
+				msName="PERms001";
 			}
 			else if (spRequestSource.contains("SSI"))
 			{
