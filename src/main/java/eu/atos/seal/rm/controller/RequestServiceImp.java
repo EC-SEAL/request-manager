@@ -619,8 +619,14 @@ public class RequestServiceImp implements RequestService
 		this.model.addAttribute("msToken", token);
 		this.model.addAttribute("UrlToRedirect", endpoint);
 		
-	
-		return "redirectform2"; // redirectform2 es GET
+		if (spRequestSource.equalsIgnoreCase("PERSISTENCE"))
+		{
+			return "redirectform2"; // redirectform2 es GET
+		}
+		else
+		{
+			return "redirectform";
+		}
 	}
 	
 	
@@ -1324,9 +1330,10 @@ public class RequestServiceImp implements RequestService
 		log.info("En redirectToAP spRequestSource: "+spRequestSource);
 		log.info("urlToRedirect 	"+endpoint);
 		//return "redirectform";
-		if (spRequestSource.contains("PDS"))
+		
+		if (spRequestSource.equalsIgnoreCase("PERSISTENCE"))
 		{
-			return "redirectform2";	
+			return "redirectform2"; // redirectform2 es GET
 		}
 		else
 		{
