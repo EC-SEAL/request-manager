@@ -620,7 +620,7 @@ public class RequestServiceImp implements RequestService
 		this.model.addAttribute("UrlToRedirect", endpoint);
 		
 	
-		return "redirectform";
+		return "redirectform2"; // redirectform2 es GET
 	}
 	
 	
@@ -1411,7 +1411,7 @@ public class RequestServiceImp implements RequestService
 		model.addAttribute("UrlToRedirect", endpoint);
 		log.info("En redirectToSSI spRequestSource: "+spRequestSource);
 		log.info("urlToRedirect 	"+endpoint);
-		return "redirectform";
+		return "redirectform"; // redirectform es POST
 	}
 	
 	
