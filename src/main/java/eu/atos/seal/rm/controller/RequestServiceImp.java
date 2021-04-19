@@ -1231,11 +1231,11 @@ public class RequestServiceImp implements RequestService
 			int size = dataMetadatas.size();
 			int selected = 0; //REVIEW
 			
-			if (spRequestSource.contains("PDS"))
+			if (spRequestSource.contains("PERSISTENCE"))
 			{
-//				EntityMetadata dqMetadata= dataMetadatas.get(selected);
-//				msName = dqMetadata.getMicroservice().get(0);
-				
+				EntityMetadata dqMetadata= dataMetadatas.get(selected);
+				msName = dqMetadata.getMicroservice().get(0);
+				System.out.println("msName obtenido: "+msName);
 				msName="PERms001";
 			}
 			else if (spRequestSource.contains("SSI"))
