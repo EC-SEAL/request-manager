@@ -23,7 +23,7 @@ jobs:
         elif [ $TRAVIS_BRANCH == "master" ]; then
             export CONTAINER_TAG=latest;
         elif [ $TRAVIS_BRANCH == "requestMods01" ]; then
-            export CONTAINER_TAG=testSSI;
+            export CONTAINER_TAG=lnkClaims;
         fi
       script:
         - docker login -u "$DOCKER_USERNAME_MVJ" -p "$DOCKER_PASSWORD_MVJ"

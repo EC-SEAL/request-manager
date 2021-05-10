@@ -444,6 +444,9 @@ public class ResponseServiceImp implements ResponseService
 					
 					List<AttributeType> attrs = new ArrayList<AttributeType>();
 					boolean found = false;
+					
+					/* Paco says: to show the uri only, not the attributes linked. 07.05.2021
+					 
 					for (AttributeType auxAttr : auxLr.getDatasetA().getAttributes()) {
 						//log.info("LR****DATASET_A: auxAttr friendly: " + auxAttr.getFriendlyName());
 						//log.info("LR****DATASET_A: auxAttr: " + auxAttr.getName());
@@ -484,6 +487,68 @@ public class ResponseServiceImp implements ResponseService
 							found = false;
 						}				
 					}
+					*/
+					
+					for (AttributeType auxAttr : auxLr.getDatasetA().getAttributes()) {
+						//log.info("LR****DATASET_A: auxAttr friendly: " + auxAttr.getFriendlyName());
+						//log.info("LR****DATASET_A: auxAttr: " + auxAttr.getName());
+						for (AttributeType reqAttr : attributesRequestList) {
+							//log.info("reqAttr friendly: " + reqAttr.getFriendlyName());
+							//log.info("reqAttr: " + reqAttr.getName());
+							if ((reqAttr.getFriendlyName() != null) && (reqAttr.getFriendlyName().contains(auxAttr.getFriendlyName())) || 
+								reqAttr.getName().contains(auxAttr.getName())) {
+								found = true;
+								break;
+							}	
+						}
+						if (found) {	
+							//log.info("LR****DATASET_A: Found friendly: " + auxAttr.getFriendlyName());
+							//log.info("LR****DATASET_A: Found: " + auxAttr.getName());
+							
+							AttributeType lnkAttr = new AttributeType();
+							lnkAttr.setName("SealLink");
+							lnkAttr.setFriendlyName("SealLink");
+							List<String> values = new ArrayList <String> ();
+							//values.add(auxLr.getUri());
+							values.add(auxLr.getId());
+							lnkAttr.setValues(values);
+							attrs.add(lnkAttr);
+							
+							break;
+						}				
+					}
+					
+					if (!found) {
+						for (AttributeType auxAttr : auxLr.getDatasetB().getAttributes()) {
+							//log.info("LR****DATASET_B: auxAttr friendly: " + auxAttr.getFriendlyName());
+							//log.info("LR****DATASET_B: auxAttr: " + auxAttr.getName());
+							for (AttributeType reqAttr : attributesRequestList) {
+								//log.info("reqAttr friendly: " + reqAttr.getFriendlyName());
+								//log.info("reqAttr: " + reqAttr.getName());
+								if ((reqAttr.getFriendlyName() != null) && (reqAttr.getFriendlyName().contains(auxAttr.getFriendlyName())) || 
+									reqAttr.getName().contains(auxAttr.getName())) {
+									found = true;
+									break;
+								}	
+							}
+							if (found) {	
+								//log.info("LR****DATASET_B: Found friendly: " + auxAttr.getFriendlyName());
+								//log.info("LR****DATASET_B: Found: " + auxAttr.getName());
+								
+								AttributeType lnkAttr = new AttributeType();
+								lnkAttr.setName("SealLink");
+								lnkAttr.setFriendlyName("SealLink");
+								List<String> values = new ArrayList <String> ();
+								//values.add(auxLr.getUri());
+								values.add(auxLr.getId());
+								lnkAttr.setValues(values);
+								attrs.add(lnkAttr);	
+
+								break;
+							}				
+						}
+					}
+					
 					if (attrs.size() != 0) {
 						
 						AttributeSet attributeSet = new AttributeSet();
